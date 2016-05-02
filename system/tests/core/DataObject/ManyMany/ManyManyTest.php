@@ -27,16 +27,22 @@ class ManyManyIntegrationTest extends GomaUnitTest implements TestAble
     public function setUp()
     {
         foreach(DBTableManager::Tables("ManyManyTestObjectOne") as $table) {
-            SQL::query("TRUNCATE TABLE " . DB_PREFIX . $table);
+            if(!SQL::query("TRUNCATE TABLE " . DB_PREFIX . $table)) {
+                throw new MySQLException();
+            }
         }
 
         foreach(DBTableManager::Tables("ManyManyTestObjectTwo") as $table) {
-            SQL::query("TRUNCATE TABLE " . DB_PREFIX . $table);
+            if(!SQL::query("TRUNCATE TABLE " . DB_PREFIX . $table)) {
+                throw new MySQLException();
+            }
         }
 
         /** @var ModelManyManyRelationShipInfo $relationship */
         foreach(gObject::instance("ManyManyTestObjectOne")->ManyManyRelationships() as $relationship) {
-            SQL::query("TRUNCATE TABLE " . DB_PREFIX . $relationship->getTableName());
+            if(!SQL::query("TRUNCATE TABLE " . DB_PREFIX . $relationship->getTableName())) {
+                throw new MySQLException();
+            }
         }
 
         $this->ones = array();
@@ -63,6 +69,20 @@ class ManyManyIntegrationTest extends GomaUnitTest implements TestAble
 
             $onesInTwo->commitStaging(false, true);
         }
+    }
+
+    public function testLoad() {
+        /** @var ManyManyTestObjectOne $firstOne */
+        $firstOne = DataObject::get_one("ManyManyTestObjectOne");
+
+        $set = $firstOne->twos();
+        $data = $set->getRelationshipData();
+        $cloned = clone $firstOne;
+        $cloned->writeToDB(false, true);
+        $set->setRelationENV($firstOne->getManyManyInfo("twos"), $cloned);
+
+        $data2 = $set->getRelationshipData();
+        $this->assertEqual(count($data2), count($data));
     }
 
     /**
@@ -120,6 +140,35 @@ class ManyManyIntegrationTest extends GomaUnitTest implements TestAble
         /** @var ManyManyTestObjectTwo $two */
         $i = 0;
         foreach($firstOne->twos() as $two) {
+            $this->assertEqual($two->versionid, $ids[$i]);
+            $i++;
+        }
+
+        shuffle($ids);
+        $firstOne->twosids = $ids;
+        $i = 0;
+        foreach($firstOne->twos() as $two) {
+            $this->assertEqual($two->versionid, $ids[$i]);
+            $i++;
+        }
+    }
+
+    public function testRewriteRelationship() {
+        /** @var ManyManyTestObjectOne $firstOne */
+        $firstOne = DataObject::get_one("ManyManyTestObjectOne");
+
+        $this->assertEqual($firstOne->twos()->count(), count($this->twos));
+        $ids = $firstOne->twosids;
+        array_splice($ids, 3);
+        shuffle($ids);
+        $firstOne->twosids = $ids;
+        $firstOne->twos()->commitStaging(false, true, 3);
+
+        $newFirstOne = DataObject::get_one("ManyManyTestObjectOne");
+        $this->assertEqual($newFirstOne->twos()->count(), 3);
+        /** @var ManyManyTestObjectTwo $two */
+        $i = 0;
+        foreach($newFirstOne->twos() as $two) {
             $this->assertEqual($two->versionid, $ids[$i]);
             $i++;
         }

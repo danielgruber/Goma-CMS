@@ -483,10 +483,11 @@ class SQL
      *
      * @name extractToWhere
      * @access public
-     * @param array - where
-     * @param bool - if to include the WHERE
-     * @param array - to set field tables if you have various multi-table-fields
-     * @param array - coliding fields
+     * @param array $where
+     * @param bool $includeWhere
+     * @param array $DBFields to set field tables if you have various multi-table-fields
+     * @param array $colidingFields coliding fields
+     * @return string
      */
     static function extractToWhere($where, $includeWhere = true, $DBFields = array(), $colidingFields = array())
     {
@@ -532,7 +533,7 @@ class SQL
 
                     $b = 0;
 
-                    foreach ($DBFields[$field] as $alias) {
+                    foreach ($colidingFields[$field] as $alias) {
                         if ($b == 0)
                             $b++;
                         else
@@ -545,11 +546,9 @@ class SQL
                     continue;
                 }
 
-
                 if (isset($DBFields[$field])) {
-                    $field = $DBFields[$field] . "." . $field;
+                    $field = $DBFields[$field][0] . "." . $DBFields[$field][1];
                 }
-
 
                 $sql .= self::parseValue($field, $value);
             }
@@ -565,7 +564,9 @@ class SQL
     /**
      * returns the part of parsing value attribute
      *
-     * @name parseValue
+     * @param string $field
+     * @param string $value
+     * @return string
      */
     static function parseValue($field, $value)
     {

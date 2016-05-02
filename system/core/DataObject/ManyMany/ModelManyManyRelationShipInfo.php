@@ -123,6 +123,14 @@ class ModelManyManyRelationShipInfo extends ModelRelationShipInfo {
     /**
      * @return string
      */
+    public function getSourceVersion()
+    {
+        return $this->sourceVersion;
+    }
+
+    /**
+     * @return string
+     */
     public function getBelongingName()
     {
         return $this->inverse;

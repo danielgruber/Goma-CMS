@@ -1654,7 +1654,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
         $query->db_fields["last_modified"] = $baseTable;
         $query->db_fields["class_name"] = $baseTable;
         $query->db_fields["created"] = $baseTable;
-        $query->db_fields["versionid"] = $baseTable . ".id AS versionid";
+        $query->db_fields["versionid"] = array($baseTable, "id");
 
         // set filter
         $query->filter($filter);
@@ -1687,10 +1687,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
 
                     unset($query->filter["id"]);
 
-
                     // unmerge deleted records
                     $query->innerJoin($baseTable . "_state", " ".$baseTable."_state.id = ".$baseTable.".recordid");
 
+                    $query->db_fields["id"] = array($baseTable, "recordid");
                     // if we just get all, but we group
                 } else if ($version == DataObject::VERSION_GROUP) {
                     $query->addFilter($baseTable.'.id IN (
@@ -1700,13 +1700,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
                     // integrate state-table
                     $query->leftJoin($baseTable . "_state", " ".$baseTable."_state.id = ".$baseTable.".recordid");
 
-                    $query->db_fields["id"] = $baseTable . ".record";
+                    $query->db_fields["id"] = array($baseTable, "recordid");
                 }
             } else {
                 // if we make no versioning, we just merge state-table-information
                 // unmerge deleted records
                 $query->leftJoin($baseTable . "_state", " ".$baseTable."_state.id = ".$baseTable.".recordid");
-                $query->db_fields["id"] = $baseTable;
+                $query->db_fields["id"] = array($baseTable, "recordid");
             }
         }
 
@@ -2066,7 +2066,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
 
         $query->fields = array($groupField);
 
-        // TODO: Extendable field
         $query->groupby($groupField);
         $this->tryToBuild($query);
 
@@ -2138,12 +2137,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
             if($i == 0) $i++;
             else $aggregateSQL .= ",";
 
-            $aggregateField = trim(strtolower($aggregateField));
-            // TODO: do better ambigious selection
-            if(isset($query->db_fields[$aggregateField]))  {
-                $aggregateField = $query->db_fields[$aggregateField] . "." . $aggregateField;
-            }
-
+            $aggregateField = $query->getFieldIdentifier($aggregateField);
             $aggregateSQL .= $singleAggregate . "( " . $distinctSQL . " " . $aggregateField . ") as " . strtolower($singleAggregate);
         }
 

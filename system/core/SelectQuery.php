@@ -89,21 +89,40 @@ class SelectQuery {
 	 */
 	public $db_fields = array();
 
+	/**
+	 * @var array
+	 */
 	static $aliases = array("group" => "_group");
 
-	public static function getAlias($c) {
-		if(isset(self::$aliases[$c])) {
-			return self::$aliases[$c];
+	/**
+	 * this is a cache for generating field-list and coliding fields
+	 *
+	 * @var array
+	 */
+	protected static $new_field_cache = array();
+
+	/**
+	 * from-hash.
+	 */
+	private $fromHash;
+
+	/**
+	 * @param string $table
+	 * @return mixed
+	 */
+	public static function getAlias($table) {
+		if(isset(self::$aliases[$table])) {
+			return self::$aliases[$table];
 		}
-		return $c;
+		return $table;
 	}
 
 	/**
 	 * __construct
 	 *@name __consturct
-	 *@param string - table
-	 *@param array - fields
-	 *@param array - where
+	 *@param string $table
+	 *@param array $fields
+	 *@param array $filter
 	 */
 	public function __construct($table = "", $fields = array(), $filter = array()) {
 		if($table != "")
@@ -115,13 +134,14 @@ class SelectQuery {
 
 	/**
 	 * this var adds a table to the from-part
-	 *@param string
+	 * @param string $table
+	 * @return $this
 	 */
-	public function from($str) {
-		if(self::getAlias($str) != $str) {
-			$this->from[str_replace(array('`', '"'), '', self::getAlias($str))] = array("table" => $str, "statement" => DB_PREFIX . $str . ' AS _' . $str . '');
+	public function from($table) {
+		if(self::getAlias($table) != $table) {
+			$this->from[str_replace(array('`', '"'), '', self::getAlias($table))] = array("table" => $table, "statement" => DB_PREFIX . $table . ' AS _' . $table . '');
 		} else {
-			$this->from[str_replace(array('`', '"'), '', $str)] = DB_PREFIX . $str . ' AS ' . $str . '';
+			$this->from[str_replace(array('`', '"'), '', $table)] = DB_PREFIX . $table . ' AS ' . $table . '';
 		}
 		return $this;
 	}
@@ -138,7 +158,7 @@ class SelectQuery {
 
 	/**
 	 * adds a filter
-	 *
+	 * @param array|string $filter
 	 */
 	public function addFilter($filter) {
 		if(is_string($this->filter)) {
@@ -202,7 +222,7 @@ class SelectQuery {
 
 				$type = $field["type"];
 				$field = $field["field"];
-			} else if(count($field) == 2 && !in_array(strtolower($fieldValues[0]), array("desc", "asc"))) {
+			} else if(count($field) == 2 && !is_array($fieldValues[0]) && !in_array(strtolower($fieldValues[0]), array("desc", "asc"))) {
 				if(isset($fieldValues[1])) {
 					$type = $fieldValues[1];
 				}
@@ -214,9 +234,9 @@ class SelectQuery {
 							$this->sort($fieldName, $type);
 						} else if(is_bool($type)) {
 							$this->sort($fieldName, $type ? "asc" : "desc");
-						} else if(is_array($type)) {
-							$this->sort($field, $type);
 						}
+					} else if(is_array($type)) {
+						$this->sort($type);
 					}
 				}
 
@@ -314,7 +334,7 @@ class SelectQuery {
 
 	/**
 	 * sets the fields
-	 *@param new value
+	 *@param array $field new value
 	 */
 	public function setFields($fields) {
 		$this->fields = $fields;
@@ -323,9 +343,10 @@ class SelectQuery {
 	/**
 	 * adds an outer-join
 	 *
-	 *@param string - table
-	 *@param string - statement after the ON
-	 *@param string - alias: for joining the same table more than one time
+	 * @param string $table
+	 * @param string $statement after the ON
+	 * @param string $alias : for joining the same table more than one time
+	 * @return $this
 	 */
 	public function outerJoin($table, $statement, $alias = "") {
 		$this->getAliasAndStatement($table, $statement, $alias);
@@ -337,8 +358,10 @@ class SelectQuery {
 	/**
 	 * adds an inner-join
 	 *
-	 *@param string - table
-	 *@param string - statement after the ON
+	 * @param string $table
+	 * @param string $statement after the ON
+	 * @param string $alias
+	 * @return $this
 	 */
 	public function innerJoin($table, $statement, $alias = "") {
 		$this->getAliasAndStatement($table, $statement, $alias);
@@ -387,7 +410,7 @@ class SelectQuery {
 		$alias = ($alias == "") ? self::getAlias($table) : $alias;
 
 		if($alias != $table) {
-			$statement = str_replace($table . ".", $alias . ".", $statement);
+			$statement = str_replace(" " . $table . ".", " " . $alias . ".", $statement);
 		}
 
 		$statement = $this->replaceAliasInStatement($statement);
@@ -417,50 +440,73 @@ class SelectQuery {
 
 	/**
 	 * checks if joined
-	 *
-	 *@param string - table
-	 *@return bool
+	 * @param string $table
+	 * @return bool
 	 */
 	public function isJoinedTo($table) {
 		return isset($this->from[$table]);
 	}
 
 	/**
-	 * this is a cache for generating field-list and coliding fields
+	 * resolves correct identifier for field.
+	 * @param string $field
+	 * @return string
 	 */
-	protected static $new_field_cache = array();
+	public function getFieldIdentifier($field) {
+		$field = strtolower(trim($field));
+
+		$data = $this->generateDBFieldColidingCache();
+
+		if(isset($data["dbfields"][$field])) {
+			return $data["dbfields"][$field][0] . "." . $data["dbfields"][$field][1];
+		}
+
+		return $field;
+	}
 
 	/**
-	 * builds the SQL-Query
-	 *
-	 * @param string - override fields part
-	 * @return string
-	 * @throws SQLException
+	 * parses DB-Field-Data.
+	 * @param string $key
+	 * @param string|array $data
+	 * @return array
 	 */
-	public function build($fields = null) {
-
-		if(PROFILE)
-			Profiler::mark("SelectQuery::build");
-
-		// first make a index of all fields and check for coliding fields
-		// we cache this part, because we need this just one time foreach from-array
-		$fromHash = md5(var_export($this->from, true) . implode($this->db_fields));
-		if(isset(self::$new_field_cache[$fromHash])) {
-			$colidingFields = self::$new_field_cache[$fromHash]["coliding"];
-			$DBFields = self::$new_field_cache[$fromHash]["dbfields"];
+	protected function parseDBFieldData($key, $data) {
+		if(is_array($data) && count($data) == 2) {
+			$parsedValue = self::parseDBFieldData($key, $data[0]);
+			return array($parsedValue[0], $data[1]);
+		} else if(!strpos($data, ".")) {
+			return array($data, $key);
 		} else {
+			return array($this->replaceAliasInStatement($data), $key);
+		}
+	}
+
+	/**
+	 * from-hash.
+	 */
+	protected function fromHash() {
+		if(!isset($this->fromHash) || $this->from != $this->fromHash["from"] || $this->db_fields != $this->fromHash["db"]) {
+			$this->fromHash["hash"] = md5(var_export($this->from, true) . serialize($this->db_fields));
+			$this->fromHash["from"] = $this->from;
+			$this->fromHash["db"] = $this->db_fields;
+		}
+
+		return $this->fromHash["hash"];
+	}
+
+	/**
+	 * generates DB-Field + Coliding-Cache.
+	 */
+	protected function generateDBFieldColidingCache() {
+		if(!isset(self::$new_field_cache[$this->fromHash()])) {
 			$DBFields = $this->db_fields;
 
 			foreach($DBFields as $k => $v) {
-				if(!strpos($v, ".")) {
-					$DBFields[$k] = self::getAlias($v);
-				} else {
-					$DBFields[$k] = $this->replaceAliasInStatement(" " . $v);
-				}
+				$DBFields[$k] = $this->parseDBFieldData($k, $v);
 			}
 
-			$predefinedFields = $DBFields;
-			$colidingFields = $DBFields;
+			$colidingFields = array();
+			$foundFields = array();
 
 			foreach($this->from as $alias => $statement) {
 				if(is_array($statement)) {
@@ -473,22 +519,38 @@ class SelectQuery {
 				$tablefields = array_keys(ClassInfo::getTableFields($table));
 				foreach($tablefields as $field) {
 					if(!isset($DBFields[$field])) {
-						$DBFields[$field] = $alias;
-					} else {
-						if(isset($predefinedFields[$field])) {
-							//$colidingFields[$field] = $predefinedFields[$field];
+						if (!isset($foundFields[$field])) {
+							$foundFields[$field] = $alias;
 						} else {
-							if(!isset($colidingFields[$field]))
-								$colidingFields[$field] = array(self::getAlias($DBFields[$field]));
+							if (!isset($colidingFields[$field])) {
+								$colidingFields[$field] = array(self::getAlias($foundFields[$field]));
+							}
+
 							$colidingFields[$field][] = $alias;
 						}
 					}
 				}
 			}
-			self::$new_field_cache[$fromHash]["coliding"] = $colidingFields;
-			self::$new_field_cache[$fromHash]["dbfields"] = $DBFields;
+			self::$new_field_cache[$this->fromHash()]["coliding"] = $colidingFields;
+			self::$new_field_cache[$this->fromHash()]["dbfields"] = $DBFields;
 			unset($alias, $statement, $tablefields, $field);
 		}
+
+		return self::$new_field_cache[$this->fromHash()];
+	}
+
+
+	/**
+	 * builds the SQL-Query
+	 *
+	 * @param string - override fields part
+	 * @return string
+	 * @throws SQLException
+	 */
+	public function build($fields = null) {
+
+		if(PROFILE)
+			Profiler::mark("SelectQuery::build");
 
 		// begin SQL
 		$sql = "SELECT ";
@@ -506,12 +568,9 @@ class SelectQuery {
 		}
 
 		if(is_array($fields) && count($fields) > 0) {
-			$sql .= $this->generateFieldSQLFromArray($fields, $fromHash, $this->from, $colidingFields);
+			$sql .= $this->generateFieldSQLFromArray($fields);
 		} else if(is_string($fields)) {
 			$sql .= " " . $fields . " ";
-			if(is_array($this->fields) && $fieldsSQL = $this->generateFieldSQLFromArray($this->fields, "withoutfrom_" . $fromHash, array(), array())) {
-				$sql .= "," . $fieldsSQL;
-			}
 		}
 
 		// FROM
@@ -551,7 +610,8 @@ class SelectQuery {
 
 		// WHERE
 
-		$sql .= SQL::extractToWhere($this->filter, true, $DBFields/*, $colidingFields*/);
+		$data = $this->generateDBFieldColidingCache();
+		$sql .= SQL::extractToWhere($this->filter, true, $data["dbfields"], $data["coliding"]);
 
 		//$sql .= $this->addWhere;
 		// GROUP BY
@@ -564,7 +624,7 @@ class SelectQuery {
 		// HAVING
 		if(count($this->having) > 0) {
 			$sql .= " HAVING ";
-			$sql .= SQL::ExtractToWhere($this->having, false, $DBFields, $colidingFields);
+			$sql .= SQL::ExtractToWhere($this->having, false, $data["dbfields"], $data["coliding"]);
 		}
 
 		ksort($this->orderby);
@@ -580,15 +640,11 @@ class SelectQuery {
 				}
 
 				if(is_array($data[1])) {
-					$sql .= "FIELD('.$data[0].', '".implode("','", $data[1])."')";
+					$sql .= "FIELD(" . $this->getFieldIdentifier($data[0]) . ", '" . implode("','", $data[1]) . "')";
 				} else {
 					$collate = isset($data[2]) ? " COLLATE " . $data[2] : "";
 
-					if (isset($DBFields[$data[0]])) {
-						$sql .= $DBFields[$data[0]] . "." . $data[0] . $collate . " " . $data[1];
-					} else {
-						$sql .= $data[0] . $collate . " " . $data[1];
-					}
+					$sql .= $this->getFieldIdentifier($data[0]) . $collate . " " . $data[1];
 				}
 			}
 		}
@@ -621,21 +677,22 @@ class SelectQuery {
 
 	/**
 	 * generates the coliding SQL
-	 *
-	 * @param string $from
-	 * @param array $colidingFields
 	 * @return string
 	 */
-	protected function generateColidingSQL($from, $colidingFields) {
-
+	protected function generateColidingSQL() {
 		// some added caches ;)
-		if(isset(self::$new_field_cache[$from]["colidingSQL"])) {
-			return self::$new_field_cache[$from]["colidingSQL"];
+		if(isset(self::$new_field_cache[$this->fromHash()]["colidingSQL"])) {
+			return self::$new_field_cache[$this->fromHash()]["colidingSQL"];
 		} else {
+			$data = $this->generateDBFieldColidingCache();
 			$colidingSQL = array();
 
+			foreach($data["dbfields"] as $field => $info) {
+				$colidingSQL[] = $info[0] . "." . $info[1] . " as " . $field;
+			}
+
 			// fix coliding fields
-			foreach($colidingFields as $field => $tables) {
+			foreach($data["coliding"] as $field => $tables) {
 
 				if(is_string($tables)) {
 					if(strpos($tables, ".")) {
@@ -650,11 +707,11 @@ class SelectQuery {
 				foreach($tables as $table) {
 					$fieldSQL .= self::getAlias($table) . "." . $field . ",";
 				}
-				$fieldSQL .= "'')";
+				$fieldSQL .= "'') as " . $field;
 				$colidingSQL[] = $fieldSQL;
 			}
 
-			self::$new_field_cache[$from]["colidingSQL"] = $colidingSQL;
+			self::$new_field_cache[$this->fromHash()]["colidingSQL"] = $colidingSQL;
 
 			return $colidingSQL;
 		}
@@ -673,6 +730,9 @@ class SelectQuery {
 
 	/**
 	 * executes the query
+	 * @param string|null $fields
+	 * @return $this
+	 * @throws SQLException
 	 */
 	public function execute($fields = null) {
 
@@ -709,18 +769,15 @@ class SelectQuery {
 
 	/**
 	 * @param array $fields
-	 * @param string $fromHash
-	 * @param array $from
-	 * @param array $colidingFields
 	 * @return string
 	 */
-	protected function generateFieldSQLFromArray($fields, $fromHash, $from, $colidingFields)
+	protected function generateFieldSQLFromArray($fields)
 	{
 		$fieldsData = array();
 
 		if(in_array("*", $fields)) {
 			// join all from-tables
-			foreach($from as $alias => $statement) {
+			foreach($this->from as $alias => $statement) {
 				if(RegexpUtil::isNumber($alias))
 					continue;
 
@@ -730,7 +787,7 @@ class SelectQuery {
 			}
 		}
 
-		$fieldsData = array_merge($fieldsData, $this->generateColidingSQL($fromHash, $colidingFields, $i = 0));
+		$fieldsData = array_merge($fieldsData, $this->generateColidingSQL());
 
 		foreach($fields as $key => $field) {
 			// some basic filter
@@ -749,7 +806,7 @@ class SelectQuery {
 			} else {
 				if(isset($DBFields[$field]) && !isset($colidingFields[$field])) {
 					$alias = $field;
-					$field = self::getAlias($DBFields[$field]) . "." . $field;
+					$field = self::getAlias($DBFields[$field][0]) . "." . $DBFields[$field][1];
 				} else if(isset($colidingFields[$field])) {
 					continue;
 				} else {

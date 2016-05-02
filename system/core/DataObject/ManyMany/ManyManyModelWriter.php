@@ -25,34 +25,6 @@ class ManyManyModelWriter extends Extension {
     protected $many_many_relationships;
 
     /**
-     * on before write.
-     */
-    public function gatherDataToWrite() {
-        $data = $this->getOwner()->getData();
-
-        $this->many_many_objects = array();
-        $this->many_many_relationships = array();
-
-        // here the magic for many-many happens
-        if ($many_many = $this->getOwner()->getModel()->ManyManyRelationships()) {
-            foreach($many_many as $key => $value) {
-                if (isset($data[$key]) && is_object($data[$key]) && is_a($data[$key], "ManyMany_DataObjectSet")) {
-                    $this->many_many_objects[$key] = $data[$key];
-                    $this->many_many_relationships[$key] = $value;
-                    unset($data[$key]);
-                } else if(isset($data[$key]) && is_array($this->data[$key])) {
-                    unset($data[$key . "ids"]);
-                } else {
-                    $data[$key] = $this->getOwner()->getModel()->getRelationData($key);
-                }
-                unset($key, $value);
-            }
-        }
-
-        $this->getOwner()->setData($data);
-    }
-
-    /**
      * called when data was written so we have new versionid, but transaction is still on stage.
      *
      * @param array $manipulation
@@ -60,35 +32,26 @@ class ManyManyModelWriter extends Extension {
     public function onBeforeWriteData(&$manipulation) {
         $data = $this->getOwner()->getData();
 
-        /** @var ManyMany_DataObjectSet $object */
-        foreach($this->many_many_objects as $key => $object) {
-            $object->setRelationENV($this->many_many_relationships[$key], $this->getOwner()->getModel());
-            $object->commitStaging(false, true, $this->getOwner()->getWriteType());
-            unset($data[$key . "ids"]);
-        }
-
         $many_many = $this->getOwner()->getModel()->ManyManyRelationships();
 
         // many-many
         if ($many_many) {
             /** @var ModelManyManyRelationshipInfo $relationShip */
-            foreach($many_many as $name => $relationShip)
-            {
+            foreach($many_many as $name => $relationShip) {
+
                 /** @var ModelManyManyRelationShipInfo $relationShip */
                 $relationShip = $this->getOwner()->getModel()->getManyManyInfo($name);
 
-                $set = new ManyMany_DataObjectSet($relationShip->getTargetClass());
-                $set->setRelationENV($relationShip, $this->getOwner()->getModel());
-                // it is supported to have extra-fields in this array
-                if(isset($data[$name]) && is_array($data[$name])) {
-                    $set->setSourceData($data[$name]);
-                    $set->commitStaging(false, true, $this->getOwner()->getWriteType(), $this->getOwner()->getRepository());
-                } else if (isset($data[$name . "ids"]) && is_array($data[$name . "ids"]))
-                {
-                    $set->setSourceData($data[$name . "ids"]);
-                    $set->commitStaging(false, true, $this->getOwner()->getWriteType(), $this->getOwner()->getRepository());
+                /** @var ManyMany_DataObjectSet $set */
+                if(isset($data[$name]) && is_a($data[$name], "ManyMany_DataObjectSet")) {
+                    $set = $data[$name];
+                    $set->setRelationENV($relationShip, $this->getOwner()->getModel());
+                    $set->commitStaging(false, true, $this->getOwner()->getWriteType(), $this->getOwner()->getRepository(), $this->getOwner()->getOldId());
+                } else {
+                    $set = $this->getOwner()->getModel()->getManyMany($name);
+                    $set->setRelationENV($relationShip, $this->getOwner()->getModel());
+                    $set->commitStaging(false, true, $this->getOwner()->getWriteType(), $this->getOwner()->getRepository(), $this->getOwner()->getOldId());
                 }
-
             }
         }
 
