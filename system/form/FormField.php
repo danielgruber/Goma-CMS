@@ -128,16 +128,31 @@ class FormField extends RequestHandler {
      */
     protected $placeholder;
 
+
     /**
      * creates field.
-     * @param $name
-     * @param $title
-     * @param $value
-     * @param null $parent
+     * @param string $name
+     * @param string $title
+     * @param mixed $value
+     * @param Form|null $parent
      * @return static
      */
     public static function create($name, $title, $value = null, $parent = null) {
         return new static($name, $title, $value, $parent);
+    }
+
+    /**
+     * creates field with maxlength.
+     * @param string $name
+     * @param string $title
+     * @param mixed $value
+     * @param Form|null $parent
+     * @return static
+     */
+    public static function createWithMaxLength($name, $title, $maxLength, $value = null, $parent = null) {
+        $field = new static($name, $title, $value, $parent);
+        $field->maxLength = $maxLength;
+        return $field;
     }
 
     /**

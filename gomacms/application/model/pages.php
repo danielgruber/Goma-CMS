@@ -1072,6 +1072,9 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
             array_push($query->from, "LEFT JOIN ".DB_PREFIX."permission_state AS view_permission_state ON view_permission_state.id = pages.read_permissionid");
             array_push($query->from, "LEFT JOIN ".DB_PREFIX."permission AS view_permission ON view_permission.id = view_permission_state.publishedid");
 
+            // TODO: Find out why
+            $query->db_fields["parentid"] = $this->baseTable;
+
             if(!member::login()) {
                 $this->addFilterToQueryForGuest($query);
             } else if(Permission::check("ADMIN_CONTENT")) {

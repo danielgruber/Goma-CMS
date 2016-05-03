@@ -55,7 +55,11 @@ class TableFieldAddButton implements TableField_HTMLProvider, TableField_URLHand
 
 		$submit = $tableField->form()->useStateData ? "submit_form" : "publish";
 
-		$content = $obj->controller($tableField->form()->getController())->form("add", null, array(), false, $submit);
+		/** @var Controller $controller */
+		$controller = is_a($tableField->form()->controller, "Controller") ?
+			$tableField->form()->controller : ControllerResolver::instanceForModel($obj);
+
+		$content = $controller->getWithModel($obj)->form("add", null, array(), false, $submit);
 
 		Core::setTitle(lang("add_record"));
 

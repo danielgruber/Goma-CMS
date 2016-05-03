@@ -32,6 +32,9 @@ class DataObjectSetTests extends GomaUnitTest
         $this->janine = new DumpDBElementPerson("Janine", 19, "W");
         $this->nik = new DumpDBElementPerson("Nik", 21, "M");
         $this->julian = new DumpDBElementPerson("Julian", 20, "M");
+
+        $this->daniel->queryVersion = $this->kathi->queryVersion = $this->patrick->queryVersion = $this->janine->queryVersion =
+            $this->nik->queryVersion = $this->julian->queryVersion = DataObject::VERSION_PUBLISHED;
     }
 
     /**
@@ -152,6 +155,7 @@ class DataObjectSetTests extends GomaUnitTest
 
     public function testFirstLast() {
         $set = new DataObjectSet("DumpDBElementPerson");
+        $set->setVersion(DataObject::VERSION_PUBLISHED);
 
         /** @var MockIDataObjectSetDataSource $source */
         $source = $set->getDbDataSource();
@@ -195,6 +199,7 @@ class DataObjectSetTests extends GomaUnitTest
 
     public function testPagination() {
         $set = new DataObjectSet("DumpDBElementPerson");
+        $set->setVersion(DataObject::VERSION_PUBLISHED);
 
         /** @var MockIDataObjectSetDataSource $source */
         $source = $set->getDbDataSource();
@@ -241,6 +246,7 @@ class DataObjectSetTests extends GomaUnitTest
 
     public function testStaging() {
         $set = new DataObjectSet("DumpDBElementPerson");
+        $set->setVersion(DataObject::VERSION_PUBLISHED);
 
         /** @var MockIDataObjectSetDataSource $source */
         $source = $set->getDbDataSource();
@@ -273,6 +279,7 @@ class DataObjectSetTests extends GomaUnitTest
 
     public function testStagingMulti() {
         $set = new DataObjectSet("DumpDBElementPerson");
+        $set->setVersion(DataObject::VERSION_PUBLISHED);
 
         /** @var MockIDataObjectSetDataSource $source */
         $source = $set->getDbDataSource();
@@ -300,6 +307,7 @@ class DataObjectSetTests extends GomaUnitTest
 
     public function testCustomised() {
         $set = new DataObjectSet("DumpDBElementPerson");
+        $set->setVersion(DataObject::VERSION_PUBLISHED);
 
         /** @var MockIDataObjectSetDataSource $source */
         $source = $set->getDbDataSource();
@@ -376,6 +384,7 @@ class DataObjectSetTests extends GomaUnitTest
 
     public function unittestObjectPersistence($records) {
         $set = new DataObjectSet("DumpDBElementPerson");
+        $set->setVersion(DataObject::VERSION_PUBLISHED);
 
         /** @var MockIDataObjectSetDataSource $source */
         $source = $set->getDbDataSource();

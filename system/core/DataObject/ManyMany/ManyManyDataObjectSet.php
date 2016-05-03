@@ -490,6 +490,7 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
             )
         );
 
+        $this->dbDataSource()->clearCache();
         $this->dbDataSource()->onBeforeManipulateManyMany($manipulation, $this, $addedRecords);
         $this->modelSource()->callExtending("onBeforeManipulateManyMany", $manipulation, $this, $addedRecords);
         if(!$this->dbDataSource()->manipulate($manipulation)) {
