@@ -36,6 +36,10 @@ class HasMany_DataObjectSet extends RemoveStagingDataObjectSet {
      * @param int $value
      */
     public function setRelationENV($relationShipInfo, $value) {
+        if(!isset($relationShipInfo)) {
+            throw new InvalidArgumentException("First argument of setRelationENV needs to be type of ModelHasManyRelationShipInfo. Null given.");
+        }
+
         $this->relationShipInfo = $relationShipInfo;
         $this->relationShipValue = $value;
         $this->relationShipField = $relationShipInfo->getInverse() . "id";
@@ -70,7 +74,7 @@ class HasMany_DataObjectSet extends RemoveStagingDataObjectSet {
     public function generateForm($name = null, $edit = false, $disabled = false, $request = null, $controller = null, $submission = null) {
         $form = parent::generateForm($name, $edit, $disabled, $request, $controller, $submission);
 
-        if($id = $this->getRelationID()) {
+        if(($id = $this->getRelationID()) !== null) {
             $form->add(new HiddenField($this->relationShipField, $id));
         }
 
@@ -96,7 +100,7 @@ class HasMany_DataObjectSet extends RemoveStagingDataObjectSet {
             }
         }
 
-        if($id = $this->getRelationID()) {
+        if(($id = $this->getRelationID()) !== null) {
             foreach($this->staging as $record) {
                 $record->{$this->relationShipField} = $this->getRelationID();
             }
@@ -127,7 +131,7 @@ class HasMany_DataObjectSet extends RemoveStagingDataObjectSet {
      */
     public function push($record, $write = false)
     {
-        if($id = $this->getRelationID()) {
+        if(($id = $this->getRelationID()) !== null) {
             $record->{$this->relationShipField} = $id;
         }
 
@@ -142,8 +146,6 @@ class HasMany_DataObjectSet extends RemoveStagingDataObjectSet {
     protected function getRelationID() {
         if(isset($this->relationShipValue)) {
             return $this->relationShipValue;
-        } else if(isset($this->first()->{$this->relationShipField})) {
-            return $this->first()->{$this->relationShipField};
         } else if(isset($this->filter[$this->relationShipField]) && (is_string($this->filter[$this->relationShipField]) || is_int($this->filter[$this->relationShipField]))) {
             return $this->filter[$this->relationShipField];
         }
@@ -176,7 +178,7 @@ class HasMany_DataObjectSet extends RemoveStagingDataObjectSet {
     {
         $filter = parent::getFilterForQuery();
 
-        if($id = $this->getRelationID()) {
+        if(($id = $this->getRelationID()) !== null) {
             $filter[$this->relationShipField] = $id;
         } else {
             throw new InvalidArgumentException("HasMany_DataObjectSet needs relationship-info for query.");

@@ -443,6 +443,10 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 			return (int) $this->perPage;
 		}
 
+		if($this->getPageCount() == 0) {
+			return 0;
+		}
+
 		return $this->countWholeSet() - ($this->getPageCount() - 1)  * $this->perPage;
 	}
 

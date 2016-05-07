@@ -85,7 +85,7 @@ class HasManyGetter extends Extension {
         $hasManyObject = $owner->fieldGet($name);
         if(!$hasManyObject || !is_a($hasManyObject, "HasMany_DataObjectSet")) {
             $hasManyObject = new HasMany_DataObjectSet($has_many[$name]->getTargetClass());
-            $hasManyObject->setRelationENV($has_many[$name], $this->getOwner()->id);
+            $hasManyObject->setRelationENV($has_many[$name], $this->getOwner()->id ? $this->getOwner()->id : 0);
 
             $owner->setField($name, $hasManyObject);
 

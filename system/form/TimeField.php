@@ -9,6 +9,13 @@
 class TimeField extends FormField
 {
     /**
+     * regional.
+     *
+     * @var string
+     */
+    protected $regional;
+
+    /**
      * @name __construct
      * @param string -name
      * @param string - title
@@ -25,8 +32,7 @@ class TimeField extends FormField
     /**
      * creates the field
      *
-     * @name createNode
-     * @access public
+     * @return HTMLNode
      */
     public function createNode()
     {
@@ -40,6 +46,7 @@ class TimeField extends FormField
      * validate
      *
      * @name validate
+     * @return bool|mixed|string
      */
     public function validate($value)
     {
@@ -76,20 +83,31 @@ class TimeField extends FormField
     }
 
     /**
+     * @param FormFieldRenderData $info
+     * @param bool $notifyField
+     */
+    public function addRenderData($info, $notifyField = true)
+    {
+        $info->addJSFile("system/libs/thirdparty/ui-timepicker/jquery.ui.timepicker.js");
+        $info->addCSSFile("system/libs/thirdparty/ui-timepicker/jquery.ui.timepicker.css");
+
+        $this->regional = "";
+        foreach (i18n::getLangCodes(Core::$lang) as $code) {
+            if (file_exists("system/libs/thirdparty/ui-timepicker/i18n/jquery.ui.timepicker-" . $code . ".js")) {
+                $info->addJSFile("system/libs/thirdparty/ui-timepicker/i18n/jquery.ui.timepicker-" . $code . ".js");
+                $this->regional = $code;
+                break;
+            }
+        }
+
+        parent::addRenderData($info, $notifyField);
+    }
+
+    /**
      * render JavaScript
      */
     public function JS()
     {
-        Resources::add("system/libs/thirdparty/ui-timepicker/jquery.ui.timepicker.js");
-        Resources::add("system/libs/thirdparty/ui-timepicker/jquery.ui.timepicker.css");
-        $regional = "";
-        foreach (i18n::getLangCodes(Core::$lang) as $code) {
-            if (file_exists("system/libs/thirdparty/ui-timepicker/i18n/jquery.ui.timepicker-" . $code . ".js")) {
-                Resources::add("system/libs/thirdparty/ui-timepicker/i18n/jquery.ui.timepicker-" . $code . ".js");
-                $regional = $code;
-                break;
-            }
-        }
-        return '$(function(){$("#' . $this->ID() . '").timepicker({regional: ' . var_export($regional, true) . '});});';
+        return '$(function(){$("#' . $this->ID() . '").timepicker({regional: ' . var_export($this->regional, true) . '});});';
     }
 }

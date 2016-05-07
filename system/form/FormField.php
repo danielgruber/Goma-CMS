@@ -562,10 +562,12 @@ class FormField extends RequestHandler {
 
     /**
      * @param string $title
+     * @return $this
      */
     public function setTitle($title)
     {
         $this->title = $title;
+        return $this;
     }
 
     /**
@@ -578,10 +580,12 @@ class FormField extends RequestHandler {
 
     /**
      * @param int $maxLength
+     * @return $this
      */
     public function setMaxLength($maxLength)
     {
         $this->maxLength = $maxLength;
+        return $this;
     }
 
     /**
@@ -594,10 +598,12 @@ class FormField extends RequestHandler {
 
     /**
      * @param string $regexp
+     * @return $this
      */
     public function setRegexp($regexp)
     {
         $this->regexp = $regexp;
+        return $this;
     }
 
     /**
@@ -606,6 +612,7 @@ class FormField extends RequestHandler {
     public function addExtraClass($class)
     {
         $this->container->addClass($class);
+        return $this;
     }
 
     /**
@@ -614,14 +621,17 @@ class FormField extends RequestHandler {
     public function removeExtraClass($class)
     {
         $this->container->removeClass($class);
+        return $this;
     }
 
     /**
      * @param array $errors
+     * @return $this
      */
     public function setErrors($errors)
     {
         $this->errors = $errors;
+        return $this;
     }
 
     /**

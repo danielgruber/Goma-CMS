@@ -54,7 +54,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		"code_has_sent" => "Switch",
 		"timezone"		=> "timezone",
 		"custom_lang"	=> "varchar(10)",
-		"groupAdmin"	=> "Switch"
+		"groupAdmin"	=> "Switch",
 	);
 
 
@@ -295,7 +295,6 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 				new ExternalForm("passwort", lang("password", "password"), lang("edit_password", "change password"), '**********', array($this, "pwdform")),
 				new ImageUploadField("avatar", lang("pic", "image")),
 				new TextArea("signatur", lang("signatur", "signature"), null, "100px")
-
 			), lang("general"))
 		)));
 

@@ -244,6 +244,21 @@ class DataObjectSetTests extends GomaUnitTest
         $this->assertEqual($set[4], $this->patrick);
     }
 
+    public function testEmptyPagination() {
+        $set = new DataObjectSet("DumpDBElementPerson");
+        $set->setVersion(DataObject::VERSION_PUBLISHED);
+
+        /** @var MockIDataObjectSetDataSource $source */
+        $source = $set->getDbDataSource();
+
+        $source->records = array();
+
+        $set->activatePagination(null, 2);
+
+        $this->assertEqual($set->count(), 0);
+        $this->assertEqual($set->getPageCount(), 0);
+    }
+
     public function testStaging() {
         $set = new DataObjectSet("DumpDBElementPerson");
         $set->setVersion(DataObject::VERSION_PUBLISHED);

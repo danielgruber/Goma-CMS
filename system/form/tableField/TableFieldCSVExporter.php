@@ -102,7 +102,9 @@ class TableFieldCSVExporter implements TableField_HTMLProvider, TableField_URLHa
 
         $csv->addRow($titleRow);
 
-        foreach($tableField->getData() as $record) {
+        $data = clone $tableField->getData();
+        $data->disablePagination();
+        foreach($data as $record) {
             $row = array();
 
             foreach ($tableField->getColumns() as $column) {

@@ -22,6 +22,7 @@ if(ClassInfo::ClassInfoHasBeenRegenerated()) {
 
 Core::setCMSVar("ptitle", settingsController::get("titel"));
 Core::setCMSVar("title", settingsController::get("titel"));
+Core::setCMSVar("description", settingsController::get("meta_description"));
 Core::setHeader("description", settingsController::Get("meta_description"));
 Core::setHeader("robots", "index,follow");
 

@@ -20,7 +20,7 @@ class DateField extends FormField
 	 */
 	public function __construct($name = null, $title = null, $value = null, $between = null, $form = null)
 	{
-		$this->between = $between;
+		$this->between = is_int($between) ? array($between, PHP_INT_MAX) : $between;
 		parent::__construct($name, $title, $value, $form);
 	}
 
@@ -78,10 +78,86 @@ class DateField extends FormField
 				}
 			}
 
-			// TODO: Find out what the hell this is used for?
-			$this->value = date("H:i:s", $timestamp);
 			return true;
 		}
+	}
+
+	/**
+	 * @param FormFieldRenderData $info
+	 * @param bool $notifyField
+	 */
+	public function addRenderData($info, $notifyField = true)
+	{
+		parent::addRenderData($info, $notifyField);
+
+		$info->addJSFile("system/libs/thirdparty/moment/moment.min.js");
+		$info->addJSFile("system/libs/thirdparty/jquery-daterangepicker/daterangepicker.js");
+		$info->addCSSFile("system/libs/thirdparty/jquery-daterangepicker/daterangepicker.css");
+	}
+
+	/**
+	 * @param string $php_format
+	 * @return string
+	 */
+	public static function dateformat_PHP_to_DatePicker($php_format)
+	{
+		$SYMBOLS_MATCHING = array(
+			// Day
+			'd' => 'DD',
+			'D' => 'D',
+			'j' => 'D',
+			'l' => 'DD',
+			'N' => '',
+			'S' => '',
+			'w' => '',
+			'z' => 'o',
+			// Week
+			'W' => '',
+			// Month
+			'F' => 'MM',
+			'm' => 'MM',
+			'M' => 'M',
+			'n' => 'M',
+			't' => '',
+			// Year
+			'L' => '',
+			'o' => '',
+			'Y' => 'YYYY',
+			'y' => 'YY',
+			// Time
+			'a' => '',
+			'A' => '',
+			'B' => '',
+			'g' => '',
+			'G' => '',
+			'h' => '',
+			'H' => '',
+			'i' => '',
+			's' => '',
+			'u' => ''
+		);
+		$jqueryui_format = "";
+		$escaping = false;
+		for($i = 0; $i < strlen($php_format); $i++)
+		{
+			$char = $php_format[$i];
+			if($char === '\\') // PHP date format escaping character
+			{
+				$i++;
+				if($escaping) $jqueryui_format .= $php_format[$i];
+				else $jqueryui_format .= '\'' . $php_format[$i];
+				$escaping = true;
+			}
+			else
+			{
+				if($escaping) { $jqueryui_format .= "'"; $escaping = false; }
+				if(isset($SYMBOLS_MATCHING[$char]))
+					$jqueryui_format .= $SYMBOLS_MATCHING[$char];
+				else
+					$jqueryui_format .= $char;
+			}
+		}
+		return $jqueryui_format;
 	}
 
 	/**
@@ -89,10 +165,57 @@ class DateField extends FormField
 	 */
 	public function JS()
 	{
-		Resources::add("system/libs/javascript/ui/datepicker.js");
-		Resources::add("system/libs/javascript/ui/datepicker.i18n.js");
-		return '$(function(){
-			if($.datepicker.regional["' . Core::$lang . '"] !== undefined) { $.datepicker.setDefaults( $.datepicker.regional[ "' . Core::$lang . '" ] ); }
-			$("#' . $this->ID() . '").datepicker();});';
+		return '$(\'#'.$this->ID().'\').daterangepicker('.json_encode($this->getDatePickerOptions()).');';
+	}
+
+	/**
+	 * @return array
+	 */
+	protected function getDatePickerOptions() {
+		/** @var string[] $calendar */
+		require_once (ROOT . LANGUAGE_DIRECTORY . Core::$lang . "/calendar.php");
+
+
+		return array(
+			"singleDatePicker" => true,
+			"showDropdowns"	=> true,
+			"showWeekNumbers"	=> true,
+			"autoApply"	=> true,
+			"minDate"	=> isset($this->between[0]) ? date("d/m/Y", $this->between[0]) : null,
+			"maxDate"	=> isset($this->between[1]) ? date("d/m/Y", $this->between[1]) : null,
+			"locale"	=> array(
+				"format"		=> self::dateformat_PHP_to_DatePicker(DATE_FORMAT_DATE),
+				"seperator"		=> " - ",
+				"applyLabel"	=> lang("save"),
+				"cancelLabel"	=> lang("cancel"),
+				"fromLabel"		=> lang("fromLabel"),
+				"toLabel"		=> lang("toLabel"),
+				"customRangeLabel"	=> lang("customLabel"),
+				"daysOfWeek"	=> array(
+					$calendar["Sun"],
+					$calendar["Mon"],
+					$calendar["Tue"],
+					$calendar["Wed"],
+					$calendar["Thu"],
+					$calendar["Fri"],
+					$calendar["Sat"]
+				),
+				"monthNames"	=> array(
+					$calendar["January"],
+					$calendar["February"],
+					$calendar["March"],
+					$calendar["April"],
+					$calendar["May"],
+					$calendar["June"],
+					$calendar["July"],
+					$calendar["August"],
+					$calendar["September"],
+					$calendar["October"],
+					$calendar["November"],
+					$calendar["December"]
+				),
+				"firstDay"	=> 1
+			)
+		);
 	}
 }

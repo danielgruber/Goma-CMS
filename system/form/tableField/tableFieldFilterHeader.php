@@ -181,32 +181,49 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
         foreach ($filterArguments as $columnName => $value) {
             if(isset($this->valueCallback[strtolower($columnName)])) {
                 call_user_func_array($this->valueCallback[strtolower($columnName)], array($filterArguments, $data));
-            } else
-                if ($data->canFilterBy($columnName) && $this->isValueValid($value)) {
-                    if (isset($this->valueCasting[$columnName])) {
-                        $values = array();
-                        foreach ($this->valueCasting[$columnName] as $key => $orgValue) {
-                            if (preg_match('/' . preg_quote($value, "/") . '/i', $key)) {
-                                if(is_array($orgValue)) {
-                                    $values = array_merge($values, $orgValue);
-                                } else {
-                                    $values[] = $orgValue;
-                                }
-                            }
-                        }
-
-                        if (is_array($values) && count($values) > 0) {
-                            $data->AddFilter(array($columnName => $values));
-                        } else {
-                            $data->AddFilter(array($columnName => array("LIKE", "%" . $value . "%")));
-                        }
-                    } else {
-                        $data->AddFilter(array($columnName => array("LIKE", "%" . $value . "%")));
-                    }
+            } else if ($data->canFilterBy($columnName) && $this->isValueValid($value)) {
+                $values = $this->getValueCastingForValue($columnName, $value);
+                if (is_array($values) && count($values) > 0) {
+                    $data->AddFilter(array($columnName => $values));
+                } else {
+                    $data->AddFilter(array($columnName => array("LIKE", "%" . $value . "%")));
                 }
+            }
         }
 
         return $data;
+    }
+
+    /**
+     * @param string $columnName
+     * @param string $value
+     * @return mixed
+     */
+    protected function getValueCastingForValue($columnName, $value) {
+        $values = array();
+        if(isset($this->selectList[$columnName])) {
+            if(isset($this->valueCasting[$value])) {
+                return array($value);
+            } else if($key = array_search($value, $this->valueCasting)) {
+                return array($key);
+            } else {
+                return array($value);
+            }
+        } else {
+            if (isset($this->valueCasting[$columnName])) {
+                foreach ($this->valueCasting[$columnName] as $key => $orgValue) {
+                    if (preg_match('/' . preg_quote($value, "/") . '/i', $key)) {
+                        if (is_array($orgValue)) {
+                            $values = array_merge($values, $orgValue);
+                        } else {
+                            $values[] = $orgValue;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $values;
     }
 
     /**

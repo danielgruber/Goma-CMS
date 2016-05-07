@@ -62,7 +62,11 @@ class ProfileController extends FrontedController {
 		$userdata = DataObject::get("user", array("id" => member::$id))->first();
 		$controller = ControllerResolver::instanceForModel($userdata);
 
-		return '<h1>'.lang("edit_profile").'</h1>' . $controller->edit();
+		$data = $controller->edit();
+		if(is_object($data)) {
+			return $data;
+		}
+		return '<h1>'.lang("edit_profile").'</h1>' . $data;
 	}
 
 	/**

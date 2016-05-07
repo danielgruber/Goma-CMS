@@ -8,22 +8,22 @@
  *
  * last modified: 04.12.2015
  * $Version 1.3
-*/
+ */
 class NumberField extends FormField {
 	/**
 	 * start of range
 	 *
 	 *@name rangeStart
 	 *@access protected
-	*/
+	 */
 	protected $rangeStart;
-	
+
 	/**
 	 * end of range
 	 *
 	 *@name rangeEnd
 	 *@access protected
-	*/
+	 */
 	protected $rangeEnd;
 
 	/**
@@ -35,6 +35,23 @@ class NumberField extends FormField {
 	 * @var string
 	 */
 	protected $regexpError = "form_no_number";
+
+	/**
+	 * @param string $name
+	 * @param string $title
+	 * @param int $start
+	 * @param int|null $end
+	 * @param int|null $value
+	 * @param Form|null $parent
+	 * @return NumberField
+	 */
+	public static function createWithRange($name, $title, $start, $end = null, $value = null, $parent = null)
+	{
+		/** @var NumberField $field */
+		$field = parent::create($name, $title, $value, $parent);
+		$field->setRange($start, $end);
+		return $field;
+	}
 
 	/**
 	 * NumberField constructor.
@@ -60,11 +77,11 @@ class NumberField extends FormField {
 		if(isset($this->rangeStart) && $value < $this->rangeStart) {
 			return lang("form_number_wrong_area") . '"' . $this->title . '" ';
 		}
-		
+
 		if(isset($this->rangeEnd) && $value > $this->rangeEnd) {
 			return lang("form_number_wrong_area") . '"' . $this->title . '" ';
 		}
-		
+
 		return parent::validate($value);
 	}
 

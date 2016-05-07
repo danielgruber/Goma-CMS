@@ -54,5 +54,4 @@ $calendar = array(
 	"Fri"		=> "Fri",
 	"Sat"		=> "Sat",
 	"Sun"		=> "Sun",
-	
-);	
+);

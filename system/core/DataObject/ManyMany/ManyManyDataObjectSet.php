@@ -321,17 +321,17 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
 
         $recordIdQuery = new SelectQuery($this->relationShip->getTargetBaseTableName(), array());
         $recordIdQuery->innerJoin($this->relationShip->getTableName(), " {$this->relationShip->getTableName()}.{$this->relationShip->getTargetField()} =" .
-            "{$this->relationShip->getTargetBaseTableName()}.id AND {$this->relationShip->getOwnerField()} = '{$this->getQueryVersionID($oldId)}'");
+            "{$this->relationShip->getTargetBaseTableName()}.id AND {$this->relationShip->getTableName()}.{$this->relationShip->getOwnerField()} = '{$this->getQueryVersionID($oldId)}'");
 
         if (ClassManifest::isSameClass($this->relationShip->getTargetClass(), $this->ownRecord->DataClass()) ||
             is_subclass_of($this->relationShip->getTargetClass(), $this->ownRecord->DataClass()) ||
             is_subclass_of($this->ownRecord->DataClass(), $this->relationShip->getTargetClass())
         ) {
-            $recordIdQuery->addFilter("recordid != '".$this->ownRecord->id."'");
+            $recordIdQuery->addFilter("{$this->relationShip->getTargetBaseTableName()}.recordid != '".$this->ownRecord->id."'");
         }
 
         if($excludedRecords = array_merge($this->staging->fieldToArray("id"), $this->removeStaging->fieldToArray("id"))) {
-            $recordIdQuery->addFilter(" recordid NOT IN ('" . implode("','", $excludedRecords) . "') ");
+            $recordIdQuery->addFilter(" {$this->relationShip->getTargetBaseTableName()}.recordid NOT IN ('" . implode("','", $excludedRecords) . "') ");
         }
 
         return $recordIdQuery;
