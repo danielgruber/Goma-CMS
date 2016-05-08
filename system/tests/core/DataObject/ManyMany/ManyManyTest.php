@@ -166,13 +166,13 @@ class ManyManyIntegrationTest extends GomaUnitTest implements TestAble
 
         $this->assertEqual($firstOne->twos()->count(), count($this->twos));
         $ids = $firstOne->twosids;
-        array_splice($ids, 3);
+        array_splice($ids, 4);
         shuffle($ids);
         $firstOne->twosids = $ids;
         $firstOne->twos()->commitStaging(false, true, 3);
 
         $newFirstOne = DataObject::get_one("ManyManyTestObjectOne");
-        $this->assertEqual($newFirstOne->twos()->count(), 3);
+        $this->assertEqual($newFirstOne->twos()->count(), 4);
         /** @var ManyManyTestObjectTwo $two */
         $i = 0;
         foreach($newFirstOne->twos() as $two) {

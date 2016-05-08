@@ -26,7 +26,7 @@ class ManyManyDataObjectSetTests extends GomaUnitTest
         $relationShips = array_values(ModelManyManyRelationShipInfo::generateFromClass(" ManyManyRelationshipTest"));
 
         $info = $relationShips[0];
-        $dataset->setRelationENV($info, 2);
+        $dataset->setRelationENV($info, new Group(array("versionid" => 2)));
 
         $this->assertEqual($dataset->getRelationShip(), $info);
         $this->assertEqual($dataset->getRelationOwnValue(), 2);

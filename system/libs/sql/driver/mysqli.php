@@ -1029,8 +1029,12 @@ class mysqliDriver implements SQLDriver
      */
     private function getRecords($data) {
         $records = $data["fields"];
+        if(!is_array($records)) {
+            throw new InvalidArgumentException("Fields must be an array.");
+        }
+
         $values = array_values($records);
-        if(!is_array($values[0])) {
+        if(isset($values[0]) && !is_array($values[0])) {
             $records = array($records);
         }
 
@@ -1044,8 +1048,15 @@ class mysqliDriver implements SQLDriver
      * @return array
      */
     private function getFieldsFromInsertManipulation($data) {
+        if(!isset($data) || !$data) {
+            throw new InvalidArgumentException("Fields must be an array with at least one field.");
+        }
 
         $fields = $this->getRecords($data);
+
+        if(!isset($fields[0])) {
+            return array();
+        }
 
         return array_keys($fields[0]);
     }

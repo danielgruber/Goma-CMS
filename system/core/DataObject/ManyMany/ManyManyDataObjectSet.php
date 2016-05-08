@@ -528,10 +528,16 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
     {
         $sort = parent::getSortForQuery();
         if(isset($this->manyManyData)) {
-            if($sort) {
-                return array_merge((array) $sort, array("versionid", array_keys($this->manyManyData)));
+            if ($sort) {
+                return array_merge((array)$sort, array("versionid", array_keys($this->manyManyData)));
             } else {
                 return array(array("versionid", array_keys($this->manyManyData)));
+            }
+        } else {
+            if(is_array($sort)) {
+                $sort[] = $this->getManyManySort();
+            } else {
+                $sort = $this->getManyManySort($sort);
             }
         }
 
