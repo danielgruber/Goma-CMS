@@ -207,7 +207,7 @@ class Permission extends DataObject
                     self::$perm_cache[$userId][$permissionCode] = $data->hasPermission();
                     $data->forModel = "permission";
                     if ($data->type != "groups") {
-                        $data->write(false, true, 2, false, false);
+                        $data->writeToDB(false, true, 2, false, false);
                     }
                     return self::$perm_cache[$userId][$permissionCode];
                 } else {
@@ -221,7 +221,7 @@ class Permission extends DataObject
                             $perm->name = $permissionCode;
                             $data->forModel = "permission";
                             self::$perm_cache[$userId][$permissionCode] = $perm->hasPermission();
-                            $perm->write(true, true, 2);
+                            $perm->writeToDB(true, true, 2);
                             return self::$perm_cache[$userId][$permissionCode];
                         }
                     }
@@ -231,7 +231,7 @@ class Permission extends DataObject
                         $perm->setType(self::$providedPermissions[$permissionCode]["default"]["type"]);
 
                     self::$perm_cache[$userId][$permissionCode] = $perm->hasPermission();
-                    $perm->write(true, true, 2, false, false);
+                    $perm->writeToDB(true, true, 2, false, false);
                     return self::$perm_cache[$userId][$permissionCode];
                 }
             } else {
@@ -266,7 +266,7 @@ class Permission extends DataObject
                         $perm->name = $r;
                         $data->forModel = "permission";
                         self::$perm_cache[$r] = $perm->hasPermission();
-                        $perm->write(true, true, 2, false, false);
+                        $perm->writeToDB(true, true, 2, false, false);
                         return self::$perm_cache[$r];
                     }
                 }
@@ -275,7 +275,7 @@ class Permission extends DataObject
                 if (isset(self::$providedPermissions[$r]["default"]["type"]))
                     $perm->setType(self::$providedPermissions[$r]["default"]["type"]);
 
-                $perm->write(true, true, 2, false, false);
+                $perm->writeToDB(true, true, 2, false, false);
 
                 return $perm;
             }

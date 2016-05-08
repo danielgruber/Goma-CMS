@@ -96,14 +96,14 @@ class DefaultPermission {
 
                 // create new
                 $defaultGroup = new Group(array("name" => lang("user"), "type" => 1, "usergroup" => 1));
-                $defaultGroup->write(true, true, 2, false, false);
+                $defaultGroup->writeToDB(true, true, 2, false, false);
             } else {
 
                 // iterate trough all groups with type 1 and set default group to the first one without permissions
                 foreach(DataObject::get("group", array("type" => 1)) as $defaultGroup) {
                     if($defaultGroup->permissions()->count() === 0) {
                         $defaultGroup->usergroup = 1;
-                        $defaultGroup->write(false, true, 2, true, false);
+                        $defaultGroup->writeToDB(false, true, 2, true, false);
                         break;
                     } else {
                         unset($defaultGroup);
@@ -112,7 +112,7 @@ class DefaultPermission {
 
                 if(!isset($defaultGroup)) {
                     $defaultGroup = new Group(array("name" => lang("user"), "type" => 1, "usergroup" => 1));
-                    $defaultGroup->write(true, true, 2, false, false);
+                    $defaultGroup->writeToDB(true, true, 2, false, false);
                 }
             }
         }

@@ -53,7 +53,7 @@ class UploadsTest extends GomaUnitTest {
 		// file1: Tests Deletable and some basics
 		$this->assertEqual($file->deletable, "1");
 		$file->deletable = false;
-		$file->write(false, true);
+		$file->writeToDB(false, true);
 
 		$this->assertEqual($file->deletable, "0");
 		$this->assertEqual($file->filename, "1" . $this->filename);

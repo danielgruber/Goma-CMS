@@ -251,7 +251,7 @@ class Uploads extends DataObject {
                     // maybe file of object has changed and md5 is not valid anymore
                     // so rewrite md5-hash of object
                     $object->md5 = md5_file($object->realfile);
-                    $object->write(false, true);
+                    $object->writeToDB(false, true);
                 }
             }
         }
@@ -482,7 +482,7 @@ class Uploads extends DataObject {
             return md5($this->identifier);
         }
 
-        $this->write(false, true);
+        $this->writeToDB(false, true);
         return $this->realfile;
     }
 
@@ -504,14 +504,12 @@ class Uploads extends DataObject {
     /**
      * returns the raw-path
      *
-     * @name raw
-     * @access public
      * @return string
      */
     public function raw() {
         if($this->deletable) {
-            $this->deletable = true;
-            $this->write(false, true);
+            $this->deletable = false;
+            $this->writeToDB(false, true);
         }
 
         return $this->path;
@@ -717,7 +715,7 @@ class Uploads extends DataObject {
             "collectionid" 	=> $parentId,
             "type" 			=> "collection"
         ));
-        $collection->write(true, true);
+        $collection->writeToDB(true, true);
         return $collection;
     }
 
@@ -728,7 +726,7 @@ class Uploads extends DataObject {
         $this->collection = self::getCollection("default");
 
         if($this->id != 0) {
-            $this->write(false, true);
+            $this->writeToDB(false, true);
         }
     }
 }

@@ -514,7 +514,7 @@ class Box extends Boxes {
 			new Tab("settings", array(), lang("settings"))
 		)));
 		$form->add(new TextField("title", lang("box_title")), null, "content");
-		if ($this->RecordClass == "box") {
+		if ($this->classname == "box") {
 			if ($this->fullsized) {
 				$width = "";
 			} else if (strpos($this->width, "%") === false) {
@@ -636,10 +636,11 @@ class boxpage extends Page {
 		if ($this->boxes_seite_id && $this->id != $this->boxes_seite_id) {
 			$data = DataObject::get("boxes", array("seiteid" => $this->boxes_seite_id));
 
+			/** @var Box $record */
 			foreach ($data as $record) {
 				$new = $record->duplicate();
 				$new->seiteid = $this->id;
-				$new->write(true, true);
+				$new->writeToDB(true, true);
 			}
 		}
 	}

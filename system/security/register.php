@@ -106,14 +106,11 @@ class RegisterExtension extends ControllerExtension
 					$data->status = 1; // activation
 				}
 
-				if ($data->write(false, true)) {
-					if (self::$mustBeValidated) {
-						return $this->renderView($data, lang("register_require_acitvation"));
-					} else {
-						return $this->renderView($data, lang("register_ok"));
-					}
+				$data->writeToDB(false, true);
+				if (self::$mustBeValidated) {
+					return $this->renderView($data, lang("register_require_acitvation"));
 				} else {
-					throw new Exception("Could not save data");
+					return $this->renderView($data, lang("register_ok"));
 				}
 			} else {
 				return $this->renderView(isset($_GET["email"]) ? $_GET["email"] : "", lang("register_not_found"), isset($_GET["email"]));

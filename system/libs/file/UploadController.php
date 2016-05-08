@@ -61,7 +61,7 @@ class UploadController extends Controller {
 
 		if($upload->deletable) {
 			$upload->deletable = false;
-			$upload->write(false, true);
+			$upload->writeToDB(false, true);
 		}
 
 		GlobalSessionManager::globalSession()->stopSession();

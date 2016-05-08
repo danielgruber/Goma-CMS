@@ -86,9 +86,9 @@ class welcomeController extends Controller {
 		$data->name = $result["username"];
 		$data->password = $result["password"]; // we don't need to hash, it's implemented in the user-model
 		$data->email = $result["email"];
-		$data->write(true, true);
+		$data->writeToDB(true, true);
 		$data->groups()->add(DataObject::get_one("group", array("type" => 2)));
-		$data->groups()->write(false, true);
+		$data->groups()->commitStaging(false, true);
 		HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "step3/");
 	}
 	/**

@@ -41,7 +41,7 @@ class Word extends DataObject {
 			
 			// add to DataBase
 			$word = new Word(array("word" => strtolower($word)));
-			$word->write(true, true);
+			$word->writeToDB(true, true);
 			
 			// add to Cache
 			$words[$word->versionid] = $word->word;

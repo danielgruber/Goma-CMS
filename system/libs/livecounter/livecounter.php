@@ -276,7 +276,7 @@ class livecounter extends DataObject
 				if($data && date("d", $data->created) == date("d", NOW)) {
 					$data->phpsessid = $user_identifier;
 					$data->hitcount++;
-					$data->write(false, true);
+					$data->writeToDB(false, true);
 				} else if($data) {
 					// update longterm-entry and remove life entry
 					$lt = $data->longtermid;
@@ -343,7 +343,7 @@ class livecounter extends DataObject
 		$dataLive->hitcount = 1;
 		$dataLive->browser = $userAgent;
 		$dataLive->longterm = $data;
-		$dataLive->write(true, true);
+		$dataLive->writeToDB(true, true);
 
 		return $dataLive;
 	}
