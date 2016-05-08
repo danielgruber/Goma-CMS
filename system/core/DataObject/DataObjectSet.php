@@ -379,10 +379,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 				$this->page = $this->getPageCount();
 			}
 
-			// TODO: Check if we can leave it out
-			if($this->count() == 0) {
-				$this->lastCache = null;
-			} else if($this->page === null || $this->page == $this->getPageCount()) {
+			if($this->page === null || $this->page == $this->getPageCount()) {
 				$this->lastCache = $this->getConverted($this->getRange($this->countWholeSet() - 1, 1)->first());
 			} else {
 				$index = $this->page * $this->perPage - 1;
@@ -877,6 +874,15 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 */
 	protected function getRecordsByRange($start, $length)
 	{
+		if($start < 0) {
+			if ($start + $length <= 0) {
+				return array();
+			} else {
+				$length -= abs($start);
+				$start = 0;
+			}
+		}
+
 		if($this->fetchMode == self::FETCH_MODE_CREATE_NEW) {
 			return $this->staging->getRange($start, $length)->ToArray();
 		}
@@ -912,6 +918,10 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 					return array_slice($this->items, $pre, $length);
 				}
 			}
+		}
+
+		if($this->count === 0) {
+			return array();
 		}
 
 		return null;
