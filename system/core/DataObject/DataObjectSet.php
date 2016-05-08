@@ -375,10 +375,6 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 		if(!isset($this->lastCache)) {
 			$this->checkForPageUpdate();
 
-			if($this->page !== null && $this->getPageCount() < $this->page) {
-				$this->page = $this->getPageCount();
-			}
-
 			if($this->page === null || $this->page == $this->getPageCount()) {
 				$this->lastCache = $this->getConverted($this->getRange($this->countWholeSet() - 1, 1)->first());
 			} else {
