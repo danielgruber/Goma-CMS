@@ -347,9 +347,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 */
 	public function first() {
 		if(!isset($this->firstCache)) {
-			if($this->page !== null && $this->getPageCount() < $this->page) {
-				$this->page = $this->getPageCount();
-			}
+			$this->checkForPageUpdate();
 
 			$start = $this->page === null ? 0 : $this->page * $this->perPage - $this->perPage;
 			$range = $this->getRange($start, 1);
@@ -375,6 +373,8 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 */
 	public function last() {
 		if(!isset($this->lastCache)) {
+			$this->checkForPageUpdate();
+
 			if($this->page !== null && $this->getPageCount() < $this->page) {
 				$this->page = $this->getPageCount();
 			}
@@ -388,6 +388,15 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 		}
 
 		return $this->lastCache;
+	}
+
+	/**
+	 * checks for page-update.
+	 */
+	protected function checkForPageUpdate() {
+		if($this->page !== null && $this->getPageCount() < $this->page) {
+			$this->page = $this->getPageCount();
+		}
 	}
 
 	/**
