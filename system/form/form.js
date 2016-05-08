@@ -10,14 +10,15 @@ if(typeof goma == "undefined")
 	var goma = {};
 
 (function ( $ ) {
-	goma.form = function(id, fields, errors) {
+	goma.form = function(id, leave_check, fields, errors) {
 		if(!this instanceof goma.form)
-			return new goma.form(id, fields);
+			return new goma.form(id, leave_check, fields, errors);
 
 		goma.form.garbageCollect();
 
 		var that = this;
 
+		this.leave_check = leave_check;
 		this.fields = fields;
 		this.errors = errors;
 
@@ -113,8 +114,10 @@ if(typeof goma == "undefined")
 		},
 
 		unloadEvent: function() {
-			if(this.form.hasClass("leave_check")) {
-				return lang("unload_not_saved").replace('\n', "\n");
+			if(this.leave_check) {
+				if (this.form.hasClass("leave_check")) {
+					return lang("unload_not_saved").replace('\n', "\n");
+				}
 			}
 
 			return true;

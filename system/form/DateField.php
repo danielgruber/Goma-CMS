@@ -3,8 +3,11 @@
 /**
  * Date-Field for SQL-Date.
  *
- * @package        Goma\Core\Model
- * @version        1.5.1
+ * @package	Goma\Forms
+ * @link	http://goma-cms.org
+ * @license LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+ * @author 	Goma-Team
+ * @version 2.0
  */
 class DateField extends FormField
 {
@@ -42,43 +45,50 @@ class DateField extends FormField
 	/**
 	 * validate
 	 *
-	 * @name validate
-	 * @return bool|mixed|string
+	 * @param string $value
+	 * @return bool
+	 * @throws FormInvalidDataException
 	 */
 	public function validate($value)
 	{
 		if (($timestamp = strtotime($value)) === false) {
-			return lang("no_valid_date", "No valid date.");
+			throw new FormInvalidDataException($this->name, lang("no_valid_date", "No valid date."));
 		} else {
 			if ($this->between && is_array($this->between)) {
-				$between = array_values($this->between);
-
-				if (!preg_match("/^[0-9]+$/", trim($between[0]))) {
-					$start = strtotime($between[0]);
-				} else {
-					$start = $between[0];
-				}
-
-				if (!preg_match("/^[0-9]+$/", trim($between[1]))) {
-					$end = strtotime($between[1]);
-				} else {
-					$end = $between[1];
-				}
-
-				if ((!isset($between[2]) || $between[2] === false) && $start < $timestamp && $timestamp < $end) {
-					return true;
-				}
-				if (isset($between[2]) && $between[2] === true && $start <= $timestamp && $timestamp <= $end) {
-					return true;
-				} else {
-					$err = lang("date_not_in_range", "The given time is not between the range \$start and \$end.");
-					$err = str_replace('$start', date(DATE_FORMAT_DATE, $start), $err);
-					$err = str_replace('$end', date(DATE_FORMAT_DATE, $end), $err);
-					return $err;
-				}
+				$this->validateTimestamp($timestamp);
 			}
+		}
 
-			return true;
+		return true;
+	}
+
+	/**
+	 * @param int $timestamp
+	 * @throws FormInvalidDataException
+	 */
+	protected function validateTimestamp($timestamp) {
+		$between = array_values($this->between);
+
+		if (!preg_match("/^[0-9]+$/", trim($between[0]))) {
+			$start = strtotime($between[0]);
+		} else {
+			$start = $between[0];
+		}
+
+		if (!preg_match("/^[0-9]+$/", trim($between[1]))) {
+			$end = strtotime($between[1]);
+		} else {
+			$end = $between[1];
+		}
+
+		if(
+			((!isset($between[2]) || $between[2] === false) && ($start >= $timestamp || $timestamp >= $end)) ||
+			(isset($between[2]) && $between[2] === true && ($start > $timestamp && $timestamp > $end))
+		) {
+			$err = lang("date_not_in_range", "The given time is not between the range \$start and \$end.");
+			$err = str_replace('$start', date(DATE_FORMAT_DATE, $start), $err);
+			$err = str_replace('$end', date(DATE_FORMAT_DATE, $end), $err);
+			throw new FormInvalidDataException($this->name, $err);
 		}
 	}
 
@@ -183,6 +193,7 @@ class DateField extends FormField
 			"autoApply"	=> true,
 			"minDate"	=> isset($this->between[0]) ? date("d/m/Y", $this->between[0]) : null,
 			"maxDate"	=> isset($this->between[1]) ? date("d/m/Y", $this->between[1]) : null,
+			"applyClass"=> "btn-success button green",
 			"locale"	=> array(
 				"format"		=> self::dateformat_PHP_to_DatePicker(DATE_FORMAT_DATE),
 				"seperator"		=> " - ",
