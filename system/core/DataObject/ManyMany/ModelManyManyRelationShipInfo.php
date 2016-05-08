@@ -54,18 +54,7 @@ class ModelManyManyRelationShipInfo extends ModelRelationShipInfo {
      */
     public function __construct($ownerClass, $name, $options, $isMain)
     {
-        if(is_array($options) && count($options) == 2 && !isset($options[DataObject::CASCADE_TYPE]) && !isset($options[DataObject::FETCH_TYPE])) {
-            Core::Deprecate("2.0", "Use Constants instead of 2 count array for ManyMany-inverse.");
-            $options = array_values($options);
-            $options = array(
-                DataObject::RELATION_TARGET => $options[0],
-                DataObject::RELATION_INVERSE => $options[1]
-            );
-        }
-
-        if(isset($options["belonging"])) {
-            $options["inverse"] = $options["belonging"];
-        }
+        $options = $this->parseOptionsForLegacySupport($options);
 
         $this->controlling = !!$isMain;
 
@@ -92,6 +81,35 @@ class ModelManyManyRelationShipInfo extends ModelRelationShipInfo {
         } else {
             $this->tableName = $this->generateTableName();
         }
+    }
+
+    /**
+     * parses options for legacy support.
+     *
+     * @param string|array $options
+     * @return array
+     */
+    protected function parseOptionsForLegacySupport($options) {
+        if(is_string($options)) {
+            $options = array(
+                DataObject::RELATION_TARGET => $options
+            );
+        }
+
+        if(is_array($options) && count($options) == 2 && !isset($options[DataObject::CASCADE_TYPE]) && !isset($options[DataObject::FETCH_TYPE])) {
+            Core::Deprecate("2.0", "Use Constants instead of 2 count array for ManyMany-inverse.");
+            $options = array_values($options);
+            $options = array(
+                DataObject::RELATION_TARGET => $options[0],
+                DataObject::RELATION_INVERSE => $options[1]
+            );
+        }
+
+        if(isset($options["belonging"])) {
+            $options["inverse"] = $options["belonging"];
+        }
+
+        return $options;
     }
 
     /**

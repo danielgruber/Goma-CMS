@@ -143,8 +143,6 @@ class DataObjectSetTests extends GomaUnitTest
         $count = $data->count();
         $first = $data->first();
 
-        // TODO: Test with foreach
-
         $data->search("daniel");
         $this->assertNotEqual($count, $data->count());
         $this->assertIsA($data->first(), "DataObject");

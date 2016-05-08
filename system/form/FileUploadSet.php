@@ -8,6 +8,8 @@
  * @package Goma\Form
  * @version 1.2.1
  */
+
+// TODO: Update for new DataObjectSet.
 class FileUploadSet extends FormField
 {
     /**

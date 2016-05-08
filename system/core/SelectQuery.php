@@ -545,7 +545,7 @@ class SelectQuery {
 	 *
 	 * @param string - override fields part
 	 * @return string
-	 * @throws SQLException
+	 * @throws Exception
 	 */
 	public function build($fields = null) {
 
@@ -601,7 +601,7 @@ class SelectQuery {
 
 			if(is_string($table)) {
 				if(ClassInfo::$database && !isset(ClassInfo::$database[$table])) {
-					throw new SQLException("Table " . $table . " does not exist!");
+					throw new Exception("Table " . $table . " does not exist! " . print_r($fromHash, true));
 				}
 			}
 		}
