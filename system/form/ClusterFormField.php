@@ -15,92 +15,105 @@ class ClusterFormField extends FormField {
 	 *
 	 *@name fields
 	 *@access public
-	*/
+	 */
 	public $fields = array();
-	
+
 	/**
 	 * items of this cluster
 	 *
 	 *@name items
 	 *@access public
-	*/
+	 */
 	public $items = array();
-	
+
 	/**
 	 * fields already rendered
 	 *
 	 *@name renderedFields
 	 *@access public
-	*/
+	 */
 	public $renderedFields = array();
-	
+
 	/**
 	 * sort of the items
 	 *@name sort
 	 *@access public
-	*/
+	 */
 	public $sort = array();
-	
+
 	/**
 	 * url of the original form
 	 *
 	 *@name url
 	 *@access public
-	*/
+	 */
 	public $url;
-	
+
 	/**
 	 * result will be linked on value
 	 *
 	 *@name result
 	 *@access public
-	*/
+	 */
 	public $result;
 
-    /**
-     * model.
-     */
-    public $model;
+	/**
+	 * model.
+	 */
+	public $model;
 
 	/**
 	 * controller
 	 *
 	 *@name controller
 	 *@access public
-	*/
+	 */
 	public $controller;
-	
+
 	/**
 	 * post-data
 	 *
 	 *@name post
 	 *@access public
-	*/
+	 */
 	public $post;
-	
+
 	/**
 	 * state
-	*/
+	 */
 	public $state;
-	
+
+	/**
+	 * template.
+	 * @var string
+	 */
+	protected $template = "form/FieldSet.html";
+
+	/**
+	 * @var ViewAccessableData
+	 */
+	protected $templateView;
+
 	/**
 	 * constructing
 	 *
 	 *@name __construct
 	 *@access public
-	*/
+	 */
 	public function __construct($name = null, $title = null, $fields = null, $value = null, &$form = null) {
 		if(!isset($value))
 			$value = array();
-		
+
+		$this->templateView = new ViewAccessableData();
+
 		parent::__construct($name, $title, $value, $form);
-		
+
 		foreach((array)$fields as $field) {
 			$field->overridePostName = $this->name . "_" . $field->name;
 			$this->sort[$field->name] = 1 + count($this->items);
 			$this->items[] = $field;
 		}
-		
+
 		$this->result =& $this->value;
 	}
 
@@ -115,36 +128,36 @@ class ClusterFormField extends FormField {
 	public function hasAction($action) {
 		if(isset($this->fields[$action]))
 			return true;
-			
+
 		if(parent::hasAction($action))
 			return true;
-			
+
 		return false;
 	}
 
-    /**
-     * handles the action
-     * we implement sub-namespaces for sub-items here
-     *
-     * @name handleAction
-     * @access public
-     * @return string|false
-     */
+	/**
+	 * handles the action
+	 * we implement sub-namespaces for sub-items here
+	 *
+	 * @name handleAction
+	 * @access public
+	 * @return string|false
+	 */
 	public function handleAction($action) {
 		if(isset($this->fields[$action])) {
-            return $this->fields[$action]->handleRequest($this->request);
-        }
-			
+			return $this->fields[$action]->handleRequest($this->request);
+		}
+
 		return parent::handleAction($action);
 	}
 
-    /**
-     * returns the node
-     *
-     * @name createNode
-     * @access public
-     * @return HTMLNode
-     */
+	/**
+	 * returns the node
+	 *
+	 * @name createNode
+	 * @access public
+	 * @return HTMLNode
+	 */
 	public function createNode() {
 		return new HTMLNode("div");
 	}
@@ -157,14 +170,21 @@ class ClusterFormField extends FormField {
 		parent::addRenderData($info);
 
 		/** @var FormFieldRenderData $child */
-		$subContainer = new HTMLNode("div");
-		foreach($info->getChildren() as $child) {
-            if($this->form()->isFieldToRender($child->getName())) {
-                $child->getField()->addRenderData($child);
-                $subContainer->append($child->getRenderedField());
-            }
+		$data = array();
+		foreach ($info->getChildren() as $child) {
+			if ($this->form()->isFieldToRender($child->getName())) {
+				$child->getField()->addRenderData($child);
+
+				$data[] = $child->ToRestArray(true, false);
+			}
 		}
-		$info->getRenderedField()->append($subContainer);
+
+		$info->getRenderedField()->append(
+			$this->templateView
+				->customise($info->ToRestArray(false, false))
+				->customise(array("fields" => new DataSet($data)))
+				->renderWith($this->template)
+		);
 	}
 
 	/**
@@ -191,34 +211,34 @@ class ClusterFormField extends FormField {
 
 		return $data;
 	}
-	
+
 	/**
 	 * adds an field
 	 *@name add
 	 *@access public
-	*/
+	 */
 	public function add($field, $sort = 0)
-	{	
+	{
 		$field->overridePostName = $this->name . "_" . $field->name;
-		
+
 		if($sort == 0) {
 			$sort = 1 + count($this->items);
 		}
-		
+
 		$this->sort[$field->name] = $sort;
 		$this->items[$field->name] = $field;
 		if(isset($this->parent))
 			/** @var FormField $field */
 			$field->setForm($this);
 	}
-	
-	
+
+
 	/**
 	 * removes a field or this field
 	 *
 	 *@name remove
 	 *@access public
-	*/
+	 */
 	public function remove($field = null)
 	{
 		if($field === null) {
@@ -229,7 +249,7 @@ class ClusterFormField extends FormField {
 			{
 				unset($this->fields[$this->name . "_" . $field]);
 			}
-			
+
 			if(isset($this->items[$this->name . "_" . $field]))
 			{
 				unset($this->items[$this->name . "_" . $field]);
@@ -249,7 +269,7 @@ class ClusterFormField extends FormField {
 		{
 			return 0;
 		}
-			
+
 		return ($this->sort[$a->name] > $this->sort[$b->name]) ? 1 : -1;
 	}
 
@@ -281,21 +301,21 @@ class ClusterFormField extends FormField {
 
 		if($renderAfterSetForm) $this->renderAfterSetForm();
 	}
-	
+
 	/**
 	 * gets value if is in result or post-data
 	 *
 	 *@name getValue
 	 *@access public
-	*/
+	 */
 	public function getValue() {
 		if(!$this->disabled && $this->POST && isset($this->orgForm()->post[$this->PostName()])) {
 			$this->value = $this->orgForm()->post[$this->PostName()];
 		} else if($this->POST && $this->value == null && isset($this->orgForm()->result[$this->name]) && is_object($this->orgForm()->result)) {
 			$this->value = ($this->orgForm()->result->doObject($this->name)) ? $this->orgForm()->result->doObject($this->name)->raw() : null;
 		} else if($this->POST && $this->value == null && isset($this->orgForm()->result[$this->name])) {
-            $this->value = $this->orgForm()->result[$this->name];
-        }
+			$this->value = $this->orgForm()->result[$this->name];
+		}
 	}
 
 	/**
@@ -329,31 +349,31 @@ class ClusterFormField extends FormField {
 	 */
 	public function externalURL()
 	{
-			return $this->orgForm()->externalURL() . "/" . $this->name;
+		return $this->orgForm()->externalURL() . "/" . $this->name;
 	}
-	
+
 	/**
 	 * disables this field and all sub-fields
 	 *
 	 *@name disable
 	 *@access public
-	*/
+	 */
 	public function disable()
-	{	
+	{
 		$this->disabled = true;
 		/** @var FormField $field */
 		foreach($this->fields as $field)
 			$field->disable();
 	}
-	
+
 	/**
 	 * enables this field and all sub-fields
 	 *
 	 *@name enable
 	 *@access public
-	*/
+	 */
 	public function enable()
-	{	
+	{
 		$this->disabled = false;
 		/** @var FormField $field */
 		foreach($this->fields as $field)
@@ -382,14 +402,14 @@ class ClusterFormField extends FormField {
 	 * @access public
 	 * @return array|mixed|null
 	 */
-	public function result() {	
+	public function result() {
 		$this->result = array();
 		/** @var FormField $field */
 		foreach($this->fields as $field) {
 
 			$this->result[$field->dbname] = $field->result();
 		}
-	
+
 		return $this->result;
 	}
 
@@ -401,7 +421,7 @@ class ClusterFormField extends FormField {
 	 */
 	public function name()
 	{
-			return $this->name;
+		return $this->name;
 	}
 
 	/**
@@ -431,13 +451,13 @@ class ClusterFormField extends FormField {
 		$this->fields[strtolower($name)] = $field;
 		$field->overridePostName = $this->name . "_" . $name;
 	}
-	
+
 	/**
 	 * just unregisters the field in this form
 	 *
 	 *@name unRegister
 	 *@access public
-	*/
+	 */
 	public function unRegister($name) {
 		unset($this->fields[strtolower($name)]);
 	}
@@ -451,9 +471,9 @@ class ClusterFormField extends FormField {
 	 * @return bool
 	 */
 	public function getField($offset) {
-		if(isset($this->fields[strtolower($offset)])) 
+		if(isset($this->fields[strtolower($offset)]))
 			return $this->fields[strtolower($offset)];
-		
+
 		return false;
 	}
 
@@ -466,7 +486,7 @@ class ClusterFormField extends FormField {
 	 */
 	public function isField($name)
 	{
-			return (isset($this->fields[strtolower($name)]));
+		return (isset($this->fields[strtolower($name)]));
 	}
 
 	/**
@@ -478,35 +498,35 @@ class ClusterFormField extends FormField {
 	 */
 	public function isFieldToRender($name)
 	{
-			return ((isset($this->fields[strtolower($name)])) && !isset($this->renderedFields[strtolower($name)]));
+		return ((isset($this->fields[strtolower($name)])) && !isset($this->renderedFields[strtolower($name)]));
 	}
-	
+
 	/**
 	 * registers the field as rendered
 	 *
 	 *@name registerRendered
 	 *@access public
 	 *@param string - name
-	*/
+	 */
 	public function registerRendered($name) {
 		$this->renderedFields[strtolower($name)] = true;
 	}
-	
+
 	/**
 	 * removes the registration as rendered
 	 *
 	 *@name unregisterRendered
 	 *@access public
 	 *@param string - name
-	*/
+	 */
 	public function unregisterRendered($name) {
 		unset($this->renderedFields[strtolower($name)]);
 	}
-	
+
 	//!Overloading
 	/**
 	 * Overloading
-	*/
+	 */
 
 	/**
 	 * returns a field in this form by name
@@ -524,16 +544,16 @@ class ClusterFormField extends FormField {
 
 		return $this->getField($offset);
 	}
-	
+
 	/**
 	 * currently set doesn't do anything
 	 *
 	 *@name __set
 	 *@access public
-	*/
+	 */
 	public function __set($offset, $value)
 	{
-			// currently there is no option to overload a form with fields
+		// currently there is no option to overload a form with fields
 	}
 
 	/**
@@ -545,6 +565,6 @@ class ClusterFormField extends FormField {
 	 */
 	public function __isset($offset)
 	{
-			return $this->isField($offset);
+		return $this->isField($offset);
 	}
 }

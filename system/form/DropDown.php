@@ -190,10 +190,6 @@ class DropDown extends FormField {
 	public function renderAfterSetForm() {
 		parent::renderAfterSetForm();
 
-		Resources::add("dropdown.css");
-		Resources::add("system/form/dropdown.js", "js", "tpl");
-		Resources::add("font-awsome/font-awesome.css", "css", "tpl");
-
 		$this->widget = new HTMLNode("div", array(
 			"class" => "dropdown_widget",
 			"id" => $this->ID() . "_widget"
@@ -243,6 +239,19 @@ class DropDown extends FormField {
 		} else {
 			$this->widget->addClass("single-value");
 		}
+	}
+
+	/**
+	 * @param FormFieldRenderData $info
+	 * @param bool $notifyField
+	 */
+	public function addRenderData($info, $notifyField = true)
+	{
+		$info->addCSSFile("dropdown.css");
+		$info->addJSFile("system/form/dropdown.js");
+		$info->addCSSFile("font-awsome/font-awesome.css");
+
+		parent::addRenderData($info, $notifyField);
 	}
 
 	/**
