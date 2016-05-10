@@ -635,10 +635,9 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
     /**
      * validates if page can be created with this configuration of parent.
      *
-     * @name validateParentId
-     * @access public
      * @param FormValidator $obj
      * @return bool|string
+     * @throws FormInvalidDataException
      */
     public function validatePageType($obj)
     {
@@ -647,7 +646,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
 
         // check if form was filled out correctrly.
         if($data["parenttype"] == "subpage" && $data["parentid"] == null) {
-            return lang("form_required_fields", "Please fill out the oligatory fields") . ' "' . lang("parentpage", "Parent Page") . '""';
+            throw new FormInvalidDataException("parent", lang("form_required_fields", "Please fill out the oligatory fields") . ' "' . lang("parentpage", "Parent Page") . '""');
         }
 
         // find classes that should be allowed parents.
@@ -658,7 +657,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
         {
             // check if page should be created as subpage from itself.
             if(isset($data["recordid"]) && $data["parentid"] == $data["recordid"]) {
-                return lang("error_page_self", "You can't suborder a page under itself!");
+                throw new FormInvalidDataException("parent", lang("error_page_self", "You can't add a page as a child under itself!"));
             }
 
             // get parent-page versioned to ensure supporting state-versions + check if any page parent is page itself.
@@ -668,7 +667,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
                 // validate if we subordered under subtree
                 while($temp->parent) {
                     if($temp->id == $data["recordid"]) {
-                        return lang("error_page_self", "You can't suborder a page under itself!");
+                        throw new FormInvalidDataException("parent", lang("error_page_self", "You can't add a page as a child under itself!"));
                     }
                     $temp = $temp->parent;
                 }
@@ -681,46 +680,40 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
             return true;
         }
 
-        return lang("form_bad_pagetype");
+        throw new FormInvalidDataException("parenttype", lang("form_bad_pagetype"));
     }
 
     /**
      * validates page-filename
      *
-     * @name validatePageFileName
-     * @access public
      * @param FormValidator $obj
      * @return bool|string
+     * @throws FormInvalidDataException
      */
     public function validatePageFileName($obj) {
         $data = $obj->getForm()->result;
         $filename =  PageUtils::cleanPath($data["filename"]);
-        $parentid = ($data["parentid"] == "") ? 0 : $data["parentid"];
+        $parentid = ($data["parentid"] == "" || $data["parenttype"] == "root") ? 0 : $data["parentid"];
+        $filter = array("path" => array("LIKE", $filename), "parentid" => $parentid);
         if(isset($obj->getForm()->result["recordid"])) {
-            if($filename == "index" || DataObject::count("pages", array("path" => array("LIKE", $filename), "parentid" => $parentid, "recordid" => array("!=", $obj->getForm()->result["recordid"]))) > 0) {
-                return lang("site_exists", "The page with this filename already exists.");
-            } else {
-                return true;
-            }
-        } else if(DataObject::count("pages", array("path" => array("LIKE", $filename), "parentid" => $parentid)) > 0) {
-            return lang("site_exists", "The page with this filename already exists.");
-        } else {
-            return true;
+            $filter["recordid"] = array("!=", $obj->getForm()->result["recordid"]);
         }
-    }
 
-    //!Form
+        if($filename == "index" || trim($filename) == "" ||
+            DataObject::count("pages", $filter) > 0) {
+            throw new FormInvalidDataException("filename", lang("site_exists", "The page with this filename already exists."));
+        }
+
+        return true;
+    }
 
     /**
      * writes the form
      *
-     *@name getForm
-     *@access public
-     *@param object - form
+     * @param Form $form
      */
     public function getForm(&$form)
     {
-
         parent::getForm($form);
 
         $allowed_parents = $this->parentResolver()->getAllowedParents();

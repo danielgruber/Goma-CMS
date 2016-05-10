@@ -298,4 +298,20 @@ class FieldSet extends FormField
 
         return ($this->sort[$a->name] > $this->sort[$b->name]) ? 1 : -1;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getTemplateView()
+    {
+        return $this->templateView;
+    }
+
+    /**
+     * @param mixed $templateView
+     */
+    public function setTemplateView($templateView)
+    {
+        $this->templateView = $templateView;
+    }
 }

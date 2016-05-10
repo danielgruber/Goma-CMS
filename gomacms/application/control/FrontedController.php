@@ -87,7 +87,7 @@ class FrontedController extends Controller
      */
     public function serve($content)
     {
-        if (Core::is_ajax() && isset($_GET["dropdownDialog"])) {
+        if ($this->request->is_ajax() && isset($this->request->get_params["dropdownDialog"])) {
             return $content;
         }
 

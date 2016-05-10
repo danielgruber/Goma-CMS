@@ -178,8 +178,8 @@ class FileUpload extends FormField {
 			$_SERVER["HTTP_X_FILE_NAME"] = "";
 
 		if($this->allowed_file_types == "*" || preg_match('/\.(' . implode("|", $this->allowed_file_types) . ')$/i', $_SERVER["HTTP_X_FILE_NAME"])) {
-			if(Core::phpInputFile()) {
-				$tmp_name = Core::phpInputFile();
+			if($this->request->inputStreamFile()) {
+				$tmp_name = $this->request->inputStreamFile();
 
 				// filesize problem, file has not been uploaded completly or is corrupted.
 				if(filesize($tmp_name) != $_SERVER["HTTP_X_FILE_SIZE"]) {
@@ -395,6 +395,10 @@ class FileUpload extends FormField {
 
 	/**
 	 * handles the upload
+	 *
+	 * @param array $upload
+	 * @return mixed
+	 * @throws FileUploadException
 	 */
 	public function handleUpload($upload) {
 		if(!isset($upload["name"], $upload["size"], $upload["tmp_name"])) {
@@ -437,5 +441,21 @@ class FileUpload extends FormField {
 	public function result() {
 		$this->getValue();
 		return $this->value;
+	}
+
+	/**
+	 * @return ViewAccessableData
+	 */
+	public function getTemplateView()
+	{
+		return $this->templateView;
+	}
+
+	/**
+	 * @param ViewAccessableData $templateView
+	 */
+	public function setTemplateView($templateView)
+	{
+		$this->templateView = $templateView;
 	}
 }

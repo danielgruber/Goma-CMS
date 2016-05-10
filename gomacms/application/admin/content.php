@@ -179,7 +179,7 @@ class contentAdmin extends LeftAndMain {
                 $data = DataObject::get_one($this->modelInst()->classname, array("id" => $this->model_inst->id));
                 if ($data) {
                     $data->writeToDB(false, false, 2, true);
-                    if (Core::is_ajax()) {
+                    if ($this->request->is_ajax()) {
                         $response = new AjaxResponse();
                         Notification::notify("pages", lang("revert_changes_success", "The last version was recovered successfully."), lang("reverted"));
                         $response->exec("reloadTree(function(){ LoadTreeItem('" . $data->class_name . "_" . $data->id . "'); });");

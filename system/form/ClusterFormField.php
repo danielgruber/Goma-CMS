@@ -567,4 +567,20 @@ class ClusterFormField extends FormField {
 	{
 		return $this->isField($offset);
 	}
+
+	/**
+	 * @return ViewAccessableData
+	 */
+	public function getTemplateView()
+	{
+		return $this->templateView;
+	}
+
+	/**
+	 * @param ViewAccessableData $templateView
+	 */
+	public function setTemplateView($templateView)
+	{
+		$this->templateView = $templateView;
+	}
 }

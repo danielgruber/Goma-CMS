@@ -104,6 +104,11 @@ class Request extends gObject {
 	protected $remoteAddr;
 
 	/**
+	 * php-input.
+	 */
+	protected $phpInputFile;
+
+	/**
 	 * @param string $method
 	 * @param string $url
 	 * @param array $get_params
@@ -476,5 +481,49 @@ class Request extends gObject {
 				return false;
 			}
 		return false;
+	}
+
+	/**
+	 * @return bool|string
+	 * @throws FileNotPermittedException
+	 */
+	public function inputStreamFile() {
+		if(!isset($this->phpInputFile)) {
+			if ($handle = @fopen("php://input", "rb")) {
+				if (PROFILE)
+					Profiler::mark("php://input read");
+
+				$random = randomString(20);
+				if (!file_exists(FRAMEWORK_ROOT . "temp/")) {
+					FileSystem::requireDir(FRAMEWORK_ROOT . "temp/");
+				}
+				$filename = FRAMEWORK_ROOT . "temp/php_input_" . $random;
+
+				$file = fopen($filename, 'wb');
+				stream_copy_to_stream($handle, $file);
+				fclose($handle);
+				fclose($file);
+				$this->phpInputFile = $filename;
+
+				register_shutdown_function(array($this, "cleanUpInput"));
+
+				if (PROFILE)
+					Profiler::unmark("php://input read");
+			} else {
+				$this->phpInputFile = false;
+			}
+		}
+
+		return $this->phpInputFile;
+	}
+
+
+	/**
+	 * clean-up for saved file-data
+	 */
+	public function cleanUpInput() {
+		if(isset($this->phpInputFile) && file_exists($this->phpInputFile)) {
+			@unlink($this->phpInputFile);
+		}
 	}
 }

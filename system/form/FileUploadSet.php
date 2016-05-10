@@ -6,10 +6,10 @@
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package Goma\Form
- * @version 1.2.1
+ * @version 2.0
+ *
+ * @property DataObjectSet $value
  */
-
-// TODO: Update for new DataObjectSet.
 class FileUploadSet extends FormField
 {
     /**
@@ -62,61 +62,60 @@ class FileUploadSet extends FormField
 
     /**
      * max filesize
-     * @name max_filesize
+     *
+     * @var int
      */
     public $max_filesize = 10485760; // 10 Mib
 
     /**
      * collection
      *
-     * @name collection
-     * @access public
+     * @var string
      */
     public $collection = "FormUploadSet";
 
     /**
      * upload-class
+     *
+     * @var string
      */
     protected $uploadClass = "Uploads";
 
     /**
      * unique key of this dataset
      *
-     * @name key
-     * @access protected
+     * @var string
      */
     protected $key;
 
     /**
-     * main view
-     *
-     * @name view
-     * @access public
-     */
-    public $view;
-
-    /**
-     * table-body for files
-     *
-     * @name tbody
-     * @access public
-     */
-    public $tbody;
-
-    /**
      * defines whether set a link to the file or not
      *
-     * @name link
-     * @access public
+     * @var bool
      */
     public $link = true;
 
     /**
+     * default-icon.
+     */
+    protected $defaultIcon = "images/icons/goma/128x128/file.png";
+
+    /**
      * this field needs to have the full width
      *
-     * @name fullSizedField
+     * @var bool
      */
     protected $fullSizedField = true;
+
+    /**
+     * template-view.
+     */
+    protected $template = "form/FileUploadSet.html";
+
+    /**
+     * @var ViewAccessableData
+     */
+    protected $templateView;
 
     /**
      * used for internal sort-function.
@@ -124,25 +123,45 @@ class FileUploadSet extends FormField
     private $sortInfo;
 
     /**
-     * @name __construct
-     * @access public
+     * @param string $name
+     * @param string $title
+     * @param array|null $file_types
+     * @param DataObjectSet|null $value
+     * @param string|null $collection
+     * @param null $parent
+     * @return static
+     */
+    public static function create($name, $title, $file_types = null, $value = null, $collection = null, $parent = null)
+    {
+        return new static($name, $title, $file_types, $value, $collection, $parent);
+    }
+
+    /**
+     * @param string|null $name
+     * @param string|null $title
+     * @param array|null $file_types
+     * @param string $value
+     * @param null $collection
+     * @param null $form
      */
     public function __construct($name = null, $title = null, $file_types = null, $value = "", $collection = null, &$form = null)
     {
         parent::__construct($name, $title, $value, $form);
-        if ($file_types !== null && (is_array($file_types) || $file_types == "*"))
+
+        if (isset($file_types) && (is_array($file_types) || $file_types == "*"))
             $this->allowed_file_types = $file_types;
 
         if (isset($collection))
             $this->collection = $collection;
+
+        $this->templateView = new ViewAccessableData();
     }
 
     /**
      * handles the request and saves the data to the session
      *
-     * @handleRequest
-     * @access public
-     * @param request -object
+     * @param Request $request
+     * @param bool $subController
      * @return false|string
      */
     public function handleRequest($request, $subController = false)
@@ -154,9 +173,6 @@ class FileUploadSet extends FormField
 
     /**
      * stores the data
-     *
-     * @name storeData
-     * @access public
      */
     public function storeData()
     {
@@ -166,40 +182,40 @@ class FileUploadSet extends FormField
 
     /**
      * gets the current value
-     *
-     * @name getValue
-     * @access public
      */
     public function getValue()
     {
+        if(!isset($this->value)) {
+            if (is_a($this->form()->result, "DataObject")) {
+                /** @var DataObject $object */
+                $object = $this->form()->result;
+                $relationShip = $object->getManyManyInfo($this->name);
+                $this->uploadClass = $relationShip->getTargetClass();
+            }
 
-        if (is_object($this->form()->result)) {
-            /** @var DataObject $object */
-            $object = $this->form()->result;
-            $relationShip = $object->getManyManyInfo($this->name);
-            $this->uploadClass = $relationShip->getTargetClass();
+            if (isset($this->form()->post[$this->PostName() . "__key"]) && Core::globalSession()->hasKey("FileUploadSet_" . $this->form()->post[$this->PostName() . "__key"])) {
+                $this->value = Core::globalSession()->get("FileUploadSet_" . $this->form()->post[$this->PostName() . "__key"]);
+                $this->key = $this->form()->post[$this->PostName() . "__key"];
+            } else {
+                if (!isset($this->uploadClass)) {
+                    throw new LogicException("FileUploadSet only works with DataObjects and corresponding Many-Many-Connections.");
+                }
+
+                if (isset($this->form()->result->{$this->name})) {
+                    $this->key = randomString(10);
+                    $this->value = $this->form()->result->{$this->name};
+                    if (!is_object($this->value)) {
+                        throw new LogicException("ManyMany-Connection did not return Object.");
+                    }
+                } else {
+                    $this->value = new ManyMany_DataObjectSet($this->uploadClass);
+                    $this->value->setFetchMode(DataObjectSet::FETCH_MODE_CREATE_NEW);
+                }
+            }
         }
 
-        if (isset($this->form()->post[$this->PostName() . "__key"]) && Core::globalSession()->hasKey("FileUploadSet_" . $this->form()->post[$this->PostName() . "__key"])) {
-            $this->value = Core::globalSession()->get("FileUploadSet_" . $this->form()->post[$this->PostName() . "__key"]);
-            $this->key = $this->form()->post[$this->PostName() . "__key"];
-        } else {
-            if(!isset($this->uploadClass)) {
-                throw new LogicException("FileUploadSet only works with DataObjects and corresponding Many-Many-Connections.");
-            }
-
-            if (isset($this->form()->result[$this->name])) {
-                $this->key = randomString(10);
-                $this->value = $this->form()->result[$this->name];
-                if (!is_object($this->value)) {
-                    $this->value = new ManyMany_DataObjectSet($this->uploadClass);
-                }
-            } else if (isset($this->form()->result[$this->name . "ids"])) {
-                $this->value = new ManyMany_DataObjectSet($this->uploadClass, array("id" => $this->form()->result[$this->name . "ids"]));
-                $this->value->forceData();
-            } else {
-                $this->value = new ManyMany_DataObjectSet($this->uploadClass);
-            }
+        if(!is_a($this->value, "DataObjectSet")) {
+            throw new InvalidArgumentException("FileUploadSet requires DataObjectSet as source.");
         }
 
         $this->checkForEvents();
@@ -209,8 +225,8 @@ class FileUploadSet extends FormField
      * checks if user wants to change something.
      */
     protected function checkForEvents() {
-        if (isset($_FILES[$this->PostName() . "_upload"]) && !empty($_FILES[$this->PostName() . "_upload"]["name"])) {
-            $response = $this->handleUpload($_FILES[$this->PostName() . "_upload"]);
+        if (isset($this->request->post_params[$this->PostName() . "_upload"]) && !empty($this->request->post_params[$this->PostName() . "_upload"]["name"])) {
+            $response = $this->handleUpload($this->request->post_params[$this->PostName() . "_upload"]);
             if ($response === false) {
                 AddContent::addNotice(lang("files.upload_failure"));
             } else if (is_string($response)) {
@@ -220,40 +236,39 @@ class FileUploadSet extends FormField
             }
         }
 
+        /** @var DataObject $record */
         foreach ($this->value as $record) {
-            if (isset($this->form()->post[$this->PostName() . "__delete_" . $record["id"]])) {
-                $record->disconnect($this->value);
+            if (isset($this->request->post_params[$this->PostName() . "__delete_" . $record->id])) {
+                if(is_a($this->value, "RemoveStagingDataObjectSet")) {
+                    /** @var ManyMany_DataObjectSet $manyManySet */
+                    $manyManySet = $this->value;
+                    $manyManySet->removeFromSet($record);
+                } else {
+                    $this->value->removeFromStage($record);
+                }
             }
         }
     }
 
     /**
      * ajax upload
-     *
-     * @name ajaxUpload
-     * @access public
      */
     public function ajaxUpload()
     {
-        if (!isset($_SERVER["HTTP_X_FILE_NAME"]))
-            $_SERVER["HTTP_X_FILE_NAME"] = "";
+        if ($this->allowed_file_types == "*" || preg_match('/\.(' . implode("|", $this->allowed_file_types) . ')$/i', $this->request->getHeader("x-file-name"))) {
+            if ($this->request->inputStreamFile()) {
+                $tmp_name = $this->request->inputStreamFile();
 
-        if ($this->allowed_file_types == "*" || preg_match('/\.(' . implode("|", $this->allowed_file_types) . ')$/i', $_SERVER["HTTP_X_FILE_NAME"])) {
-
-            if (Core::phpInputFile()) {
-                $tmp_name = Core::phpInputFile();
-
-
-                if (filesize($tmp_name) != $_SERVER["HTTP_X_FILE_SIZE"]) {
-                    $this->sendJSONError(lang("files.upload_failure"));
+                if (filesize($tmp_name) != $this->request->getHeader("x-file-size")) {
+                    return $this->sendJSONError(lang("files.upload_failure"));
                 }
             } else {
                 return $this->sendJSONError(lang("files.upload_failure"));
             }
 
             $upload = array(
-                "name" => $_SERVER["HTTP_X_FILE_NAME"],
-                "size" => $_SERVER["HTTP_X_FILE_SIZE"],
+                "name" => $this->request->getHeader("x-file-name"),
+                "size" => $this->request->getHeader("x-file-size"),
                 "error" => 0,
                 "tmp_name" => $tmp_name
             );
@@ -261,26 +276,36 @@ class FileUploadSet extends FormField
             // clean up
             if (isset($tmp_name))
                 @unlink($tmp_name);
+
+            /** @var Uploads $response */
             if (is_object($response)) {
-                HTTPResponse::setHeader("Content-Type", "text/x-json");
-                HTTPResponse::sendHeader();
-
-                $filedata = array("name" => $response->filename, "realpath" => $response->fieldGet("path"), "icon16" => $response->getIcon(16), "path" => $response->path, "id" => $response->id);
-                if (!$this->link) {
-                    unset($filedata["realpath"]);
-                    unset($filedata["path"]);
-                }
-
-                echo json_encode(array("status" => 1, "file" => $filedata));
-                exit;
+                return new JSONResponseBody(array("status" => 1, "file" => $this->getFileArray($response)));
             } else if (is_string($response)) {
-                $this->sendJSONError($response);
+                return $this->sendJSONError($response);
             } else {
-                $this->sendJSONError(lang("files.upload_failure"));
+                return $this->sendJSONError(lang("files.upload_failure"));
             }
         } else {
-            $this->sendJSONError(lang("files.filetype_failure", "The filetype isn't allowed."));
+            return $this->sendJSONError(lang("files.filetype_failure", "The filetype isn't allowed."));
         }
+    }
+
+    /**
+     * gets file data from uploads object.
+     * @param Uploads $file
+     * @return array
+     */
+    protected function getFileArray($file) {
+        return array(
+            "name" => $file->filename,
+            "realpath" => $this->link ? $file->fieldGet("path") : null,
+            "icon128" => $file->getIcon(128),
+            "icon16" => $file->getIcon(16),
+            "icon32" => $file->getIcon(32),
+            "icon64" => $file->getIcon(64),
+            "path" => $this->link ? $file->path : null,
+            "id" => $file->id
+        );
     }
 
     /**
@@ -288,15 +313,10 @@ class FileUploadSet extends FormField
      *
      * @param string $error
      * @param bool $sendContentType
+     * @return JSONResponseBody
      */
     protected function sendJSONError($error, $sendContentType = true) {
-        if($sendContentType === true) {
-            HTTPResponse::setHeader("Content-Type", "text/x-json");
-        }
-
-        HTTPResponse::sendHeader();
-        echo json_encode(array("status" => 0, "errstring" => $error));
-        exit;
+        return new JSONResponseBody(array("status" => 0, "errstring" => $error));
     }
 
     /**
@@ -304,59 +324,54 @@ class FileUploadSet extends FormField
      *
      * @name frameUpload
      * @access public
+     * @return string
      */
     public function frameUpload()
     {
-        if (isset($_FILES["file"])) {
-            if (is_array($_FILES["file"]["name"])) {
-                $files = $this->handleUpload($_FILES["file"]);
+        if (isset($this->request->post_params["file"])) {
+            if (is_array($this->request->post_params["file"]["name"])) {
+                $files = $this->handleUpload($this->request->post_params["file"]);
                 $filedata = array();
+                /** @var Uploads $data */
                 foreach ($files as $data) {
-                    $filedata[] = array("name" => $data->filename, "realpath" => $data->fieldGet("path"), "icon16" => $data->getIcon(16), "path" => $data->path, "id" => $data->id);
-                    if (!$this->link) {
-                        unset($filedata[count($filedata) - 1]["realpath"]);
-                        unset($filedata[count($filedata) - 1]["path"]);
-                    }
+                    $filedata[] = $this->getFileArray($data);
                 }
 
-                echo json_encode(array("status" => 1, "multiple" => true, "files" => $filedata));
-                exit;
+                return new JSONResponseBody(array("status" => 1, "multiple" => true, "files" => $filedata));
             } else {
-                $response = $this->handleUpload($_FILES["file"]);
+                $response = $this->handleUpload($this->request->post_params["file"]);
+                /** @var Uploads $response */
                 if (is_object($response)) {
-                    HTTPResponse::sendHeader();
-                    $filedata = array("name" => $response->filename, "realpath" => $response->fieldGet("path"), "icon16" => $response->getIcon(16), "path" => $response->path, "id" => $response->id);
-                    if (!$this->link) {
-                        unset($filedata["realpath"]);
-                        unset($filedata["path"]);
-                    }
-
-                    echo json_encode(array("status" => 1, "file" => $filedata));
-                    exit;
+                    return new JSONResponseBody(array("status" => 1, "file" => $this->getFileArray($response)));
                 } else if (is_string($response)) {
-                    $this->sendJSONError($response, false);
+                    return $this->sendJSONError($response, false);
                 } else {
-                    $this->sendJSONError(lang("files.upload_failure"), false);
+                    return $this->sendJSONError(lang("files.upload_failure"), false);
                 }
             }
         } else {
-            $this->sendJSONError(lang("files.upload_failure"), false);
+            return $this->sendJSONError(lang("files.upload_failure"), false);
         }
     }
 
     /**
      * removes a file from list
      *
-     * @name removeFile
-     * @access public
      * @return bool
      */
     public function removeFile()
     {
         $id = $this->getParam("id");
+        /** @var DataObject $record */
         foreach ($this->value as $record) {
-            if ($record["id"] == $id) {
-                $record->disconnect($this->value);
+            if ($record->id == $id) {
+                if(is_a($this->value, "RemoveStagingDataObjectSet")) {
+                    /** @var ManyMany_DataObjectSet $manyManySet */
+                    $manyManySet = $this->value;
+                    $manyManySet->removeFromSet($record);
+                } else {
+                    $this->value->removeFromStage($record);
+                }
             }
         }
 
@@ -365,10 +380,8 @@ class FileUploadSet extends FormField
 
     /**
      * handles the upload(s)
-     *
-     * @name handleUpload
-     * @access public
-     * @return bool|string|array
+     * @param array $upload
+     * @return array|bool|string
      */
     public function handleUpload($upload)
     {
@@ -451,8 +464,8 @@ class FileUploadSet extends FormField
     public function saveSort()
     {
         $this->sortInfo = array();
-        if (isset($_POST["sorted"])) {
-            foreach ($_POST["sorted"] as $k => $id) {
+        if (isset($this->request->post_params["sorted"])) {
+            foreach ($this->request->post_params["sorted"] as $k => $id) {
                 $this->sortInfo[$id] = $k;
             }
         }
@@ -478,139 +491,36 @@ class FileUploadSet extends FormField
 
     }
 
-
-    /**
-     * renders the base-structure of the field
-     *
-     * @name renderAfterSetForm
-     * @access public
-     */
-    public function renderAfterSetForm()
-    {
-        parent::renderAfterSetForm();
-
-        $this->view = new HTMLNode('div', array("class" => "view"), array(
-            new HTMLNode('div', array("class" => "subview table"), array(
-                new HTMLNode('table', array("class" => "filetable"), array(
-                    new HTMLNode('thead', array(), array(
-                        new HTMLNode('tr', array(), array(
-                            new HTMLNode('td', array("class" => "icon")),
-                            new HTMLNode('td', array(), lang("files.filename")),
-                            new HTMLNode('th', array("class" => "no-js actions"), array(
-                                new HTMLNode('input', array(
-                                    "type" => "file",
-                                    "class" => "no-js-upload",
-                                    "name" => $this->PostName() . "_upload"
-                                )),
-                                new HTMLNode('input', array(
-                                    "type" => "submit",
-                                    "class" => "no-js-upload button",
-                                    "name" => $this->PostName() . "_uploadbutton",
-                                    "value" => lang("files.upload")
-                                ))
-                            ))
-                        ))
-                    )),
-                    $this->tbody = new HTMLNode('tbody', array()),
-                ))
-            ))
-        ));
-
-        $files = $this->FileList();
-
-        if (count($files) > 0) {
-            $b = 0;
-            $i = 0;
-            foreach ($files as $data) {
-                if (strlen($data["filename"]) > 43) {
-                    $filename = mb_substr($data["filename"], 0, 35, "UTF-8") . "…" . mb_substr($data["filename"], -7, 7, "UTF-8");
-                } else {
-                    $filename = $data["filename"];
-                }
-                $this->tbody->append(
-                    new HTMLNode('tr', array(
-                        "class" => ($i == 0) ? "white" : "grey",
-                        "id" => $this->name . "__upload_" . $b,
-                        "name" => $data["id"],
-                        "data-id"   => "node_" . $data["id"]
-                    ), array(
-                        new HTMLNode('td', array("class" => "icon"), array(
-                            new HTMLNode('img', array("src" => $data["icon16"], "alt" => $data["filename"]))
-                        )),
-                        new HTMLNode('td', array("class" => "filename", "title" => $data["filename"]), array(
-                            $a = new HTMLNode('a', array("href" => $data["path"], "target" => "_blank"), $filename)
-                        )),
-                        new HTMLNode('td', array("class" => "actions"), $this->renderActions($data))
-                    ))
-                );
-
-                if (!$this->link)
-                    $a->removeAttr("href");
-
-                $i = ($i == 0) ? 1 : 0;
-                $b++;
-            }
-        } else {
-            $this->tbody->append(
-                new HTMLNode('tr', array("class" => "empty"), array(
-                    new HTMLNode('th', array("colspan" => 3, "class" => "empty"), lang("files.no_file"))
-                ))
-            );
-        }
-
-    }
-
-    /**
-     * renders the actions
-     *
-     * @name renderActions
-     * @access public
-     * @return array
-     */
-    public function renderActions($data)
-    {
-        return array(
-            new HTMLNode('div', array(
-                "class" => "delete"
-            ), array(
-                new HTMLNode('input', array("type" => "checkbox", "id" => $this->ID() . "__delete_" . $data["id"], "name" => $this->PostName() . "__delete_" . $data["id"], "value" => 1)),
-                new HTMLNode('label', array("for" => $this->ID() . "__delete_" . $data["id"]), lang("delete"))
-            ))
-        );
-    }
-
     /**
      * sets the right enctype for the form
-     * @name field
-     * @access public
+     *
+     * @param FileUploadSetRenderData|null $info
      * @return HTMLNode
      */
-    public function field()
+    public function field($info = null)
     {
         if (PROFILE) Profiler::mark("FormField::field");
 
         $this->storeData();
 
-        Resources::addData("var filelist_" . $this->name . " = " . json_encode($this->FileList()) . ";");
-        gloader::load("ajaxupload");
-        gloader::load("sortable");
-        Resources::add("system/form/FileUploadSet.js", "js", "tpl");
-        Resources::add("FileUpload.less", "css");
-        Resources::addJS("$(function(){new FileUploadSet('" . $this->name . "',$('#" . $this->divID() . " .view'), '" . $this->externalURL() . "');});");            // modify form for right datatype
-
         $this->form()->form->enctype = "multipart/form-data";
 
         $this->callExtending("beforeField");
 
-        $this->container->append(new HTMLNode(
-            "label",
-            array("for" => $this->ID(), "style" => "display: block;"),
-            $this->title
-        ));
-
-        $this->container->append($this->view);
-        $this->container->append(new HTMLNode('input', array("type" => "hidden", "value" => $this->key, "name" => $this->PostName() . "__key")));
-        $this->container->append(new HTMLNode("div", array("class" => "clear")));
+        $this->container->append(
+            $this->templateView
+                ->customise(
+                    $info->setIncludeLink($this->link)
+                        ->setDefaultIcon($this->defaultIcon)
+                        ->setUploads($this->value->ToArray())
+                        ->ToRestArray(false, false)
+                )->customise(
+                    array(
+                        "postname" => $this->PostName()
+                    )
+                )
+                ->renderWith($this->template)
+        );
 
         $this->callExtending("afterField");
 
@@ -620,37 +530,52 @@ class FileUploadSet extends FormField
     }
 
     /**
+     * @param FormFieldRenderData $info
+     * @param bool $notifyField
+     */
+    public function addRenderData($info, $notifyField = true)
+    {
+        parent::addRenderData($info, $notifyField);
+
+        gloader::load("ajaxupload");
+        gloader::load("sortable");
+        $info->addJSFile("system/form/FileUploadSet.js");
+        $info->addCSSFile("FileUpload.less");
+    }
+
+    /**
+     * @return string
+     */
+    public function JS() {
+        return "$(function(){new FileUploadSet('" . $this->name . "',$('#" . $this->divID() . " .view'), '" . $this->externalURL() . "');});";
+    }
+
+    /**
      * returns a file list
      *
-     * @name FileList
-     * @access public
      * @return array
      */
     public function FileList()
     {
         $list = array();
-
         /** @var Uploads $file */
         foreach ($this->value as $file) {
-            $list[$file->id] = array(
-                "filename" => $file->filename,
-                "realfile" => $file->realfile,
-                "path" => $file->path,
-                "icon128" => $file->getIcon(128),
-                "icon16" => $file->getIcon(16),
-                "icon32" => $file->getIcon(32),
-                "icon64" => $file->getIcon(64),
-                "id" => $file->id
-            );
+            $list[$file->id] = $this->getFileArray($file);
         }
         return $list;
     }
 
     /**
+     * @return FileUploadSetRenderData
+     */
+    public function createsRenderDataClass()
+    {
+        return new FileUploadSetRenderData($this->name, $this->classname, $this->ID(), $this->divID());
+    }
+
+    /**
      * returns the result
      *
-     * @name result
-     * @access public
      * @return ManyMany_DataObjectSet<Uploads>
      */
     public function result()
@@ -665,5 +590,21 @@ class FileUploadSet extends FormField
         $this->checkForEvents();
 
         return $this->value;
+    }
+
+    /**
+     * @return ViewAccessableData
+     */
+    public function getTemplateView()
+    {
+        return $this->templateView;
+    }
+
+    /**
+     * @param ViewAccessableData $templateView
+     */
+    public function setTemplateView($templateView)
+    {
+        $this->templateView = $templateView;
     }
 }

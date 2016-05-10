@@ -396,6 +396,7 @@ class FormField extends RequestHandler {
     public function setForm(&$form, $renderAfterSetForm = true)
     {
         $this->parent =& $form;
+        $this->request = $form->request;
 
         $this->form()->registerField($this->name, $this);
         if (is_object($this->input)) {

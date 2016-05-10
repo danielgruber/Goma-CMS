@@ -233,43 +233,6 @@ class Core extends gObject {
 	}
 
 	/**
-	 * returns the data of php://input as a file.
-	 * @return string|false
-	*/
-	public static function phpInputFile() {
-		if(isset(self::$phpInputFile)) {
-			return self::$phpInputFile;
-		}
-		
-		
-		if(isset($_POST) && $handle = @fopen("php://input", "rb")) {
-			if(PROFILE)
-				Profiler::mark("php://input read");
-				
-			$random = randomString(20);
-			if(!file_exists(FRAMEWORK_ROOT . "temp/")) {
-				FileSystem::requireDir(FRAMEWORK_ROOT . "temp/");
-			}
-			$filename = FRAMEWORK_ROOT . "temp/php_input_" . $random;
-			
-			$file = fopen($filename, 'wb');
-			stream_copy_to_stream($handle, $file);
-			fclose($handle);
-			fclose($file);
-			self::$phpInputFile = $filename;
-
-			register_shutdown_function(array("Core", "cleanUpInput"));
-
-			if(PROFILE)
-				Profiler::unmark("php://input read");
-		} else {
-			self::$phpInputFile = false;
-		}
-		
-		return self::$phpInputFile;
-	}
-
-	/**
 	 * @param string $title
 	 * @param string $link
 	 * @return bool
@@ -524,16 +487,6 @@ class Core extends gObject {
 	 */
 	public static function is_ajax() {
 		return (isset($_REQUEST['ajax']) || (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == "XMLHttpRequest"));
-	}
-
-	/**
-	 * clean-up for saved file-data
-	 *
-	 */
-	public static function cleanUpInput() {
-		if(isset(self::$phpInputFile) && file_exists(self::$phpInputFile)) {
-			@unlink(self::$phpInputFile);
-		}
 	}
 
 	/**

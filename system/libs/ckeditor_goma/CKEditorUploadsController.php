@@ -203,8 +203,8 @@ class CKEditorUploadsController extends RequestHandler {
         }
 
         if($this->request->getHeader("x-file-name") && !isset($this->request->post_params["upload"])) {
-            if(Core::phpInputFile()) {
-                $tmp_name = Core::phpInputFile();
+            if($this->request->inputStreamFile()) {
+                $tmp_name = $this->request->inputStreamFile();
 
                 if(filesize($tmp_name) == $this->request->getHeader("x-file-size")) {
                     $this->request->post_params["upload"] = array(
