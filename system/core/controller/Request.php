@@ -255,9 +255,9 @@ class Request extends gObject {
 		}
 
 		if (preg_match("/^(POST|PUT|DELETE|HEAD|GET)\s+([a-zA-Z0-9\$_\-\/\!]+)$/Usi", $pattern, $matches)) {
-			$method = $matches[1];
+			$method = strtoupper($matches[1]);
 			$pattern = $matches[2];
-			if (!call_user_func_array(array($this, "is" . $method), array())) {
+			if ($this->request_method != $method) {
 				Profiler::unmark("request::match");
 				return false;
 			}
