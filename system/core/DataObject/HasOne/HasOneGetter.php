@@ -216,12 +216,57 @@ class HasOneGetter extends Extension implements ArgumentsQuery {
      */
     public function argumentQuery($query, $version, $filter, $sort, $limit, $joins, $forceClasses)
     {
-        $hasOnes = array();
-        $has_one = $this->hasOne();
-
         if (is_array($query->filter))
         {
-            foreach($query->filter as $key => $value)
+            $hasOnes = array();
+            $has_one = $this->hasOne();
+            $query->filter = $this->parseHasOnes($query->filter, $has_one, $hasOnes);
+
+            if (count($hasOnes) > 0) {
+                foreach($hasOnes as $hasOneKey) {
+                    $relationShip = $has_one[$hasOneKey];
+                    $this->addJoinForRelationship($query, $hasOneKey, $relationShip);
+                }
+            }
+        }
+    }
+
+    /**
+     * @param SelectQuery $query
+     * @param string $hasOneKey
+     * @param ModelHasOneRelationshipInfo $relationShip
+     */
+    protected function addJoinForRelationship($query, $hasOneKey, $relationShip) {
+        $table = ClassInfo::$class_info[$relationShip->getTargetClass()]["table"];
+        $hasOneBaseTable = (ClassInfo::$class_info[ClassInfo::$class_info[$relationShip->getTargetClass()]["baseclass"]]["table"]);
+
+        foreach($query->from as $k => $v) {
+            if(is_string($v) && strpos($v, " AS ".$hasOneKey." ") !== false) {
+                return;
+            }
+        }
+
+        $query->from[] = ' INNER JOIN
+													'.DB_PREFIX . $table.' AS '.$hasOneKey.' ON
+												 '.$hasOneKey.'.recordid = '.$this->getOwner()->Table().'.'.$hasOneKey.'id';
+        $query->from[] = ' INNER JOIN
+													'.DB_PREFIX . $hasOneBaseTable.'_state
+												AS
+													'.$hasOneBaseTable.'_state
+												ON
+												 '.$hasOneBaseTable.'_state.publishedid = '.$hasOneKey.'.id';
+    }
+
+    /**
+     * @param array $filter
+     * @param ModelHasOneRelationshipInfo[] $has_one
+     * @param array $hasOnes
+     * @return array
+     */
+    protected function parseHasOnes($filter, $has_one, &$hasOnes) {
+        if (is_array($filter))
+        {
+            foreach($filter as $key => $value)
             {
                 if (strpos($key, ".") !== false) {
                     // has one
@@ -229,29 +274,29 @@ class HasOneGetter extends Extension implements ArgumentsQuery {
                     if (isset($has_one[$hasOnePrefix])) {
                         $hasOnes[$hasOnePrefix] = $hasOnePrefix;
                     }
+                } else {
+                    if(is_array($value)) {
+                        $filter[$key] = $this->parseHasOnes($value, $has_one, $hasOnes);
+                    }
                 }
-                unset($key, $value, $table, $data, $__table, $_table);
             }
         }
 
-        if (count($hasOnes) > 0) {
-            foreach($hasOnes as $hasOneKey) {
-                $relationShip = $has_one[$hasOneKey];
-                $table = ClassInfo::$class_info[$relationShip->getTargetClass()]["table"];
-                $hasOneBaseTable = (ClassInfo::$class_info[ClassInfo::$class_info[$relationShip->getTargetClass()]["baseclass"]]["table"]);
+        return $filter;
+    }
 
-                $query->from[] = ' INNER JOIN
-													'.DB_PREFIX . $table.'
-												AS
-													'.$hasOneKey.'
-												ON
-												 '.$hasOneKey.'.recordid = '.$this->getOwner()->Table().'.'.$hasOneKey.'id';
-                $query->from[] = ' INNER JOIN
-													'.DB_PREFIX . $hasOneBaseTable.'_state
-												AS
-													'.$hasOneBaseTable.'_state
-												ON
-												 '.$hasOneBaseTable.'_state.publishedid = '.$hasOneKey.'.id';
+    /**
+     * @param SelectQuery $query
+     * @param string $aggregateField
+     * @param array $aggregates
+     */
+    public function extendAggregate(&$query, &$aggregateField, &$aggregates) {
+        if (strpos($aggregateField, ".") !== false) {
+            $has_one = $this->hasOne();
+
+            $hasOnePrefix = strtolower(substr($aggregateField, 0, strpos($aggregateField, ".")));
+            if (isset($has_one[$hasOnePrefix])) {
+                $this->addJoinForRelationship($query, $hasOnePrefix, $has_one[$hasOnePrefix]);
             }
         }
     }

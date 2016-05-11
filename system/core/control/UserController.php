@@ -63,8 +63,9 @@ class userController extends Controller
 	 */
 	public function serve($content) {
 		if(class_exists("FrontedController")) {
-			$c = new FrontedController();
-			return $c->serve($content);
+			$frontedController = new FrontedController();
+			$frontedController->Init($this->request);
+			return $frontedController->serve($content);
 		}
 		
 		return $content;

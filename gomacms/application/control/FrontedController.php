@@ -84,10 +84,12 @@ class FrontedController extends Controller
 
     /**
      * handles the request with showing as site
+     * @param string|mixed $content
+     * @return mixed|string
      */
     public function serve($content)
     {
-        if ($this->request->is_ajax() && isset($this->request->get_params["dropdownDialog"])) {
+        if (($this->request->is_ajax() && isset($this->request->get_params["dropdownDialog"])) || !is_string($content)) {
             return $content;
         }
 

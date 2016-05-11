@@ -68,11 +68,9 @@ class Controller extends RequestHandler
     public $model_inst = false;
 
     /**
-     * where for the model_inst
-     * @name where
-     * @access public
+     * filter for the model_inst
      */
-    public $where = array();
+    public $filter = array();
 
     /**
      * allowed actions
@@ -476,9 +474,11 @@ class Controller extends RequestHandler
             $form->add($field);
         }
 
-        // we add where to the form
-        foreach ($this->where as $key => $value) {
-            $form->add(new HiddenField($key, $value));
+        // we add filter to the form
+        foreach ($this->filter as $key => $value) {
+            if(is_string($value)) {
+                $form->add(new HiddenField($key, $value));
+            }
         }
 
         $this->callExtending("afterForm", $form);
@@ -526,7 +526,7 @@ class Controller extends RequestHandler
             return $this->form("edit_" . $this->classname . $this->modelInst()->id, $this->modelInst(), array(), true, "safe", $disabled);
         } else if ($this->getParam("id")) {
             if (preg_match('/^[0-9]+$/', $this->getParam("id"))) {
-                $model = DataObject::get_one($this->model(), array_merge($this->where, array("id" => $this->getParam("id"))));
+                $model = DataObject::get_one($this->model(), array_merge($this->filter, array("id" => $this->getParam("id"))));
                 if ($model) {
                     return $model->controller(clone $this)->edit();
                 } else {
@@ -591,7 +591,7 @@ class Controller extends RequestHandler
             }
         } else {
             if (preg_match('/^[0-9]+$/', $this->getParam("id"))) {
-                $model = DataObject::get_one($this->model(), array_merge($this->where, array("id" => $this->getParam("id"))));
+                $model = DataObject::get_one($this->model(), array_merge($this->filter, array("id" => $this->getParam("id"))));
                 if ($model) {
                     return $model->controller(clone $this)->delete();
                 } else {

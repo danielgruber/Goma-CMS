@@ -85,7 +85,7 @@ class adminItem extends AdminController implements PermProvider {
 	  *@name where
 	  *@access public
 	*/
-	public $where = array();
+	public $filter = array();
 	
 	/**
 	 * if is visible
@@ -157,7 +157,7 @@ class adminItem extends AdminController implements PermProvider {
 
 			$firstModel = ArrayLib::first($this->models);
 			if(!is_object($this->model_inst))
-				$this->model_inst = $this->decorateModel(DataObject::get($firstModel, $this->where), array(), $this);
+				$this->model_inst = $this->decorateModel(DataObject::get($firstModel, $this->filter), array(), $this);
 			
 			$this->modelInstances = array($firstModel => $this->model_inst);
 			
@@ -165,7 +165,7 @@ class adminItem extends AdminController implements PermProvider {
 		} else if(count($this->models) > 1) {
 			$models = array();
 			foreach($this->models as $model) {
-				$models[$model] = $this->decorateModel(DataObject::get($model, $this->where));
+				$models[$model] = $this->decorateModel(DataObject::get($model, $this->filter));
 			}
 
 			/** @var ViewAccessableData $model */

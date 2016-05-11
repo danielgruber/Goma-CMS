@@ -54,7 +54,7 @@ class lost_passwordExtension extends ControllerExtension {
                 /** @var User $data */
                 $data = DataObject::get_one("user", array("code" => $code), array("id"));
 
-                if(isset($_GET["deny"])) {
+                if(isset($this->request->get_params["deny"])) {
                     $data->generateCode(false, true);
                     return lang("lp_deny_okay");
                 }
@@ -101,7 +101,7 @@ class lost_passwordExtension extends ControllerExtension {
             new PasswordField("repeat", lang("REPEAT"))
         ));
         $pwdform->addValidator(new FormValidator(array("User", "validateNewAndRepeatPwd")), "pwdvalidator");
-        $pwdform->addAction(new FormAction("update", lang("save", "save"),"pwdsave"));
+        $pwdform->addAction(new FormAction("update", lang("save", "save"), "pwdsave"));
 
         return $pwdform;
     }
@@ -109,13 +109,13 @@ class lost_passwordExtension extends ControllerExtension {
     /**
      * saves new password
      *
-     * @name pwdsave
-     * @access public
+     * @param array $data
      * @return string
      */
     public function pwdsave($data)
     {
-        $user = DataObject::get_by_id("User", array("id" => $data["id"]));
+        /** @var User $user */
+        $user = DataObject::get_by_id("User", $data["id"]);
         $user->password = $data["password"];
         $user->code = randomString(20);
 
@@ -146,6 +146,10 @@ class lost_passwordExtension extends ControllerExtension {
         }
     }
 
+    /**
+     * @param array $data
+     * @return string
+     */
     public function submit($data) {
         /** @var User $data */
         $data = DataObject::get_one("user", array("nickname" => $data["email"], "OR", "email" => $data["email"]));

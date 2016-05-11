@@ -1,83 +1,86 @@
 <?php
-/**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 19.02.2012
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+defined('IN_GOMA') OR die();
 
 /**
- * you also can use a controller-extension, so you can controller-methods
-*/
-abstract class ControllerExtension extends Controller implements ExtensionModel
-{
-		/**
-		 * works the same as on {@link requestHandler}
-		 *
-		 *@name url_handlers
-		 *@access public
-		*/
-		public $url_handlers = array();
-		
-		/**
-		 * works the same as on {@link requestHandler}
-		 *
-		 *@name allowed_actions
-		 *@access public
-		*/
-		public $allowed_actions = array();
-		
-		/**
-		 * extra_methods
-		 *
-		 *@name extra_methods
-		 *@access public
-		*/
-		public static $extra_methods = array();
-		
-		/**
-		 * the owner-class
-		 *@name owner
-		 *@access protected
-		*/
-		protected $owner;
-		
-		/**
-		 * sets the owner-class
-		 *@name setOwner
-		*/		
-		public function setOwner($object)
-		{
-			if(!is_object($object)) {
-				throw new InvalidArgumentException('$object isn\'t a object');
-			}
+ * Controller-Extension wraps request and other stuff to this model.
+ *
+ * @package		Goma\Security\Users
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @version		2.3.2
+ */
+abstract class ControllerExtension extends Controller implements ExtensionModel {
+    /**
+     * works the same as on {@link requestHandler}
+     *
+     * @name url_handlers
+     * @access public
+     */
+    public $url_handlers = array();
 
-			$this->owner = $object;
-		}
-		
-		/**
-		 * gets the owner of class
-		 *@name getOwner
-		*/
-		public function getOwner()
-		{
-				return $this->owner;
-		}
-		
-		/**
-		 * gets the url handlers
-		*/
-		public function url_handlers() {
-			return $this->url_handlers;
-		}
-		
-		/**
-		 * gets the allowed_actions
-		*/
-		public function allowed_actions() {
-			return $this->allowed_actions;
-		}
+    /**
+     * works the same as on {@link requestHandler}
+     *
+     * @name allowed_actions
+     * @access public
+     */
+    public $allowed_actions = array();
+
+    /**
+     * extra_methods
+     *
+     * @name extra_methods
+     * @access public
+     */
+    public static $extra_methods = array();
+
+    /**
+     * the owner-class
+     * @name owner
+     * @access protected
+     */
+    protected $owner;
+
+    /**
+     * sets the owner-class
+     * @param Controller $object
+     */
+    public function setOwner($object)
+    {
+        if (!is_a($object, "RequestHandler")) {
+            throw new InvalidArgumentException('$object isn\'t a object of type RequestHandler.');
+        }
+
+        $this->request = $object->getRequest();
+        $this->namespace = $object->namespace;
+        $this->originalNamespace = $object->originalNamespace;
+        $this->subController = $object->isSubController();
+        $this->owner = $object;
+    }
+
+    /**
+     * gets the owner of class
+     * @name getOwner
+     */
+    public function getOwner()
+    {
+        return $this->owner;
+    }
+
+    /**
+     * gets the url handlers
+     */
+    public function url_handlers()
+    {
+        return $this->url_handlers;
+    }
+
+    /**
+     * gets the allowed_actions
+     */
+    public function allowed_actions()
+    {
+        return $this->allowed_actions;
+    }
 }
