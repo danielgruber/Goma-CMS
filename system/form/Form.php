@@ -288,7 +288,7 @@ class Form extends gObject {
 	 * inits model.
 	 *
 	 * @param RequestHandler $controller
-	 * @param ViewAccessableData|null $model
+	 * @param ViewAccessabeleData|null $model
 	 */
 	protected function initModel($controller, $model) {
 		// set model

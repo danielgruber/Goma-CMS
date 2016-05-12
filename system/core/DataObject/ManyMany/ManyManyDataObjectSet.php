@@ -290,11 +290,11 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
             throw new LogicException("Target-Relationship needs at least basetable.");
         }
 
-        $recordIdQuerySQL = $this->getRecordIdQuery($oldId)->build("distinct recordid");
-
         $baseTable = $this->relationShip->getTargetBaseTableName();
 
-        $query = new SelectQuery($baseTable, $fields, "recordid IN (".$recordIdQuerySQL.")");
+        $recordIdQuerySQL = $this->getRecordIdQuery($oldId)->build("distinct recordid");
+
+        $query = new SelectQuery($baseTable, $fields, $baseTable . ".recordid IN (".$recordIdQuerySQL.")");
         $query->db_fields["relationid"] = array($this->relationShip->getTableName(), "id");
 
         // filter for not existing records
@@ -549,12 +549,13 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
      */
     public function getFilterForQuery()
     {
-        $filter = parent::getFilterForQuery();
+        $filter = (array) parent::getFilterForQuery();
 
+        $baseTable = $this->relationShip->getTargetBaseTableName();
         if(isset($this->manyManyData)) {
-            $filter[] = $this->relationShip->getTargetBaseTableName() . ".id IN ('".implode("','", array_keys($this->manyManyData))."') ";
+            $filter[] = $baseTable . ".id IN ('".implode("','", array_keys($this->manyManyData))."') ";
         } else {
-            $filter[] = " recordid IN (".$this->getRecordIdQuery()->build("distinct recordid").") ";
+            $filter[] = " {$baseTable}.recordid IN (".$this->getRecordIdQuery()->build("distinct recordid").") ";
         }
 
         return $filter;
