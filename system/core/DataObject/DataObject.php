@@ -332,7 +332,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
         $alias = SelectQuery::getAlias($table_name);
         $sql = "UPDATE
 						".DB_PREFIX . $table_name." AS ".$alias."
-					SET 
+					SET
 						".$updates."
 					".$where."
 					".$limit."";
@@ -1436,32 +1436,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
             return isset($this->data["id"]) ? $this->data["id"] : 0;
         }
     }
-
     /**
      * sets the id
-     *
-     *@name setID
-     *@access public
+     * @param $val
      */
     public function setID($val) {
-        if ($val == 0) {
-            $this->setField("id", 0);
-            $this->setField("versionid", 0);
-            $this->setField("recordid", 0);
-        } else {
-            $this->setField("id", $val);
-            $this->setField("recordid", $val);
-
-            $vID = 0;
-            $query = new SelectQuery($this->baseTable . "_state", array("publishedid"), array("id" => $val));
-            if ($query->execute()) {
-                if ($row = $query->fetch_object()) {
-                    $vID = $row->publishedid;
-                }
-            }
-
-            $this->setField("versionid", $vID);
-        }
+        $this->setField("id", $val);
+        $this->setField("recordid", $val);
     }
 
     /**

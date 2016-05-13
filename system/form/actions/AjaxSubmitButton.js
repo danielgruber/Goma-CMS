@@ -1,7 +1,8 @@
-var initAjaxSubmitbutton = function(id, divId, formId, url, appendix) {
+var initAjaxSubmitbutton = function(id, divId, formObject, field, url, appendix) {
     var button = $("#" + id);
     var container = $("#" + divId);
-    var form = $("#" + formId);
+    var form = $("#" + formObject.id);
+
     button.click(function(){
         var eventb = jQuery.Event("beforesubmit");
         button.trigger(eventb);
@@ -14,7 +15,6 @@ var initAjaxSubmitbutton = function(id, divId, formId, url, appendix) {
             return false;
         }
 
-        form.gForm().setLeaveCheck(false);
         button.css("display", "none");
         container.append("<img src=\"images/16x16/loading.gif\" alt=\"loading...\" class=\"loading\" />");
         $("body").css("cursor", "wait");
@@ -40,14 +40,9 @@ var initAjaxSubmitbutton = function(id, divId, formId, url, appendix) {
             success: function(script, textStatus, jqXHR) {
 
                 goma.ui.loadResources(jqXHR).done(function(){;
-                    if (window.execScript)
-                        window.execScript("method = " + "function(){" + script + "};",""); // execScript doesn’t return anything
-                    else
-                        method = eval("(function(){" + script + "});");
+                    var method = new Function("field", "form", script);
                     RunAjaxResources(jqXHR);
-                    var r = method.call(form.get(0));
-
-                    form.gForm().setLeaveCheck(false);
+                    var r = method.call(form.get(0), field, formObject);
 
                     goma.ui.updateFlexBoxes();
 

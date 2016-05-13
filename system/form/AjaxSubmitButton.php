@@ -51,32 +51,38 @@ class AjaxSubmitButton extends FormAction {
 	}
 
 	/**
+	 * @param FormFieldRenderData $info
+	 * @param bool $notifyField
+	 */
+	public function  addRenderData($info, $notifyField = true)
+	{
+		$info->addJSFile("system/form/actions/AjaxSubmitButton.js");
+
+		parent::addRenderData($info, $notifyField);
+	}
+
+	/**
 	 * generates the js
-	 * @name js
-	 * @access public
+	 *
 	 * @return string
 	 */
 	public function js() {
 		// appendix to the url
 		$append = '?redirect=' . urlencode(getRedirect());
-		foreach($_GET as $key => $val) {
+		foreach($this->form()->request->get_params as $key => $val) {
 			$append .= '&' . urlencode($key) . '=' . urlencode($val);
 		}
 
-		Resources::add("system/form/actions/AjaxSubmitButton.js", "js", "tpl");
-
-		return 'initAjaxSubmitbutton('.var_export($this->ID(), true).', '.var_export($this->divID(), true).', '.var_export($this->form()->ID(), true).', '.var_export($this->externalURL() . "/", true).', '.var_export($append, true).');';
+		return 'initAjaxSubmitbutton('.var_export($this->ID(), true).', '.var_export($this->divID(), true).', form, field, '.var_export($this->externalURL() . "/", true).', '.var_export($append, true).');';
 	}
 
 	/**
 	 * endpoint for ajax request.
 	 *
-	 * @name handleRequest
-	 * @access public
-	 * @param object - request
+	 * @param Request $request
 	 * @return false|mixed|null|string|void
 	 */
-	public function handleRequest(request $request) {
+	public function handleRequest($request) {
 		$this->request = $request;
 
 		$this->init();
@@ -86,8 +92,6 @@ class AjaxSubmitButton extends FormAction {
 
 	/**
 	 * submit-function
-	 * @name submit
-	 * @access public
 	 * @return mixed
 	 */
 	public function submit() {
@@ -98,11 +102,13 @@ class AjaxSubmitButton extends FormAction {
 
 		if($this->form()->getsecret()) {
 			GlobalSessionManager::globalSession()->set("form_secrets." . $this->form()->name(), randomString(30));
-			$response->exec('$("#' . $this->form()->fields["secret_" . $this->form()->id()]->id() . '").val("' . convert::raw2js($this->form()->secretKey) . '");');
+			$response->exec('$("#' . $this->form()->{"secret_" . $this->form()->id()}->id() . '").val("' . convert::raw2js($this->form()->secretKey) . '");');
 		}
 
 		try {
 			$this->handleSubmit($response);
+
+			$response->exec('form.setLeaveCheck(false);');
 
 			return $response;
 		} catch(Exception $e) {
@@ -156,7 +162,7 @@ class AjaxSubmitButton extends FormAction {
 
 		$submission = $this->ajaxsubmit;
 
-		if(is_callable($submission)) {
+		if(is_callable($submission) && !is_string($submission)) {
 			return call_user_func_array($submission, array(
 				$result,
 				$response,
@@ -164,7 +170,6 @@ class AjaxSubmitButton extends FormAction {
 				$this->form()->controller
 			));
 		} else {
-
 			return call_user_func_array(array(
 				$this->form()->controller,
 				$submission

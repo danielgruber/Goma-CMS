@@ -24,6 +24,14 @@
 </div>
 <div class="actions">
 	<% CONTROL actions() %>
+		<% CONTROL actions.jsRenderResources() as $resource %>
+			<% INCLUDE_JS $resource %>
+		<% ENDCONTROL %>
+
+		<% CONTROL actions.cssRenderResources() as $resource %>
+			<% INCLUDE_CSS $resource %>
+		<% ENDCONTROL %>
+
 		$actions.field
 	<% ENDCONTROL %>
 </div>

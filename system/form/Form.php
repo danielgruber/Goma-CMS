@@ -702,7 +702,7 @@ class Form extends gObject {
 			throw new FormNotSubmittedException();
 		}
 
-		if(is_callable($submission)) {
+		if(is_callable($submission) && !is_string($submission)) {
 			return call_user_func_array($submission, array(
 				$result,
 				$this,
