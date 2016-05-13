@@ -181,13 +181,11 @@ class TreeNode extends ArrayList {
 	public function bubbles() {
 		return $this->bubbles;
 	}
-	
+
 	/**
 	 * sets children
-	 *
-	 *@name setChildren
-	 *@access public
-	*/
+	 * @param TreeNode $children
+	 */
 	public function setChildren($children) {
 		// validate and stack it in
 		$this->items = array();
@@ -265,12 +263,11 @@ class TreeNode extends ArrayList {
 	
 	/**
 	 * forces to get children
-	 *
-	 *@name forceChildren
+	 * it will call callback if not available
 	*/ 
 	public function forceChildren() {
 		if($this->childCallback) {
-			if(isset($this->items)) {
+			if($this->items) {
 				return $this->children();
 			} else {
 				$this->items = call_user_func_array($this->childCallback, array($this, (array) $this->childParams));
@@ -283,39 +280,33 @@ class TreeNode extends ArrayList {
 	
 	/**
 	 * sets children collapsed
-	 *
-	 *@name setCollapsed
-	 *@access public
 	*/
 	public function setCollapsed() {
 		$this->childState = "collapsed";
+		return $this;
 	}
 	
 	/**
 	 * returns if is Collapsed
-	 *
-	 *@name isCollaped
-	 *@access public
 	*/
 	public function isCollapsed() {
 		return ($this->childState == "collapsed");
 	}
-	
+
 	/**
 	 * sets children expanded
 	 *
-	 *@name setCollapsed
-	 *@access public
-	*/
+	 * @name setCollapsed
+	 * @access public
+	 * @return $this
+	 */
 	public function setExpanded() {
 		$this->childState = "expanded";
+		return $this;
 	}
 	
 	/**
 	 * returns if is Expanded
-	 *
-	 *@name isExpanded
-	 *@access public
 	*/
 	public function isExpanded() {
 		return ($this->childState == "expanded");
@@ -323,9 +314,6 @@ class TreeNode extends ArrayList {
 	
 	/**
 	 * sets children to cookie-based
-	 *
-	 *@name setCookieBased
-	 *@access public
 	*/
 	public function setCookieBased() {
 		$this->childState = null;
@@ -333,8 +321,6 @@ class TreeNode extends ArrayList {
 	
 	/**
 	 * returns the record
-	 *
-	 *@name record
 	*/
 	public function record() {
 		if(isset($this->model))
@@ -343,33 +329,30 @@ class TreeNode extends ArrayList {
 		$this->model = DataObject::Get_by_id($this->treeclass, $this->recordid);
 		return $this->model;
 	}
-	
+
 	/**
 	 * adds a html-class
-	 *
-	 *@name addClass
-	 *@access public
-	*/
+	 * @param string $class
+	 * @return $this
+	 */
 	public function addClass($class) {
 		$this->htmlClasses[$class] = $class;
+		return $this;
 	}
-	
+
 	/**
 	 * rempves a html-class
-	 *
-	 *@name removeClass
-	 *@access public
-	*/
+	 * @param string $class
+	 * @return $this
+	 */
 	public function removeClass($class) {
 		unset($this->htmlClasses[$class]);
+		return $this;
 	}
 	
 	/**
-	 * returns the HTML-Classes 
-	 *
-	 *@name getClasses
-	 *@access public
-	*/
+	 * returns the HTML-Classes
+	 */
 	public function getClasses() {
 		return $this->htmlClasses;
 	}

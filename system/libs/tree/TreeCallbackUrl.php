@@ -86,12 +86,13 @@ class TreeCallbackUrl extends RequestHandler {
 	public function handleByKey() {
 		$key = $this->getParam("key");
 		$renderer = GlobalSessionManager::globalSession()->get("tree_renderer_" . $this->getParam("renderer"));
-		
+
 		if(GlobalSessionManager::globalSession()->hasKey("tree_node_" . $key)) {
+			/** @var TreeNode $node */
 			$node = GlobalSessionManager::globalSession()->get("tree_node_" . $key);
 			$tree = $node->forceChildren();
-			
-			if(Core::is_ajax()) {
+
+			if($this->request->is_ajax()) {
 				$renderer->tree = $tree;
 				return $renderer->render(false, $node->recordid);
 			} else {

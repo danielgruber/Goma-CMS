@@ -114,12 +114,14 @@ class TreeRenderer extends gObject {
 	public function LinkCallback() {
 		return $this->linkCallback;
 	}
-	
+
 	/**
 	 * renders the tree.
 	 *
-	 * @return 	String
-	*/
+	 * @param bool $includeUL
+	 * @param int $parentID
+	 * @return String
+	 */
 	public function render($includeUL = false, $parentID = 0) {
 		
 		Resources::add("tree.css", "css", "tpl");

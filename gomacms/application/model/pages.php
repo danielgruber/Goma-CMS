@@ -1118,10 +1118,11 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
     /**
      * builds the tree.
      *
-     * @param    TreeNode|int $parent parent node or no parent node = 0
-     *
-     * @param    array $dataparams "version", "filter"
+     * 
+     * @param null|TreeNode $parentNode
+     * @param array $dataParams
      * @return array
+     * @throws MySQLException
      */
     static function build_tree($parentNode = null, $dataParams = array()) {
         if(!isset($dataParams["search"]) || !$dataParams["search"]) {
@@ -1159,7 +1160,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
                 if(!$record->mainbar) {
                     $node->addClass("hidden");
                 }
-                
+
                 if($record->children()->count() > 0) {
                     $node->setChildCallback(array("pages", "build_tree"), $dataParams);
                 }
@@ -1214,8 +1215,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
     /**
      * returns text what to show about the event
      *
-     * @name generateHistoryData
-     * @access public
      * @param History $record
      * @return array
      */

@@ -467,7 +467,7 @@ class FormField extends RequestHandler {
 
     /**
      * the url for ajax
-     * 
+     *
      * @return string
      */
     public function externalURL()
