@@ -41,6 +41,13 @@ class FormAjaxResponse extends AjaxResponse
     protected $success = array();
 
     /**
+     * leave-check.
+     *
+     * @var bool|null
+     */
+    protected $leaveCheck;
+
+    /**
      * constructor.
      *
      * @param Form $form
@@ -60,6 +67,25 @@ class FormAjaxResponse extends AjaxResponse
         if($button != null) {
             $this->exec('var ajax_button = $("#' . $button->ID() . '");');
         }
+    }
+
+    /**
+     * @var bool
+     */
+    public function setLeaveCheck($check) {
+        if(isset($check) && !is_bool($check)) {
+            throw new InvalidArgumentException("Leave-Check must be boolean");
+        }
+
+        $this->leaveCheck = $check;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getLeaveCheck()
+    {
+        return $this->leaveCheck;
     }
 
     /**
@@ -156,6 +182,10 @@ class FormAjaxResponse extends AjaxResponse
      */
     public function render()
     {
+        if(is_bool($this->leaveCheck)) {
+            $this->execBefore("form.setLeaveCheck(".strtolower(var_export($this->leaveCheck, true)).");");
+        }
+
         $this->renderItems($this->errors, "error");
         $this->renderItems($this->success, "success");
 

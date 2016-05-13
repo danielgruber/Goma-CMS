@@ -108,7 +108,9 @@ class AjaxSubmitButton extends FormAction {
 		try {
 			$this->handleSubmit($response);
 
-			$response->exec('form.setLeaveCheck(false);');
+			if($response->getLeaveCheck() === null) {
+				$response->setLeaveCheck(false);
+			}
 
 			return $response;
 		} catch(Exception $e) {

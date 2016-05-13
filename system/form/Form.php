@@ -502,7 +502,11 @@ class Form extends gObject {
 		if(PROFILE)
 			Profiler::mark("Form::renderForm::render");
 		$data = $this->form->render();
-		Resources::addJS('$(function(){ console.log(new goma.form(' . var_export($this->ID(), true) . ', '.var_export($this->leaveCheck, true).', '.json_encode($jsonData).', '.json_encode($errorSet).')); });');
+		$js = 'var form = new goma.form(' . var_export($this->ID(), true) . ', '.var_export($this->leaveCheck, true).', '.json_encode($jsonData).', '.json_encode($errorSet).');';
+		if(count($errors) > 0) {
+			$js .= "form.setLeaveCheck(true);";
+		}
+		Resources::addJS('$(function(){ '.$js.' });');
 		if(PROFILE)
 			Profiler::unmark("Form::renderForm::render");
 

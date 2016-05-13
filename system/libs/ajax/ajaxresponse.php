@@ -13,9 +13,8 @@ class AjaxResponse extends GomaResponse
 {
     /**
      * this array contains each action
-     * @name actions
-     * @access protected
-     * @var array
+     *
+     * @var string[]
      */
     protected $actions = array();
 
@@ -30,7 +29,6 @@ class AjaxResponse extends GomaResponse
      * adds war js to the actions
      *
      * @param string $js
-     * @return int
      */
     public function exec($js)
     {
@@ -38,7 +36,17 @@ class AjaxResponse extends GomaResponse
             $js = (string) $js;
         }
         $this->actions[] = $js;
-        return count($this->actions) - 1;
+    }
+
+    /**
+     * exec before.
+     */
+    public function execBefore($js) {
+        if (is_object($js)) {
+            $js = (string) $js;
+        }
+        array_unshift($this->actions, $js);
+        $this->actions[] = $js;
     }
 
     /**

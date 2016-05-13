@@ -46,7 +46,7 @@ class HasOneWriter extends Extension {
                         unset($data[$key]);
                     } else {
                         if($this->shouldUpdateData($has_one[$key])) {
-                            if($record->wasChanged()) {
+                            if($record->wasChanged() || $record->id == 0) {
                                 $this->writeObject($record);
                             }
                         }
