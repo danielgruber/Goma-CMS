@@ -233,8 +233,6 @@ class FormField extends RequestHandler {
 
     /**
      * sets the value
-     * @name setValue
-     * @access public
      */
     public function setValue() {
         if ($this->input && ($this->input->getTag() == "input" || $this->input->getTag() == "textarea") && (is_string($this->value) || (is_object($this->value) && gObject::method_exists($this->value->classname, "__toString"))))
@@ -357,8 +355,6 @@ class FormField extends RequestHandler {
     /**
      * this is the validation for this field if it is required
      *
-     * @name validation
-     * @access public
      * @return bool
      */
     public function validate($value) {
@@ -411,8 +407,7 @@ class FormField extends RequestHandler {
     /**
      * gets value if is in result or post-data
      *
-     * @name getValue
-     * @access public
+     * @internal
      */
     public function getValue()
     {
@@ -434,8 +429,7 @@ class FormField extends RequestHandler {
     /**
      * renders some field contents after setForm
      *
-     * @name renderAfterSetForm
-     * @access public
+     * @internal
      */
     public function renderAfterSetForm()
     {
@@ -445,8 +439,6 @@ class FormField extends RequestHandler {
 
     /**
      * removes this field
-     * @name remove
-     * @access public
      */
     public function remove()
     {
@@ -455,8 +447,7 @@ class FormField extends RequestHandler {
 
     /**
      * generates an id for the field
-     * @name id
-     * @access public
+     *
      * @return string
      */
     public function ID()
@@ -466,8 +457,7 @@ class FormField extends RequestHandler {
 
     /**
      * generates an id for the div
-     * @name divID
-     * @access public
+     *
      * @return string
      */
     public function divID()
@@ -477,9 +467,7 @@ class FormField extends RequestHandler {
 
     /**
      * the url for ajax
-     *
-     * @name externalURL
-     * @access public
+     * 
      * @return string
      */
     public function externalURL()
@@ -514,9 +502,6 @@ class FormField extends RequestHandler {
 
     /**
      * disables this field
-     *
-     * @name disable
-     * @access public
      */
     public function disable()
     {
@@ -524,17 +509,18 @@ class FormField extends RequestHandler {
             $this->input->disabled = "disabled";
 
         $this->disabled = true;
+        return $this;
     }
 
     /**
      * reenables the field
-     * @name enable
-     * @access public
      */
     public function enable()
     {
         unset($this->input->disabled);
         $this->disabled = false;
+
+        return $this;
     }
 
     /**
@@ -645,9 +631,11 @@ class FormField extends RequestHandler {
 
     /**
      * @param string $placeholder
+     * @return $this
      */
     public function setPlaceholder($placeholder)
     {
         $this->placeholder = $placeholder;
+        return $this;
     }
 }

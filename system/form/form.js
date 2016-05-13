@@ -24,7 +24,6 @@ if(typeof goma == "undefined")
 
 		this.id = id;
 		this.form = $("#" + id);
-		this.form.removeClass("leave_check");
 
 		this.form.bind("formsubmit",function(){
 			that.form.addClass("leave_check");
@@ -62,6 +61,10 @@ if(typeof goma == "undefined")
 		});
 
 		this.form.find("select, input, textarea").change(function(){
+			that.form.addClass("leave_check");
+		});
+
+		this.form.find("select, input, textarea").keydown(function(){
 			that.form.addClass("leave_check");
 		});
 
@@ -128,7 +131,7 @@ if(typeof goma == "undefined")
 
 			for(var i in fields) {
 				if(fields.hasOwnProperty(i)) {
-					if(fields[i].name == name) {
+					if(fields[i].name.toLowerCase() == name.toLowerCase()) {
 						return fields[i];
 					}
 

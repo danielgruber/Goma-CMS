@@ -22,6 +22,7 @@ var DropDown = function(form, field, id, url, multiple, sortable) {
 	field.dropdown = this;
 
 	field.getValue = this.getValue.bind(this);
+	field.getValueTitle = this.getValueTitle.bind(this);
 
 	this.init();
 	return this;
@@ -35,6 +36,10 @@ DropDown.prototype = {
 
 	getValue: function() {
 		return this.input.val();
+	},
+
+	getValueTitle: function() {
+		return this.widget.find(" > .field .value-title").eq(0).text();
 	},
 
 	/**
