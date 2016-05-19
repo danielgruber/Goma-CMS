@@ -631,7 +631,8 @@ class Controller extends RequestHandler
     public function safe($data, $form = null, $controller = null, $overrideCreated = false, $priority = 1, $action = 'save_success')
     {
         $givenModel = isset($form) ? $form->model : null;
-        if ($model = $this->save($data, $priority, false, false, $overrideCreated, $givenModel) !== false) {
+        // TODO: Add test if $model is Object
+        if (($model = $this->save($data, $priority, false, false, $overrideCreated, $givenModel)) !== false) {
             return $this->actionComplete($action, $model);
         } else {
             throw new Exception('Could not save data');

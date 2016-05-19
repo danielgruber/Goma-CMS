@@ -31,43 +31,31 @@ class Form extends gObject {
 
 	/**
 	 * name of the form
-	 *@name name
-	 *@access protected
-	 *@var string
+	 * @var string
 	 */
 	protected $name;
 
 	/**
 	 * you can use data-handlers, to edit data before it is given to the
 	 * submission-method
-	 *
-	 *@name dataHandlers
-	 *@access public
 	 */
 	protected $dataHandlers = array();
 
 	/**
 	 * all available fields in this form
 	 *
-	 *@name fields
-	 *@access public
-	 *@var array
+	 * @var array
 	 */
 	public $fields = array();
 
 	/**
 	 * already rendered fields
-	 *
-	 *@name renderedFields
-	 *@access public
 	 */
 	public $renderedFields = array();
 
 	/**
 	 * all fields the form has to generate from this object
-	 *@name showFields
-	 *@access public
-	 *@var arrayList
+	 * @var arrayList
 	 */
 	public $showFields;
 
@@ -80,24 +68,20 @@ class Form extends gObject {
 
 	/**
 	 * actions
-	 *@name actions
-	 *@access public
-	 *@var array
+	 * @var FormAction[]
 	 */
 	public $actions = array();
 
 	/**
 	 * the form-tag
-	 *@name form
-	 *@access public
+	 *
+	 * @var HTMLNode
 	 */
 	public $form;
 
 	/**
 	 * default submission
-	 *@name submission
-	 *@access protected
-	 *@var string
+	 * @var string
 	 */
 	protected $submission;
 
@@ -110,16 +94,13 @@ class Form extends gObject {
 
 	/**
 	 * the model, which belongs to this form
-	 *
-	 *@name model
-	 *@access public
 	 */
 	public $model;
 
 	/**
 	 * form-secret-key
-	 *@name secretKey
-	 *@access public
+	 *
+	 * @var string
 	 */
 	protected $secretKey;
 
@@ -157,17 +138,11 @@ class Form extends gObject {
 
 	/**
 	 * post-data
-	 *
-	 *@name post
-	 *@access public
 	 */
 	public $post;
 
 	/**
 	 * restore-class
-	 *
-	 *@name restorer
-	 *@access public
 	 */
 	public $restorer;
 
@@ -411,7 +386,7 @@ class Form extends gObject {
 				$this->defaultFields();
 				return $this->trySubmit();
 			} else {
-				$this->form->append(new HTMLNode("div", array("class" => "notice", ), lang("form_not_saved_yet", "The Data hasn't saved yet.")));
+				$this->form->append(new HTMLNode("div", array("class" => "notice form", ), lang("form_not_saved_yet", "The Data hasn't saved yet.")));
 			}
 		}
 
@@ -501,12 +476,14 @@ class Form extends gObject {
 
 		if(PROFILE)
 			Profiler::mark("Form::renderForm::render");
+
 		$data = $this->form->render();
 		$js = 'var form = new goma.form(' . var_export($this->ID(), true) . ', '.var_export($this->leaveCheck, true).', '.json_encode($jsonData).', '.json_encode($errorSet).');';
 		if(count($errors) > 0) {
 			$js .= "form.setLeaveCheck(true);";
 		}
 		Resources::addJS('$(function(){ '.$js.' });');
+
 		if(PROFILE)
 			Profiler::unmark("Form::renderForm::render");
 
@@ -698,9 +675,13 @@ class Form extends gObject {
 	 * @throws FormNotValidException
 	 */
 	protected function handleSubmit() {
-		$result = $this->gatherResultForSubmit();
+		$submissionWithoutValidation = self::findSubmission($this, $this->post, null);
 
-		$submission = self::findSubmission($this, $this->post, $result);
+		$result = $this->gatherResultForSubmit(is_null($submissionWithoutValidation));
+
+		$submission = isset($submissionWithoutValidation) ?
+			$submissionWithoutValidation :
+			self::findSubmission($this, $this->post, $result);
 
 		if(!$submission) {
 			throw new FormNotSubmittedException();
@@ -726,29 +707,32 @@ class Form extends gObject {
 
 
 	/**
+	 * @param bool $validate if to validate result
 	 * @return array|mixed
 	 * @throws FormNotValidException
 	 */
-	public function gatherResultForSubmit() {
+	public function gatherResultForSubmit($validate = true) {
 		$this->callExtending("beforeSubmit");
 
 		$this->result = $result = $this->fetchResultWithDataHandlers();
 
-		// validation
-		$errors = array();
+		if($validate) {
+			// validation
+			$errors = array();
 
-		foreach($this->validators as $validator) {
-			/** @var FormValidator $validator */
-			$validator->setForm($this);
-			try {
-				$validator->validate();
-			} catch(Exception $e) {
-				$errors[] = $e;
+			foreach ($this->validators as $validator) {
+				/** @var FormValidator $validator */
+				$validator->setForm($this);
+				try {
+					$validator->validate();
+				} catch (Exception $e) {
+					$errors[] = $e;
+				}
 			}
-		}
 
-		if(count($errors) > 0) {
-			throw new FormNotValidException($errors);
+			if (count($errors) > 0) {
+				throw new FormNotValidException($errors);
+			}
 		}
 
 		$this->callExtending("afterSubmit", $result);
@@ -796,6 +780,7 @@ class Form extends gObject {
 
 	/**
 	 * finds a submission for the form. returns null when not found.
+	 *
 	 * @param Form $form
 	 * @param array $post
 	 * @param array $result
@@ -957,7 +942,7 @@ class Form extends gObject {
 	 * adds a field. alias to @see Form::add.
 	 */
 	public function addField($field, $sort = null, $to = null) {
-		return $this->add($field, $sort, $to);
+		$this->add($field, $sort, $to);
 	}
 
 	/**
@@ -968,7 +953,7 @@ class Form extends gObject {
 	 * @param 	int $sort
 	 */
 	public function addToField($fieldname, $field, $sort = 0) {
-		return $this->add($field, $sort, $fieldname);
+		$this->add($field, $sort, $fieldname);
 	}
 
 	/**

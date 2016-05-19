@@ -183,7 +183,7 @@ class DateField extends FormField
 	 */
 	protected function getDatePickerOptions() {
 		/** @var string[] $calendar */
-		require_once (ROOT . LANGUAGE_DIRECTORY . Core::$lang . "/calendar.php");
+		require (ROOT . LANGUAGE_DIRECTORY . Core::$lang . "/calendar.php");
 
 
 		return array(

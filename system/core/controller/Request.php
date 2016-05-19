@@ -11,22 +11,16 @@
 class Request extends gObject {
 	/**
 	 * url of the request
-	 *@name url
-	 *@access public
 	 */
 	public $url;
 
 	/**
 	 * all params
-	 *@name all_params
-	 *@access public
 	 */
 	public $all_params = array();
 
 	/**
 	 * current params
-	 *@name params
-	 *@access public
 	 */
 	public $params = array();
 
@@ -136,6 +130,15 @@ class Request extends gObject {
 		$this -> remoteAddr = isset($remoteAddr) ? $remoteAddr :
 			(isset($_SERVER["REMOTE_ADDR"]) ? $_SERVER["REMOTE_ADDR"] : "");
 		$this -> isSSL = $isSSL;
+	}
+
+	/**
+	 * sets url-parts.
+	 *
+	 * @var array
+	 */
+	public function setUrlParts($url_parts) {
+		$this->url_parts = $url_parts;
 	}
 
 	/**

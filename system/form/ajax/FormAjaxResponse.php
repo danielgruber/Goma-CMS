@@ -61,6 +61,7 @@ class FormAjaxResponse extends AjaxResponse
         $this->button = $button;
 
         $this->exec('$("#' . $this->form->ID() . '").find(".error").remove();');
+        $this->exec('$("#' . $this->form->ID() . '").find(" > .notice.form").remove();');
         $this->exec('$("#' . $this->form->ID() . '").find(" > .success").remove();');
         $this->exec('$("#' . $this->form->ID() . '").find(".form-field-has-error").removeClass("form-field-has-error");');
 

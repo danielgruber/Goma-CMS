@@ -84,15 +84,29 @@ class FrontedController extends Controller
 
     /**
      * handles the request with showing as site
-     * @param string|mixed $content
+     * @param string $content
      * @return mixed|string
      */
     public function serve($content)
     {
-        if (($this->request->is_ajax() && isset($this->request->get_params["dropdownDialog"])) || !is_string($content)) {
+        if (Core::is_ajax() && isset($_GET["dropdownDialog"])) {
             return $content;
         }
 
+        if (SITE_MODE == STATUS_MAINTANANCE && !Permission::check("ADMIN")) {
+            return $this->getServeModel($content)->renderWith("page_maintenance.html");
+        }
+
+
+        return $this->renderWith("site.html", $this->getServeModel($content));
+    }
+
+    /**
+     * serve-model.
+     * @param string $content
+     * @return ViewAccessableData
+     */
+    protected function getServeModel($content) {
         $model = is_object($this->model_inst) ? $this->model_inst : new ViewAccessableData();
 
         $model->customise(array(
@@ -104,12 +118,7 @@ class FrontedController extends Controller
             "content"    => $content
         ));
 
-        if (SITE_MODE == STATUS_MAINTANANCE && !Permission::check("ADMIN")) {
-            return $model->customise(array("content" => $content))->renderWith("page_maintenance.html");
-        }
-
-
-        return $this->renderWith("site.html", $model);
+        return $model;
     }
 }
 

@@ -1436,6 +1436,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
             return isset($this->data["id"]) ? $this->data["id"] : 0;
         }
     }
+
     /**
      * sets the id
      * @param $val
@@ -1885,7 +1886,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
             $limithash = (is_array($limit)) ? implode($limit) : $limit;
             $joinhash = (empty($joins)) ? "" : implode($joins);
             $searchhash = (is_array($search)) ? implode($search) : $search;
-            $basehash = "record_" . $limithash . serialize($sort) . $joinhash . $searchhash . $version;
+            $basehash = "record_" . $limithash . serialize($sort) . $joinhash . $searchhash . md5(var_export($version, true));
             if (is_array($filter)) {
                 $hash = $basehash . md5(serialize($filter));
             } else {
@@ -1916,12 +1917,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
         while($row = sql::fetch_assoc($query->result))
         {
             $arr[] = $row;
-            // store id in cache
-            if (isset($basehash))
-                DataObjectQuery::$datacache[$this->baseClass][$basehash . md5(serialize(array("id" => $row["id"])))] = array($row);
-
-            // cleanup
-            unset($row);
         }
 
         /** @var String $hash */

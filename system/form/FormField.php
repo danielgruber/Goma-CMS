@@ -224,10 +224,6 @@ class FormField extends RequestHandler {
             "title" => $this->title
         ));
 
-        if($this->maxLength > 0) {
-            $input->attr("maxlength", $this->maxLength);
-        }
-
         return $input;
     }
 
@@ -259,6 +255,10 @@ class FormField extends RequestHandler {
             array("for" => $this->ID()),
             $this->title
         ));
+
+        if($this->maxLength > 0) {
+            $this->input->attr("maxlength", $this->maxLength);
+        }
 
         $this->input->placeholder = $this->placeholder;
 

@@ -50,17 +50,34 @@ class CancelButton extends FormAction
 
     /**
      * just don't let the system submit and redirect back
+     * @param $data
+     * @return bool
      */
     public function canSubmit($data)
     {
+        return true;
+    }
+
+    /**
+     * @return array
+     */
+    public function getSubmit()
+    {
+        return array($this, "redirect");
+    }
+
+    /**
+     * @return GomaResponse
+     */
+    public function redirect() {
         if ($this->redirect !== null)
-            HTTPResponse::redirect($this->redirect);
-        else if (isset($_POST["redirect"]))
-            HTTPResponse::redirect($_POST["redirect"]);
-        else if (isset($_GET["redirect"]))
-            HTTPResponse::redirect($_GET["redirect"]);
+            return GomaResponse::redirect($this->redirect);
+        else if (isset($this->form()->request->post_params["redirect"]))
+            return GomaResponse::redirect($this->form()->request->post_params["redirect"]);
+        else if (isset($this->form()->request->get_params["redirect"]))
+            return GomaResponse::redirect($this->form()->request->get_params["redirect"]);
         else
-            HTTPResponse::redirect(BASE_URI);
-        exit;
+            return GomaResponse::redirect(BASE_URI);
+
     }
 }

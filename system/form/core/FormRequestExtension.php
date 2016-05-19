@@ -19,18 +19,27 @@ class FormRequestExtension extends Extension {
         /** @var RequestHandler $owner */
         $owner = $this->getOwner();
 
+        $params = array_values($owner->getRequest()->params);
+
         $parts = $owner->getRequest()->getUrlParts();
-        if($action == "forms" && ($owner->getRequest()->getParam("id") == "form" || $parts[0] == "form")) {
-            if($owner->getRequest()->getParam("id") != "form") {
+        if(isset($params[0]) && $params[0] == "forms" && ((isset($params[1]) && $params[1] == "form") || $parts[0] == "form")) {
+            if(!isset($params[1]) && $parts[0] == "forms") {
                 $owner->getRequest()->shift(1);
+            }
+
+            $formRequest = $owner->getRequest();
+            if(count($params) > 2) {
+                $formRequest = clone $formRequest;
+                $urlParts = array_slice($params, 2);
+                $formRequest->setUrlParts(array_merge($urlParts, $parts));
             }
 
             $handleWithMethod = false;
 
             $externalForm = new ExternalFormController();
 
-            if($arguments = $owner->getRequest()->match('$form!/$field!', true)) {
-                $content = $externalForm->handleRequest($owner->getRequest(), true);
+            if($arguments = $formRequest->match('$form!/$field!', true)) {
+                $content = $externalForm->handleRequest($formRequest, true);
                 if(!$content) {
                     $content = $owner->index();
                 }
@@ -50,8 +59,10 @@ class FormRequestExtension extends Extension {
         /** @var RequestHandler $owner */
         $owner = $this->getOwner();
 
+        $params = array_values($owner->getRequest()->params);
+
         $parts = $owner->getRequest()->getUrlParts();
-        if($action == "forms" && ($owner->getRequest()->getParam("id") == "form" || $parts[0] == "form")) {
+        if(isset($params[0]) && $params[0] == "forms" && ((isset($params[1]) && $params[1] == "form") || $parts[0] == "form")) {
             $hasAction = true;
         }
     }

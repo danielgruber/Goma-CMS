@@ -685,7 +685,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 * @return array
 	 */
 	public function groupBy($field) {
-		return $this->dbDataSource()->getGroupedRecords($this->version, $field, $this->filter, $this->sort, $this->limit, $this->join, $this->search);
+		return $this->dbDataSource()->getGroupedRecords($this->version, $field, $this->getFilterForQuery(), $this->getSortForQuery(), $this->limit, $this->getJoinForQuery(), $this->search);
 	}
 
 	/**
@@ -794,18 +794,27 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	/**
 	 * resorts the data
 	 *
-	 * @name sort
-	 * @access public
-	 * @param string - column
-	 * @param string - optional - type
+	 * @param string $column
+	 * @param string $type
 	 * @return $this
 	 */
 	public function sort($column, $type = "") {
-		if(!isset($column))
-			return $this;
+		if(!is_string($column))
+			throw new InvalidArgumentException("First argument of sort must be a string.");
 
-		if(!$this->canSortBy($column))
-			return $this;
+		if(substr(strtolower($column), -4) == "desc") {
+			$column = substr($column, 0, -4);
+			$type = "desc";
+		}
+
+		if(substr(strtolower($column), -3) == "asc") {
+			$column = substr($column, 0, -3);
+			$type = "asc";
+		}
+
+		if(!$this->canSortBy($column)) {
+			throw new InvalidArgumentException("can not sort by $column");
+		}
 
 		if(is_string($type) || is_null($type)) {
 			switch (strtolower($type)) {

@@ -112,23 +112,20 @@ class FormAction extends FormField implements FormActionHandler
     }
 
     /**
-     * returns if submit or not
+     * returns if submit or not.
+     * It should check if validation is required.
      *
-     * @name canSubmit
-     * @access public
-     * @param submission
+     * @param array $data
      * @return bool
      */
     public function canSubmit($data)
     {
-        return true;
+        return !!$data;
     }
 
     /**
      * sets the submit-method
-     *
-     * @name setSubmit
-     * @access public
+     * @param string|array $submit
      */
     public function setSubmit($submit)
     {
@@ -138,8 +135,6 @@ class FormAction extends FormField implements FormActionHandler
     /**
      * returns the submit-method
      *
-     * @name getSubmit
-     * @access public
      * @return null|string
      */
     public function getSubmit()

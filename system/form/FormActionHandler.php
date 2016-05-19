@@ -5,8 +5,8 @@ interface FormActionHandler {
 	/**
 	 * returns if this action can submit the form
 	 *
-	 *@name canSubmit
-	 *@return bool
+	 * @param array $data
+	 * @return bool
 	 */
 	public function canSubmit($data);
 
