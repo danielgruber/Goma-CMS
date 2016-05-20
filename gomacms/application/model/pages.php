@@ -661,9 +661,10 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
             }
 
             // get parent-page versioned to ensure supporting state-versions + check if any page parent is page itself.
-            $d = DataObject::get_versioned("pages", "state", array("id" => $parentid));
+            /** @var Pages $page */
+            $page = DataObject::get_versioned("pages", "state", array("id" => $parentid))->first();
             if(isset($data["recordid"])) {
-                $temp = $d;
+                $temp = $page;
                 // validate if we subordered under subtree
                 while($temp->parent) {
                     if($temp->id == $data["recordid"]) {
@@ -673,7 +674,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
                 }
             }
 
-            $pclassname = strtolower($d["class_name"]);
+            $pclassname = strtolower($page->classname);
         }
 
         if(in_array($pclassname, $this->parentResolver()->getAllowedParents())) {

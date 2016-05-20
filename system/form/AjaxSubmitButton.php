@@ -101,8 +101,8 @@ class AjaxSubmitButton extends FormAction {
 		// get data
 
 		if($this->form()->getsecret()) {
-			GlobalSessionManager::globalSession()->set("form_secrets." . $this->form()->name(), randomString(30));
-			$response->exec('$("#' . $this->form()->{"secret_" . $this->form()->id()}->id() . '").val("' . convert::raw2js($this->form()->secretKey) . '");');
+			$this->form()->activateSecret();
+			$response->exec('$("#' . $this->form()->{"secret_" . $this->form()->id()}->id() . '").val("' . convert::raw2js($this->form()->getSecretKey()) . '");');
 		}
 
 		try {

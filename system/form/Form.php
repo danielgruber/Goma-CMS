@@ -106,38 +106,28 @@ class Form extends gObject {
 
 	/**
 	 * validators of the form
-	 *@name validators
-	 *@access public
-	 *@var array
+	 * @var FormValidator[]
 	 */
 	public $validators = array();
 
 	/**
 	 * result of the form
-	 *@name result
-	 *@access public
-	 *@var array
+	 *
+	 * @var array
 	 */
 	public $result = array();
 
 	/**
-	 * if we add secret key to the form
-	 *@name secret
-	 *@access public
-	 *@var bool
-	 */
-	protected $secret = true;
-
-	/**
 	 * url of this form
 	 *
-	 *@name url
-	 *@access public
+	 * @var string
 	 */
 	public $url;
 
 	/**
 	 * post-data
+	 *
+	 * @var array
 	 */
 	public $post;
 
@@ -149,8 +139,7 @@ class Form extends gObject {
 	/**
 	 * defines if we should use state-data in sub-queries of this Form
 	 *
-	 *@name useStateData
-	 *@access public
+	 * @var bool
 	 */
 	public $useStateData = false;
 
@@ -195,6 +184,8 @@ class Form extends gObject {
 		if(PROFILE)
 			Profiler::mark("form::__construct");
 
+		$this->fieldList = new ArrayList();
+
 		$this->name = strtolower($name);
 
 		$this->initWithRequest($controller, $request);
@@ -202,8 +193,6 @@ class Form extends gObject {
 		$this->initModel($controller, $model);
 
 		$this->checkForRestore();
-
-		$this->fieldList = new ArrayList();
 
 		$this->addFields($fields, $actions, $validators);
 
@@ -248,7 +237,6 @@ class Form extends gObject {
 
 		$this->controller = $controller;
 
-		$this->secretKey = randomString(30);
 		$this->url = str_replace('"', '', $_SERVER["REQUEST_URI"]);
 		$this->request = isset($request) ? $request : $controller->getRequest();
 
@@ -263,7 +251,7 @@ class Form extends gObject {
 	 * inits model.
 	 *
 	 * @param RequestHandler $controller
-	 * @param ViewAccessabeleData|null $model
+	 * @param ViewAccessableData|null $model
 	 */
 	protected function initModel($controller, $model) {
 		// set model
@@ -293,14 +281,20 @@ class Form extends gObject {
 			$this->state = $data->state;
 			$this->restorer = $data;
 
-			GlobalSessionManager::globalSession()->remove("form_restore." . $this->name());
-		}
+			if($data->secret) {
+				$this->activateSecret($data->secretKey);
+			}
 
-		// get form-state
-		if(GlobalSessionManager::globalSession()->hasKey("form_state_" . $this->name) && isset($this->post)) {
-			$this->state = new FormState(GlobalSessionManager::globalSession()->get("form_state_" . $this->name));
+			GlobalSessionManager::globalSession()->remove("form_restore." . $this->name());
 		} else {
-			$this->state = new FormState();
+			// get form-state
+			if(GlobalSessionManager::globalSession()->hasKey("form_state_" . $this->name) && isset($this->post)) {
+				$this->state = new FormState(GlobalSessionManager::globalSession()->get("form_state_" . $this->name));
+				$this->activateSecret($this->state->secret);
+			} else {
+				$this->state = new FormState();
+				$this->activateSecret();
+			}
 		}
 	}
 
@@ -338,12 +332,8 @@ class Form extends gObject {
 
 	/**
 	 * redirects to form
-	 *
-	 *@name redirectToForm
-	 *@access public
 	 */
 	public function redirectToForm() {
-
 		$this->saveToSession();
 		$this->activateRestore();
 		HTTPResponse::redirect($this->url);
@@ -351,15 +341,8 @@ class Form extends gObject {
 
 	/**
 	 * generates default fields for this form
-	 *@name defaultFields
-	 *@access public
 	 */
 	public function defaultFields() {
-		if($this->secret) {
-			$this->add(new HiddenField("secret_" . $this->ID(), $this->secretKey));
-			$this->state->secret = $this->secretKey;
-		}
-
 		$this->add(new HiddenField("form_submit_" . $this->name(), "1"));
 
 		Resources::add("system/form/form.js", "js", "tpl");
@@ -379,10 +362,10 @@ class Form extends gObject {
 		// check for submit or append info for user to resubmit.
 		if(isset($this->post["form_submit_" . $this->name()]) && GlobalSessionManager::globalSession()->hasKey(self::SESSION_PREFIX . "." . strtolower($this->name))) {
 			// check secret
-			if($this->secret && $this->post["secret_" . $this->ID()] == $this->state->secret) {
+			if($this->secretKey && $this->post["secret_" . $this->ID()] == $this->state->secret) {
 				$this->defaultFields();
 				return $this->trySubmit();
-			} else if(!$this->secret) {
+			} else if(!$this->secretKey) {
 				$this->defaultFields();
 				return $this->trySubmit();
 			} else {
@@ -406,7 +389,7 @@ class Form extends gObject {
 	 */
 	protected function checkForSubfield() {
 		// check get
-		foreach($_GET as $key => $value) {
+		foreach($this->request->get_params as $key => $value) {
 			if(preg_match("/^field_action_([a-zA-Z0-9_]+)_([a-zA-Z0-9_]+)$/", $key, $matches)) {
 				if(isset($this->fields[$matches[1]]) && $this->fields[$matches[1]]->hasAction($matches[2])) {
 					$this->activateRestore();
@@ -426,8 +409,7 @@ class Form extends gObject {
 	/**
 	 * renders the form
 	 *
-	 * @name renderForm
-	 * @access public
+	 * @param array $errors
 	 * @return mixed|string
 	 */
 	public function renderForm($errors = array()) {
@@ -634,6 +616,10 @@ class Form extends gObject {
 			}
 		}
 
+		if($this->secretKey) {
+			$this->activateSecret();
+		}
+
 		/** @var Form $data */
 		$data = GlobalSessionManager::globalSession()->get(self::SESSION_PREFIX . "." . strtolower($this->name));
 		$data->post = $this->post;
@@ -657,6 +643,7 @@ class Form extends gObject {
 			}
 
 			$this->state = $data->state;
+			$this->state->secret = $this->secretKey;
 
 			$this->defaultFields();
 
@@ -839,8 +826,6 @@ class Form extends gObject {
 
 	/**
 	 * gets the default submission
-	 *@name getSubmission
-	 *@access public
 	 */
 	public function getSubmission() {
 		return $this->submission;
@@ -918,7 +903,6 @@ class Form extends gObject {
 	 */
 	public function add($field, $sort = null, $to = null) {
 		if($to == "this" || !isset($to)) {
-
 			// if it already exists, we should remove it.
 			if($this->fieldList->find("name", $field->name)) {
 				$this->fieldList->remove($this->fieldList->find("name", $field->name));
@@ -934,7 +918,6 @@ class Form extends gObject {
 			if(isset($this->$to)) {
 				$this->$to->add($field, $sort);
 			}
-
 		}
 	}
 
@@ -1015,32 +998,32 @@ class Form extends gObject {
 	/**
 	 * removes the secret key
 	 * DON'T DO THIS IF YOU DON'T KNOW WHAT YOU DO!
-	 *@name removeSecret
-	 *@acess public
 	 */
 	public function removeSecret() {
-		$this->secret = false;
+		$this->secretKey = null;
+		$this->remove("secret_" . $this->ID());
+		$this->state->secret = null;
 	}
 
 	/**
 	 * activates the secret key
-	 *
-	 *@name activateSecret
-	 *@acess public
+	 * @param string|null $secret
 	 */
-	public function activateSecret() {
-		$this->secret = true;
+	public function activateSecret($secret = null) {
+		if($this->secretKey) $this->removeSecret();
+
+		$this->secretKey = isset($secret) ? $secret : randomString(30);
+		$this->add(new HiddenField("secret_" . $this->ID(), $this->secretKey));
+		$this->state->secret = $this->secretKey;
 	}
 
 	/**
 	 * gets the secret
 	 *
-	 * @name getSecret
-	 * @access public
-	 * @return string
+	 * @return bool
 	 */
 	public function getSecret() {
-		return $this->secret;
+		return !!$this->secretKey;
 	}
 
 	/**
@@ -1107,9 +1090,7 @@ class Form extends gObject {
 	/**
 	 * removes the registration as rendered
 	 *
-	 *@name unregisterRendered
-	 *@access public
-	 *@param string - name
+	 * @param string $name
 	 */
 	public function unregisterRendered($name) {
 		unset($this->renderedFields[strtolower($name)]);
@@ -1118,7 +1099,7 @@ class Form extends gObject {
 	/**
 	 * unregisters a field.
 	 *
-	 * @param string name
+	 * @param string $name
 	 * @return void
 	 */
 	public function unregisterField($name) {
@@ -1237,5 +1218,13 @@ class Form extends gObject {
 	{
 		$this->leaveCheck = $leaveCheck;
 		return $this;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getSecretKey()
+	{
+		return $this->secretKey;
 	}
 }

@@ -55,6 +55,7 @@ class ExternalFormController extends RequestHandler {
                 $formInstance->request = $oldRequest;
                 $formInstance->controller->setRequest($oldControllerRequest);
                 GlobalSessionManager::globalSession()->set(Form::SESSION_PREFIX . "." . strtolower($form), $formInstance);
+                GlobalSessionManager::globalSession()->set("form_state_" . $form, $formInstance->state->ToArray());
                 return $data;
             }
             return false;
