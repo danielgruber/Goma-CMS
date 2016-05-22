@@ -362,7 +362,7 @@ class Form extends gObject {
 		// check for submit or append info for user to resubmit.
 		if(isset($this->post["form_submit_" . $this->name()]) && GlobalSessionManager::globalSession()->hasKey(self::SESSION_PREFIX . "." . strtolower($this->name))) {
 			// check secret
-			if($this->secretKey && $this->post["secret_" . $this->ID()] == $this->state->secret) {
+			if($this->secretKey && isset($this->post["secret_" . $this->ID()]) && $this->post["secret_" . $this->ID()] == $this->state->secret) {
 				$this->defaultFields();
 				return $this->trySubmit();
 			} else if(!$this->secretKey) {

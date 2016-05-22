@@ -34,9 +34,14 @@ class settingsAdmin extends adminItem
 	}
 
 	public function index() {
-		$this->tplVars["form"] = $this->Form();
+		$form = $this->Form();
 
-		return parent::index();
+		if(is_string($form)) {
+			$this->tplVars["form"] = $form;
+			return parent::index();
+		} else {
+			return $form;
+		}
 	}
 
 	/**
@@ -78,7 +83,7 @@ class settingsAdmin extends adminItem
 			throw new LogicException("settingsAdmin::submit_form needs at least lang, status, timezone and date_format_date.");
 		}
 
-		parent::safe($data, $form, $model);
+		return parent::safe($data, $form, $model);
 	}
 
 	/**

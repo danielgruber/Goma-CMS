@@ -10,6 +10,10 @@
  * @version    1.1
  */
 class PasswordField extends FormField {
+
+	/**
+	 * @return HTMLNode
+	 */
 	public function createNode()
 	{
 		$node = parent::createNode();
@@ -20,5 +24,22 @@ class PasswordField extends FormField {
 
 	public function setValue()
 	{
+	}
+
+	public function getValue()
+	{
+	}
+
+	/**
+	 * @return mixed|null
+	 */
+	public function result() {
+		$result = parent::result();
+
+		if(!$result) {
+			return $this->value;
+		}
+
+		return $result;
 	}
 }

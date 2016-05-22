@@ -29,9 +29,6 @@ class BackupSettings extends NewSettings {
 
     /**
      * generates the form
-     *
-     *@name getFormFromDB
-     *@access public
      */
     public function getFormFromDB(&$form) {
         $excludedFolders = $this->excludeFolders;
@@ -58,12 +55,9 @@ class BackupSettings extends NewSettings {
 
     /**
      * data-handler
-     *
-     *@name handleData
-     *@access public
      */
     public function handleData($data) {
-        $data["excludeFolders"] = serialize($data["excludeFolders"]);
+        $data["excludefolders"] = serialize($data["excludefolders"]);
         return $data;
     }
 }

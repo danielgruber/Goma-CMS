@@ -56,7 +56,7 @@ $(function(){
 			hasBeenValidated = true;
 			$(".mailsettings-wrapper").removeClass("hasResponse").removeClass("loading");
 			xhr.abort();
-			form.find("input[type=submit]").click();
+			form.find(".actions button[name=submit]").eq(0).click();
 			return false;
 		});
 	}

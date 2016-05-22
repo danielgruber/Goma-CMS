@@ -58,7 +58,7 @@ class ContactController extends PageController
      */
     public function send($data, $from = null)
     {
-        if(!isset($from) || !is_string($from)) {
+        if(!is_string($from)) {
             $from = $this->modelInst()->email;
         }
 
@@ -86,6 +86,6 @@ class ContactController extends PageController
             AddContent::addError($e->getMessage());
         }
 
-        return GomaResponse::redirect($this->namespace);
+        return GomaResponse::redirect(BASE_URI . $this->namespace);
     }
 }
