@@ -1,42 +1,42 @@
 <?php defined("IN_GOMA") OR die();
 /**
-  * Mail-Settings DataObject.
-  *
-  *	@package 	goma cms
-  *	@link 		http://goma-cms.org
-  *	@license 	LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *	@author 	Goma-Team
-  * @Version 	1.0
-*/
+ * Mail-Settings DataObject.
+ *
+ *	@package 	goma cms
+ *	@link 		http://goma-cms.org
+ *	@license 	LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+ *	@author 	Goma-Team
+ * @Version 	1.0
+ */
 class MailSettings extends Newsettings {
 	/**
 	 * Database-Fields
 	 *
 	 *@name db
-	*/
+	 */
 	static $db = array(
 		"useSMTP"	        => "Switch",
-        "smtp_host"  		=> "varchar(200)",
-        "smtp_auth"			=> "Switch",
-        "smtp_user"			=> "varchar(200)",
-        "smtp_pwd"			=> "varchar(200)",
-        "smtp_secure"		=> "varchar(200)",
-        "smtp_port"			=> "int(10)",
-        "smtp_from"			=> "varchar(200)"
+		"smtp_host"  		=> "varchar(200)",
+		"smtp_auth"			=> "Switch",
+		"smtp_user"			=> "varchar(200)",
+		"smtp_pwd"			=> "varchar(200)",
+		"smtp_secure"		=> "varchar(200)",
+		"smtp_port"			=> "int(10)",
+		"smtp_from"			=> "varchar(200)"
 	);
-	
+
 	static $default = array(
 		"smtp_secure" 	=> "tls",
 		"smtp_port"		=> "587"
 	);
 
 	public $tab = "{\$_lang_mail}";
-	
+
 	/**
 	 * generates the Form for this.
 	 *
 	 *@name getForm
-	*/
+	 */
 	public function getFormFromDB(&$form) {
 		$form->add(new TextField("smtp_from", lang("smtp_from")));
 		$form->add($radio = new ObjectRadioButton("useSMTP", lang("use_smtp"), array(
@@ -67,7 +67,7 @@ class MailSettings extends Newsettings {
 
 	/**
 	 * sets SMTP-Settings to mailer when creating a mail.
-	*/
+	 */
 	public static function setSMTPSettings($mail, $mailer) {
 		if(SettingsController::get("useSMTP")) {
 			$mailer->isSMTP();
@@ -82,12 +82,12 @@ class MailSettings extends Newsettings {
 
 	/**
 	 * sets sender to mailer when creating a mail.
-	*/
+	 */
 	public static function setSender($mail, $mailer) {
 		if(SettingsController::get("smtp_from")) {
-			try{
+			try {
 				$parsed = Mail::parseSingleAddress(SettingsController::get("smtp_from"));
-				$mailer->From = $parsed[0];
+				$mailer->From = $mailer->Sender = $parsed[0];
 				$mailer->FromName = $parsed[1];
 			} catch(Exception $e) {
 

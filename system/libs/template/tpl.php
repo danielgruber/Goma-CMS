@@ -847,7 +847,7 @@ $data = array_pop($dataStack);
 	 */
 	public static function renderELSEIF($matches)
 	{
-		return '$data->convertDefault = false; } else ' . self::renderIF($matches) . "  \$data->convertDefault = null;";
+		return '} else ' . self::renderIF($matches) . " ";
 	}
 
 	/**
@@ -862,7 +862,7 @@ $data = array_pop($dataStack);
 		$file = self::getFilename($name, $class, true);
 		$filename = self::BuildFilesForTemplate($file, realpath($file));
 		if ($filename === false) {
-			throwError(6, "Template-Error", "Could not create Template-Cache-Files for Template <strong>" . $tpl . "</strong>");
+			throw new LogicException("Could not create Template-Cache-Files for Template <strong>" . $file . "</strong>");
 		}
 		unset($tpl);
 
@@ -875,21 +875,18 @@ $data = array_pop($dataStack);
 	 * @param bollean - to follow <!tpl inc:"neu"> or not
 	 * @param array - for replacement like {$content}
 	 * @use: parse tpl
+	 * @return string
 	 */
 	public static function includeparser($tpl, $tmpname)
 	{
 		if (PROFILE) Profiler::mark("tpl::includeparser");
 
-		if ($t = filemtime($tmpname)) {
-			$t = $t;
-		} else {
+		if (!($t = filemtime($tmpname))) {
 			$t = 0;
 		}
 
 		$cacher = new tplcacher($tmpname, $t);
-		if ($cacher->checkvalid() === true) {
-
-		} else {
+		if ($cacher->checkvalid() !== true) {
 			$data = file_get_contents($tpl);
 			$tpldata = self::compile($data);
 			$cacher->write($tpldata);
@@ -899,48 +896,6 @@ $data = array_pop($dataStack);
 		if (PROFILE) Profiler::unmark("tpl::includeparser");
 
 		return $cacher->filename();
-	}
-
-	/**
-	 * getAvailableArea
-	 *
-	 * @name access public
-	 * @param string - template
-	 */
-	public static function getAvailableAreas($filename)
-	{
-		$tpl = self::getFilename($filename);
-		$name = preg_replace("/[^a-zA-Z0-9_\-]/", "_", self::$tpl);
-		$file = ROOT . CACHE_DIRECTORY . "/tpl.areas." . $name . ".php";
-		if (!file_exists($file)) {
-			self::buildFilesForTemplate($tpl, realpath($tpl));
-		}
-
-		include($file);
-
-
-		return $areas;
-	}
-
-	/**
-	 * getAvailableArea
-	 *
-	 * @name access public
-	 * @param string - template
-	 */
-	public static function getAvailableiAreas($filename)
-	{
-		$tpl = self::getFilename($filename);
-		$name = preg_replace("/[^a-zA-Z0-9_\-]/", "_", self::$tpl);
-		$file = ROOT . CACHE_DIRECTORY . "/tpl.areas." . $name . ".php";
-		if (!file_exists($file)) {
-			self::buildFilesForTemplate($tpl, realpath($tpl));
-		}
-
-		include($file);
-
-
-		return $iAreas;
 	}
 }
 
@@ -1845,12 +1800,9 @@ class tplCaller extends gObject implements ArrayAccess
 	}
 
 	/**
-	 * __call-access-layer
-	 *
-	 * @name __call
-	 * @access public
-	 * @param $methodName
-	 * @param args
+	 * @param string $methodName
+	 * @param array $args
+	 * @return bool|mixed
 	 */
 	public function __call($methodName, $args)
 	{
@@ -1862,8 +1814,6 @@ class tplCaller extends gObject implements ArrayAccess
 		} else if (gObject::method_exists($this->classname, "_" . $methodName)) {
 			return call_user_func_array(array($this, "_" . $methodName), $args);
 		} else if (isset($this->callers[strtolower($methodName)])) {
-			$this->callers[strtolower($methodName)]->dataobject->convertDefault = null;
-
 			return $this->callers[strtolower($methodName)];
 		} else {
 			if (gObject::method_exists($this->dataobject, $methodName)) {

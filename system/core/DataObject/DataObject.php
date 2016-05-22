@@ -2100,14 +2100,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
             return $this->linkController($controller);
         }
 
-        if (property_exists($this, "controller") && is_object($this->controller))
+        if (isset($this->controller) && is_object($this->controller))
         {
             return $this->controller;
         }
 
         /* --- */
 
-        if (property_exists($this, "controller")  && $this->controller != "")
+        if (isset($this->controller)  && $this->controller != "")
         {
             /** @var Controller $controller */
             $controller = gObject::instance($this->controller);

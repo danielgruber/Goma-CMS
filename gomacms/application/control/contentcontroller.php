@@ -218,7 +218,7 @@ class ContentController extends FrontedController
     /**
      * output-hook
      *
-     * @name outputHook
+     * @param string|GomaResponse $content
      * @return bool
      */
     public static function outputHook($content)
@@ -227,6 +227,7 @@ class ContentController extends FrontedController
         if (PROFILE) Profiler::mark("contentController checkupload");
 
         if (self::$enableBacktracking && is_a(Director::$requestController, "contentController")) {
+            $content = is_a($content, "GomaResponse") ? $content->getBody() : $content;
 
             $contentmd5 = md5($content);
             $cache = new Cacher("uploadTracking_" . $contentmd5);

@@ -77,14 +77,9 @@ class ContactController extends PageController
      * @return GomaResponse
      */
     public function submitAndSend($data, $from = null) {
-        try {
             $this->send($data, $from);
 
             AddContent::addSuccess(lang("mail_successful_sent"));
-        } catch(Exception $e) {
-            log_exception($e);
-            AddContent::addError($e->getMessage());
-        }
 
         return GomaResponse::redirect(BASE_URI . $this->namespace);
     }
