@@ -58,7 +58,7 @@ class groupAdmin extends adminItem {
 			"name"		=> lang("name")
 		));
 		$config->removeComponent($config->getComponentByType("TableFieldToolbarHeader"));
-		$config->getComponentByType("TableFieldPaginator")->perPage = 5;
+		$config->getComponentByType("TableFieldPaginator")->perPage = 20;
 		
 		$form = new Form($this, "form", array(
 			new TableField("groupTable", lang("groups"), $this->modelInst(), $config)

@@ -91,5 +91,6 @@
 }
 .tabs > .active {
 	position: static;
+	clear: left;
 	border-top: 1px solid #ccc;
 }

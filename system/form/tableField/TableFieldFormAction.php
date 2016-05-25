@@ -14,6 +14,12 @@
  * @version     1.1.1
  */
 class TableField_FormAction extends FormAction {
+
+    protected $result;
+    protected $tableField;
+    protected $actionName;
+    protected $args;
+
     /**
      *
      * @param TableField $tableField
@@ -42,6 +48,17 @@ class TableField_FormAction extends FormAction {
     }
 
     /**
+     * @return Closure
+     */
+    public function getSubmit()
+    {
+        $result = $this->result;
+        return function() use($result) {
+            return $result;
+        };
+    }
+
+    /**
      * returns false, because a tableField-action never triggers the form to submit
      * but we hook into it.
      *
@@ -51,7 +68,7 @@ class TableField_FormAction extends FormAction {
      */
     public function canSubmit($data) {
         $this->tableField->form()->activateRestore();
-        $this->tableField->_handleAction($this->actionName, $this->args, $data);
-        return false;
+        $this->result = $this->tableField->_handleAction($this->actionName, $this->args, $data);
+        return !!$this->result;
     }
 }

@@ -290,6 +290,7 @@ class HTMLNode extends gObject
     {
         if ($value !== null) {
             $this->__set($name, $value);
+            return $this;
         }
 
         return $this->__get($name);
@@ -300,10 +301,12 @@ class HTMLNode extends gObject
      *
      * @name removeAttr
      * @param string - name
+     * @return $this
      */
     public function removeAttr($name)
     {
         $this->__unset($name);
+        return $this;
     }
 
     /**
@@ -331,9 +334,8 @@ class HTMLNode extends gObject
     /**
      * appends a node to the children
      *
-     * @name append
-     * @access public
-     * @param node
+     * @param $node
+     * @return $this
      */
     public function append($node)
     {
@@ -354,14 +356,13 @@ class HTMLNode extends gObject
             }
             unset($node);
         }
+        return $this;
     }
 
     /**
      * prepends a node before the children
-     *
-     * @name append
-     * @access public
-     * @param node
+     * @param $node
+     * @return $this
      */
     public function prepend($node)
     {
@@ -383,13 +384,12 @@ class HTMLNode extends gObject
 
             unset($node);
         }
+        return $this;
     }
 
     /**
      * adds a class to this node
      *
-     * @name addClass
-     * @access public
      * @return null
      */
     public function addClass($class)

@@ -109,6 +109,11 @@ if(typeof goma == "undefined")
 			}
 		},
 
+		errorsRaised: function() {
+			var event = jQuery.Event("errorsraised");
+			this.form.trigger(event);
+		},
+
 		setLeaveCheck: function(bool) {
 			if(bool)
 				this.form.addClass("leave_check");

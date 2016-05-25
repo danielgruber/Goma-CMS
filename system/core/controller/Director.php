@@ -77,10 +77,6 @@ class Director extends gObject {
      *@param string - content
      */
     public static function serve($output) {
-
-        if(isset($_GET["flush"]) && Permission::check("ADMIN"))
-            Notification::notify("Core", lang("CACHE_DELETED"));
-
         if(PROFILE)
             Profiler::unmark("render");
 
@@ -92,7 +88,9 @@ class Director extends gObject {
         if(isset(self::$requestController)) {
             if(is_a($output, "GomaResponse")) {
                 /** @var GomaResponse $output */
-                $output->setBodyString(self::$requestController->serve($output->getResponseBodyString()));
+                if($output->shouldServe()) {
+                    $output->setBodyString(self::$requestController->serve($output->getResponseBodyString()));
+                }
             } else {
                 $output = self::$requestController->serve($output);
             }
@@ -105,11 +103,11 @@ class Director extends gObject {
 
         if(!is_a($output, "GomaResponse")) {
             $output = new GomaResponse(HTTPResponse::gomaResponse()->getHeader(), $output);
-            if(HTTPResponse::gomaResponse()->getStatus() != 200) {
-                $output->setStatus(HTTPResponse::gomaResponse()->getStatus());
-            }
+            $output->setStatus(HTTPResponse::gomaResponse()->getStatus());
 
             $output->getBody()->setIncludeResourcesInBody(!Core::is_ajax());
+        } else {
+            $output->merge(HTTPResponse::gomaResponse());
         }
 
         $output->output();

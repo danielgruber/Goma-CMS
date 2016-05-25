@@ -93,18 +93,15 @@ class ManyManyGetter extends Extension implements ArgumentsQuery
     protected function factorOutFilter($filterArray, $version, $forceClasses, $relationShips) {
         foreach($filterArray as $key => $value) {
             if(isset($relationShips[strtolower($key)])) {
-                $relationShip = $relationShips[strtolower($key)];
-                $target = $relationShip->getTargetClass();
-                /** @var DataObject $targetObject */
-                $targetObject = new $target();
-                $query = $targetObject->buildExtendedQuery($version, $value, array(), array(), array(
-                    "INNER JOIN " . DB_PREFIX . $relationShip->getTableName() . " AS " . $relationShip->getTableName() .
-                    " ON " . $relationShip->getTableName() . "." . $relationShip->getTargetField() . " = " . $relationShip->getTargetTableName() . ".id"
-                ), $forceClasses);
-                $query->addFilter($relationShip->getTableName()  . "." . $relationShip->getOwnerField() . " = " . $this->getOwner()->baseTable . ".id");
-
                 unset($filterArray[$key]);
-                $filterArray[] = " EXISTS ( ".$query->build()." ) ";
+                $filterArray[] = " EXISTS ( ".
+                    $this->buildRelationQuery($relationShips[strtolower($key)], $version, $value, $forceClasses)->build()
+                    ." ) ";
+            } else if(strtolower(substr($key, -6)) == ".count" && isset($relationShips[strtolower(substr($key, 0, -6))])) {
+                unset($filterArray[$key]);
+                $filterArray[] = " (".
+                    $this->buildRelationQuery($relationShips[strtolower(substr($key, 0, -6))], $version, array(), $forceClasses)->build("count(*)")
+                    .") = " . $value;
             } else {
                 if (is_array($value)) {
                     $filterArray[$key] = $this->factorOutFilter($filterArray[$key], $version, $forceClasses, $relationShips);
@@ -115,6 +112,25 @@ class ManyManyGetter extends Extension implements ArgumentsQuery
         return $filterArray;
     }
 
+    /**
+     * @param ModelManyManyRelationShipInfo $relationShip
+     * @param string $version
+     * @param array $filter
+     * @param bool $forceClasses
+     * @return SelectQuery
+     */
+    protected function buildRelationQuery($relationShip, $version, $filter, $forceClasses) {
+        $target = $relationShip->getTargetClass();
+        /** @var DataObject $targetObject */
+        $targetObject = new $target();
+        $query = $targetObject->buildExtendedQuery($version, $filter, array(), array(), array(
+            "INNER JOIN " . DB_PREFIX . $relationShip->getTableName() . " AS " . $relationShip->getTableName() .
+            " ON " . $relationShip->getTableName() . "." . $relationShip->getTargetField() . " = " . $relationShip->getTargetTableName() . ".id"
+        ), $forceClasses);
+        $query->addFilter($relationShip->getTableName()  . "." . $relationShip->getOwnerField() . " = " . $this->getOwner()->baseTable . ".id");
+
+        return $query;
+    }
 
     /**
      * gets many-many-objects

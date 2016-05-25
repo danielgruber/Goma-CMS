@@ -97,11 +97,12 @@ class i18n extends gObject {
 					require_once (ROOT . LANGUAGE_DIRECTORY . '/' . Core::$lang . '/' . $file . '.php');
 				} else if(isset(self::$defaultLanguagefiles[$file])) {
 					if(file_exists(ROOT . LANGUAGE_DIRECTORY . '/' . self::$defaultLanguagefiles[$file] . '/' . $file . '.php')) {
-						copy(ROOT . LANGUAGE_DIRECTORY . '/' . self::$defaultLanguagefiles[$file] . '/' . $file . '.php', ROOT . LANGUAGE_DIRECTORY . '/' . Core::$lang . '/' . $file . '.php');
-						require_once (ROOT . LANGUAGE_DIRECTORY . '/' . Core::$lang . '/' . $file . '.php');
+						require_once (ROOT . LANGUAGE_DIRECTORY . '/' . self::$defaultLanguagefiles[$file] . '/' . $file . '.php');
 					}
 				}
 			}
+
+			$lang = ArrayLib::map_key("strtoupper", $lang);
 
 			// load app-language
 			if(isset(ClassInfo::$appENV["app"]["langPath"])) {
@@ -123,21 +124,19 @@ class i18n extends gObject {
 					if(isset($data["langFolder"])) {
 						if(file_exists($folder . $data["langFolder"] . "/" . Core::$lang . ".php")) {
 							self::loadExpansionLang($folder . $data["langFolder"] . "/" . Core::$lang . ".php", "exp_" . $name, $lang);
-						} else if(isset($data["defaulLang"]) && file_exists($folder . $data["langFolder"] . "/" . $data["defaultLang"] . ".php")) {
+						} else if(isset($data["defaultLang"]) && file_exists($folder . $data["langFolder"] . "/" . $data["defaultLang"] . ".php")) {
 							self::loadExpansionLang($folder . $data["langFolder"] . "/" . $data["defaultLang"] . ".php", "exp_" . $name, $lang);
 						}
 					} else if(is_dir($folder . "languages")) {
 						if(file_exists($folder . "languages/" . Core::$lang . ".php")) {
 							self::loadExpansionLang($folder . "languages/" . Core::$lang . ".php", "exp_" . $name, $lang);
-						} else if(isset($data["defaulLang"]) && file_exists($folder . "languages/" . $data["defaultLang"] . ".php")) {
+						} else if(isset($data["defaultLang"]) && file_exists($folder . "languages/" . $data["defaultLang"] . ".php")) {
 							self::loadExpansionLang($folder . "languages/" . $data["defaultLang"] . ".php", "exp_" . $name, $lang);
 						}
 						unset($default);
 					}
 				}
 			}
-
-			$lang = ArrayLib::map_key("strtoupper", $lang);
 
 			$cacher->write($lang, 600);
 		}
@@ -185,7 +184,7 @@ class i18n extends gObject {
 
 		if(isset($overrideLang)) {
 			foreach($overrideLang as $key => $value) {
-				$language[$key] = $value;
+				$language[strtoupper($key)] = $value;
 			}
 		}
 	}

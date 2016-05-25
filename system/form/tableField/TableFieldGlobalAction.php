@@ -11,32 +11,37 @@
  * @version     1.0.1
  */
 class TableFieldGlobalAction implements TableField_HTMLProvider, TableField_ActionProvider {
+
+	protected $name;
+	protected $title;
+	protected $callback;
+
 	/**
 	 * Constructor.
 	 *
 	 * @param String $name internal name
 	 * @param String $title Title of the Button
 	 * @param callback $callback Method to call, when button was pushed
-	*/
+	 */
 	public function __construct($name, $title, $callback) {
 		$this->name = $name;
 		$this->title = $title;
-		
+
 		if(is_callable($callback)) {
 			$this->callback = $callback;
 		} else {
 			throw new InvalidArgumentException('$callback must be a valid Argument for TableFieldGlobalAction::__construct.');
 		}
 	}
-	
-	
+
+
 	/**
 	 * provides HTML-fragments
 	 *
-	 *@name provideFragments
-	*/
+	 * @return array
+	 */
 	public function provideFragments($tableField) {
-		
+
 		$action = new TableField_FormAction($tableField, $this->name, $this->title, "globalaction_".strtolower($this->name)."_callback");
 		$view = new ViewAccessableData();
 		if($tableField->getConfig()->getComponentByType('TableFieldPaginator')) {
@@ -47,20 +52,19 @@ class TableFieldGlobalAction implements TableField_HTMLProvider, TableField_Acti
 			return array("footer" => $view->customise(array("field" => $action->field()))->renderWith("form/tableField/globalActionWithFooter.html"));
 		}
 	}
-	
+
 	/**
 	 * provide some actions of this tablefield
 	 *
-	 *@name getActions
-	 *@access public
-	*/
+	 * @return array
+	 */
 	public function getActions($tableField) {
 		return array("globalaction_" . strtolower($this->name) . "_callback");
 	}
-	
+
 	/**
 	 * handles the actions
-	*/
+	 */
 	public function handleAction($tableField, $actionName, $arguments, $data) {
 		if($actionName == "globalaction_" . strtolower($this->name) . "_callback") {
 			return call_user_func_array($this->callback, array($tableField, $actionName, $data));

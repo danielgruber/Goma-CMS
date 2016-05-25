@@ -15,6 +15,10 @@
  * @version     1.1.1
  */
 class TableFieldDeleteButton implements TableField_ColumnProvider, TableField_ActionProvider, TableField_URLHandler {
+
+	protected $title;
+	protected $requirePerm;
+
 	/**
 	 * constructor.
 	 * @param null|string $title
@@ -135,7 +139,7 @@ class TableFieldDeleteButton implements TableField_ColumnProvider, TableField_Ac
 	 */
 	public function handleAction($tableField, $actionName, $arguments, $data) {
 		if($actionName == "deletebtn_redirect") {
-			HTTPResponse::redirect($tableField->externalURL() . "/deletebtn/" . $arguments["id"] . URLEND . "?redirect=" . urlencode($_SERVER["REQUEST_URI"]));
+			return GomaResponse::redirect($tableField->externalURL() . "/deletebtn/" . $arguments["id"] . URLEND . "?redirect=" . urlencode($_SERVER["REQUEST_URI"]));
 		}
 		return false;
 	}

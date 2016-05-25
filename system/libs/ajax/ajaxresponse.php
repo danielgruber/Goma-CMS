@@ -18,6 +18,11 @@ class AjaxResponse extends GomaResponse
      */
     protected $actions = array();
 
+    /**
+     * @var bool
+     */
+    protected $shouldServe = false;
+
     public function setDefaultHeader()
     {
         parent::setDefaultHeader();

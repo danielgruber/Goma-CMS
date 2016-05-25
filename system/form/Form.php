@@ -389,16 +389,19 @@ class Form extends gObject {
 	 */
 	protected function checkForSubfield() {
 		// check get
-		foreach($this->request->get_params as $key => $value) {
-			if(preg_match("/^field_action_([a-zA-Z0-9_]+)_([a-zA-Z0-9_]+)$/", $key, $matches)) {
-				if(isset($this->fields[$matches[1]]) && $this->fields[$matches[1]]->hasAction($matches[2])) {
-					$this->activateRestore();
-					if($data = GlobalSessionManager::globalSession()->get(self::SESSION_PREFIX . "." . strtolower($this->name))) {
-						$this->result = $data->result;
-						$this->post = $data->post;
-						$this->restorer = $data;
+		if(isset($this->request) && isset($this->request->get_params)) {
+			foreach ($this->request->get_params as $key => $value) {
+				if (preg_match("/^field_action_([a-zA-Z0-9_]+)_([a-zA-Z0-9_]+)$/", $key, $matches)) {
+					if (isset($this->fields[$matches[1]]) && $this->fields[$matches[1]]->hasAction($matches[2])) {
+						$this->activateRestore();
+						if ($data = GlobalSessionManager::globalSession()->get(self::SESSION_PREFIX . "." . strtolower($this->name))) {
+							$this->result = $data->result;
+							$this->post = $data->post;
+							$this->restorer = $data;
+						}
+
+						return $this->fields[$matches[1]]->handleAction($matches[2]);
 					}
-					return $this->fields[$matches[1]]->handleAction($matches[2]);
 				}
 			}
 		}
@@ -1012,7 +1015,7 @@ class Form extends gObject {
 	public function activateSecret($secret = null) {
 		if($this->secretKey) $this->removeSecret();
 
-		$this->secretKey = isset($secret) ? $secret : randomString(30);
+		$this->secretKey = is_string($secret) ? $secret : randomString(30);
 		$this->add(new HiddenField("secret_" . $this->ID(), $this->secretKey));
 		$this->state->secret = $this->secretKey;
 	}

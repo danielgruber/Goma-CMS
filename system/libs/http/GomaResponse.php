@@ -76,6 +76,12 @@ class GomaResponse extends gObject {
     protected $status = 200;
 
     /**
+     * should serve?.
+     * @var bool
+     */
+    protected $shouldServe = true;
+
+    /**
      * GomaResponse constructor.
      *
      * @param array|null $header
@@ -192,6 +198,7 @@ class GomaResponse extends gObject {
         $request->setStatus($permanent ? 301 : 302);
         $request->setHeader("location", $url);
         $request->setBody('<script type="text/javascript">location.href = "'.addSlashes($url).'";</script><br /> Redirecting to: <a href="'.addSlashes($url).'">'.convert::raw2text($url).'</a>');
+        $request->setShouldServe(false);
 
         return $request;
     }
@@ -340,6 +347,41 @@ class GomaResponse extends gObject {
         header('HTTP/1.1 ' . $this->status . " " . self::$http_status_types[$this->status]);
         foreach($this->header as $key => $value) {
             header($key . ": " . $value);
+        }
+    }
+
+    /**
+     *
+     */
+    public function shouldServe()
+    {
+        return $this->shouldServe;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getShouldServe()
+    {
+        return $this->shouldServe;
+    }
+
+    /**
+     * @param bool $shouldServe
+     */
+    public function setShouldServe($shouldServe)
+    {
+        $this->shouldServe = $shouldServe;
+    }
+
+    /**
+     * @param GomaResponse $response
+     * @internal
+     */
+    public function merge($response) {
+        $this->header = array_merge($response->header, $this->header);
+        if($this->status == 200 && $response->status != 200) {
+            $this->status = $response->status;
         }
     }
 }
