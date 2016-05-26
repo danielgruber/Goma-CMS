@@ -48,5 +48,21 @@ function initObjectRadioButtons(field, divid, radioids) {
             updateRadios(true);
         }
         return this;
-    }
+    };
+    field.getPossibleValuesAsync = function() {
+        var deferred = $.Deferred();
+
+        setTimeout(function(){
+            var values = [];
+            var field = $("#" + divid);
+            field.find("input[type=radio]").each(function(){
+                if($(this).parent().css("display") != "none") {
+                    values.push($(this).attr("value"));
+                }
+            });
+            deferred.resolve(values);
+        });
+
+        return deferred.promise();
+    };
 }

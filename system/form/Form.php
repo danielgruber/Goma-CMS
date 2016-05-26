@@ -970,8 +970,10 @@ class Form extends gObject {
 
 	/**
 	 * adds a validator
-	 *@name addValidator
-	 *@access public
+	 *
+	 * @deprecated
+	 * @param FormValidator $validator
+	 * @param string $name
 	 */
 	public function addValidator($validator, $name) {
 		if(is_string($validator) && is_object($name)) {

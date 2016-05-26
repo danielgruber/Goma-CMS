@@ -23,6 +23,8 @@ var DropDown = function(form, field, id, url, multiple, sortable) {
 
 	field.getValue = this.getValue.bind(this);
 	field.getValueTitle = this.getValueTitle.bind(this);
+	field.setValue = this.setValue.bind(this);
+	field.getPossibleValuesAsync = this.getPossibleValuesAsync.bind(this);
 
 	this.init();
 	return this;
@@ -40,6 +42,48 @@ DropDown.prototype = {
 
 	getValueTitle: function() {
 		return this.widget.find(" > .field .value-title").eq(0).text();
+	},
+
+	setValue: function(ids) {
+		if(this.multiple) {
+			if(typeof ids == "object") {
+				for(var i in ids) {
+					if(ids.hasOwnProperty(i)) {
+						this.check(ids[i]);
+					}
+				}
+			} else {
+				this.check(ids)
+			}
+		} else {
+			this.check(ids);
+		}
+	},
+
+	getPossibleValuesAsync: function(page) {
+		page = page ? page : 1;
+		var deferred = $.Deferred();
+		$.ajax({
+			url: this.url + "/getData/" + page + "/",
+			type: "post",
+			dataType: "json"
+		}).fail(deferred.reject).done(function(data){
+			var records = [];
+
+			for(var i in data.data) {
+				if(data.data.hasOwnProperty(i)) {
+					records.push(data.data[i].key);
+				}
+			}
+
+			if(data.right) {
+				records.push(undefined);
+			}
+
+			deferred.resolve(records);
+		});
+
+		return deferred.promise();
 	},
 
 	/**

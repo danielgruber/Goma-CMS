@@ -105,6 +105,14 @@ if(typeof goma == "undefined")
 						return this;
 					}.bind(fields[i]);
 
+					fields[i].getPossibleValuesAsync = function() {
+						var deferred = $.Deferred();
+
+						deferred.resolve("*");
+
+						return deferred.promise();
+					};
+
 					if(fields[i]["js"]) {
 						var method = new Function("field", "fieldIndex", "form", fields[i]["js"]);
 
