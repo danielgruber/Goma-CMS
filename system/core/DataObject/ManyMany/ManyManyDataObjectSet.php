@@ -53,14 +53,13 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
      * @param array|IDataObjectSetDataSource|IDataObjectSetModelSource|null|string $class
      * @param array|null|string $filter
      * @param array|null|string $sort
-     * @param array|int|null $limit
      * @param array|null $join
      * @param array|null|string $search
      * @param null|string $version
      */
-    public function __construct($class = null, $filter = null, $sort = null, $limit = null, $join = null, $search = null, $version = null)
+    public function __construct($class = null, $filter = null, $sort = null, $join = null, $search = null, $version = null)
     {
-        parent::__construct($class, $filter, $sort, $limit, $join, $search, $version);
+        parent::__construct($class, $filter, $sort, $join, $search, $version);
 
         $this->updateExtraFieldsStage = new ArrayList();
     }

@@ -1,25 +1,28 @@
-function initObjectRadioButtons(divid, radioids) {
-    for (var i in radioids) {
-        if(radioids.hasOwnProperty(i)) {
-            var id = radioids[i];
-            if (!$("#" + id).prop("checked")) {
-                $("#displaycontainer_" + id).css("display", "none");
-            }
-        }
-    }
-
-    console.log(divid);
-
-    $("#"+divid+" div > .option > input[type=radio]").click(function () {
+function initObjectRadioButtons(field, divid, radioids) {
+    var updateRadios = function(animated) {
         for (var i in radioids) {
             if(radioids.hasOwnProperty(i)) {
                 var id = radioids[i];
+                var otherid = "displaycontainer_" + radioids[i];
                 if (!$("#" + id).prop("checked")) {
-                    var otherid = "displaycontainer_" + radioids[i];
-                    $("#" + otherid).slideUp("fast");
+                    if(animated) {
+                        $("#" + otherid).slideUp("fast")
+                    } else {
+                        $("#" + otherid).css("display", "none");
+                    }
+                } else {
+                    if(animated) {
+                        $("#" + otherid).slideDown("fast")
+                    } else {
+                        $("#" + otherid).css("display", "block");
+                    }
                 }
             }
         }
+    };
+
+    $("#"+divid+" div > .option > input[type=radio]").change(function () {
+        updateRadios(true);
 
         var currid = "displaycontainer_" + $(this).attr("id"),
             element = $("#" + currid);
@@ -30,4 +33,20 @@ function initObjectRadioButtons(divid, radioids) {
             element.find(".form_field:first-child").find(".input").click();
         }
     });
+
+    updateRadios(false);
+
+    field.getValue = function() {
+        return $("#" + divid).find("input[type=radio]:checked").attr("value");
+    };
+    field.setValue = function(value) {
+        var field = $("#" + divid);
+        var radio =  field.find("input[value="+value+"]");
+        if(radio.length == 1 && radio.parent().css("display") != "none") {
+            field.find("input[type=radio]:checked").prop("checked", false);
+            radio.prop("checked", true);
+            updateRadios(true);
+        }
+        return this;
+    }
 }

@@ -559,7 +559,7 @@ class ImageUploads extends Uploads {
         /** @var ImageUploads|null $aspectVersion */
         $aspectVersion = $this->imageVersions(
             null, " ABS((width * thumbWidth / (height * thumbHeight)) - $aspect) ASC ", 1
-        )->first(false);
+        )->first();
 
         // check if is really the better version.
         if(isset($aspectVersion) && abs($aspectVersion->getAspect() - $aspect) < ($this->getAspect() - $aspect)) {

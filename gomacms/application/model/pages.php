@@ -18,6 +18,9 @@
  * @property bool active - can be set from outside
  * @property string title
  * @property Permission|null read_permission
+ * @property int sort
+ * @property string filename
+ * @property int parentid
  *
  * @method HasMany_DataObjectSet children($filter = null)
  */
@@ -244,9 +247,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
 
     /**
      * sets parentid
-     *@name setParentId
-     *@access public
-     *@param - value
+     * @param int $value
      */
     public function setParentId($value)
     {
@@ -262,28 +263,16 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
 
     /**
      * gets the filename
-     * @name getFilename
-     * @access public
      * @return string
      */
     public function getFilename()
     {
-        $path = $this->path;
-        if(strpos($path, '/') !== false)
-        {
-            $filename = substr($path, strrpos($path, '/') + 1);
-        } else
-        {
-            return $path;
-        }
-        return $filename;
+        return $this->fieldGet("path");
     }
 
     /**
      * sets the filename
-     *
-     *@name setFilename
-     *@access public
+     * @param string $value
      */
     public function setFilename($value)
     {
@@ -292,9 +281,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
 
     /**
      * sets the path
-     *
-     *@name setPath
-     *@access public
+     * @param string $value
      */
     public function setPath($value)
     {
@@ -317,9 +304,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
 
     /**
      * gets class of a link
-     *
-     *@name getLinkClass
-     *@access public
      */
     public function getLinkClass() {
         return ($this->active) ? "active" : "";
@@ -335,9 +319,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
 
     /**
      * checks if this site is active in mainbar.
-     *
-     * @name 	getActive
-     * @access 	public
      */
     public function getActive() {
         if(in_array($this->fieldGet("id"), contentController::$activeids)) {
@@ -349,9 +330,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
 
     /**
      * the path
-     *
-     *@name getPath
-     *@access public
      */
     public function getPath()
     {
@@ -384,9 +362,9 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
 
     /**
      * returns all mainbar-activated children.
-     *
-     *@access public
-     *
+     * @param array $filter
+     * @param null $sort
+     * @return HasMany_DataObjectSet
      */
     public function subbar($filter = array(), $sort = null) {
         return $this->children(array_merge($filter, array("mainbar" => 1)), $sort);
@@ -596,38 +574,21 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
     }
 
     /**
-     * on before writing
-     *
-     *@name onBeforeWrite
+     * @param ModelWriter $modelWriter
+     * @throws FormInvalidDataException
      */
     public function onBeforeWrite($modelWriter) {
 
         parent::onBeforeWrite($modelWriter);
 
-        logging("Write record " . $this->title . ".");
-
         $this->data["uploadtrackingids"] = array();
 
         if($this->sort == 10000) {
-            if($this->id == 0) {
-                $this->data["sort"] = DataObject::count("pages", array("parentid" => $this->data["parentid"]));
-            } else {
-                $i = 0;
-                $sort = 0;
-                foreach(DataObject::get("pages", array("parentid" => $this->data["parentid"])) as $record) {
-                    if($record->id != $this->id) {
-                        $record->sort = $i;
-                        $record->writeToDB(false, true, $record->isOrgPublished() ? 2 : 1, false, false);
-                        logging("Write Record " . $record->id . " to sort " . $i);
-                    } else {
-                        $sort = $i;
-                    }
-                    $i++;
-                }
-
-                $this->data["sort"] = $sort;
-            }
+            $this->data["sort"] = DataObject::get("pages", array("parentid" => $this->data["parentid"]))->last()->sort;
         }
+
+        $this->validatePageFileName();
+        $this->validatePageType();
     }
 
     //!Validators
@@ -635,39 +596,29 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
     /**
      * validates if page can be created with this configuration of parent.
      *
-     * @param FormValidator $obj
-     * @return bool|string
      * @throws FormInvalidDataException
      */
-    public function validatePageType($obj)
+    protected function validatePageType()
     {
-        $data = $obj->getForm()->result;
-        $parentid = $data["parentid"];
-
-        // check if form was filled out correctrly.
-        if($data["parenttype"] == "subpage" && $data["parentid"] == null) {
-            throw new FormInvalidDataException("parent", lang("form_required_fields", "Please fill out the oligatory fields") . ' "' . lang("parentpage", "Parent Page") . '""');
-        }
-
         // find classes that should be allowed parents.
-        if($data["parenttype"] == "root")
+        if($this->parentid == 0)
         {
             $pclassname = "pages";
         } else
         {
             // check if page should be created as subpage from itself.
-            if(isset($data["recordid"]) && $data["parentid"] == $data["recordid"]) {
+            if($this->id == $this->parentid) {
                 throw new FormInvalidDataException("parent", lang("error_page_self", "You can't add a page as a child under itself!"));
             }
 
             // get parent-page versioned to ensure supporting state-versions + check if any page parent is page itself.
             /** @var Pages $page */
-            $page = DataObject::get_versioned("pages", "state", array("id" => $parentid))->first();
-            if(isset($data["recordid"])) {
+            $page = DataObject::get_versioned("pages", "state", array("id" => $this->parentid))->first();
+            if($this->id) {
                 $temp = $page;
                 // validate if we subordered under subtree
                 while($temp->parent) {
-                    if($temp->id == $data["recordid"]) {
+                    if($temp->id == $this->id) {
                         throw new FormInvalidDataException("parent", lang("error_page_self", "You can't add a page as a child under itself!"));
                     }
                     $temp = $temp->parent;
@@ -685,27 +636,36 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
     }
 
     /**
+     * @param bool $state
+     * @return bool
+     */
+    protected function filenameTaken($state = true) {
+        return $this->filename == "index" || trim($this->filename) == "" ||
+        DataObject::get_versioned("pages", $state ? DataObject::VERSION_STATE : null, array(
+            "path"      => array("LIKE", $this->filename),
+            "parentid"  => $this->parentid,
+            "recordid"  => array("!=", $this->id)
+        ))->count() > 0;
+    }
+
+    /**
      * validates page-filename
-     *
-     * @param FormValidator $obj
-     * @return bool|string
      * @throws FormInvalidDataException
      */
-    public function validatePageFileName($obj) {
-        $data = $obj->getForm()->result;
-        $filename =  PageUtils::cleanPath($data["filename"]);
-        $parentid = ($data["parentid"] == "" || $data["parenttype"] == "root") ? 0 : $data["parentid"];
-        $filter = array("path" => array("LIKE", $filename), "parentid" => $parentid);
-        if(isset($obj->getForm()->result["recordid"])) {
-            $filter["recordid"] = array("!=", $obj->getForm()->result["recordid"]);
-        }
+    protected function validatePageFileName() {
+        if($this->filename) {
+            if($this->filenameTaken()) {
+                throw new FormInvalidDataException("filename", lang("site_exists", "The page with this filename already exists."));
+            }
+        } else {
+            $i = 2;
+            $this->setPath($this->title);
 
-        if($filename == "index" || trim($filename) == "" ||
-            DataObject::count("pages", $filter) > 0) {
-            throw new FormInvalidDataException("filename", lang("site_exists", "The page with this filename already exists."));
+            while($this->filenameTaken()) {
+                $this->setPath($this->title . "-" . $i);
+                $i++;
+            }
         }
-
-        return true;
     }
 
     /**
@@ -720,8 +680,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
         $allowed_parents = $this->parentResolver()->getAllowedParents();
 
         $form->addValidator(new requiredFields(array('path','title', 'parenttype')), "default_required_fields"); // valiadte it!
-        $form->addValidator(new FormValidator(array($this, "validatePageType")), "pagetype");
-        $form->addValidator(new FormValidator(array($this, "validatePageFileName")), "filename");
 
         $form->useStateData = true;
         $this->queryVersion = "state";
@@ -1138,6 +1096,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
                 }
             } else if(is_int($parentNode)) {
                 $data = DataObject::get("pages", array("parentid" => $parentNode));
+            } else {
+                throw new InvalidArgumentException("you need to give a valid parentnode.");
             }
 
             // add Version-Params
@@ -1149,7 +1109,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
 
             $nodes = array();
             foreach($data as $record) {
-                $node = new TreeNode("page_" . $record->versionid, $record->id, $record->title, $record->class);
+                $node = new TreeNode($record->classname . "_" . $record->versionid, $record->id, $record->title, $record->class);
 
                 // add a bubble for changed or new pages.
                 if(!$record->isPublished())
@@ -1191,7 +1151,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
 
             $nodes = array();
             foreach($data as $record) {
-                $node = new TreeNode("page_" . $record->versionid, $record->id, $record->title, $record->class);
+                $node = new TreeNode($record->classname . "_" . $record->versionid, $record->id, $record->title, $record->class);
 
                 // add a bubble for changed or new pages.
                 if(!$record->isPublished())
@@ -1206,7 +1166,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
 
                 $nodes[] = $node;
             }
-
 
             return $nodes;
 

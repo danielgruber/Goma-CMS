@@ -267,8 +267,7 @@ var LaM_type_timeout;
 				type: "post",
 				data: oForm.serialize(),
 				success: function(html, code, jqXHR) {
-
-					renderResponseTo(html, treewrapper, jqXHR).done(function(){
+					renderResponseTo(html, treewrapper, jqXHR, undefined, false).done(function(){
 						tree_bind(treewrapper.find(".goma-tree"));
 						tree_bind_ajax(true, $(".left ul.goma-tree"));
 

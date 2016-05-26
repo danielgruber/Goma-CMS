@@ -182,7 +182,7 @@ class contentAdmin extends LeftAndMain {
                     if ($this->request->is_ajax()) {
                         $response = new AjaxResponse();
                         Notification::notify("pages", lang("revert_changes_success", "The last version was recovered successfully."), lang("reverted"));
-                        $response->exec("reloadTree(function(){ LoadTreeItem('" . $data->class_name . "_" . $data->id . "'); });");
+                        $response->exec("reloadTree(function(){ LoadTreeItem('" . $data->class_name . "_" . $data->versionid . "'); });");
 
                         return $response;
                     } else {
@@ -208,7 +208,7 @@ class contentAdmin extends LeftAndMain {
             if (Core::is_ajax()) {
                 $response = new AjaxResponse();
                 Notification::notify("pages", lang("unpublish_success", "The site was successfully unpublished."), lang("unpublished"));
-                $response->exec("reloadTree(function(){ LoadTreeItem('" . $this->modelInst()->class_name . "_" . $this->modelInst()->id . "'); });");
+                $response->exec("reloadTree(); $('.form_field_unpublish').remove();");
 
                 return $response;
             } else {
@@ -254,9 +254,6 @@ class contentAdmin extends LeftAndMain {
      */
     public function cms_add()
     {
-        // TODO: Remove this also from leftAndMain
-        defined("LAM_CMS_ADD") OR define("LAM_CMS_ADD", 1);
-
         $model = $this->getModelForAdd();
         if (is_a($model, "pages")) {
             /** @var Pages $model */

@@ -96,6 +96,15 @@ if(typeof goma == "undefined")
 						fields[i]["parent"] = parent;
 					}
 
+					fields[i].getValue = function() {
+						return $("#" + this.id).val();
+					}.bind(fields[i]);
+
+					fields[i].setValue = function(value) {
+						$("#" + this.id).val(value);
+						return this;
+					}.bind(fields[i]);
+
 					if(fields[i]["js"]) {
 						var method = new Function("field", "fieldIndex", "form", fields[i]["js"]);
 
@@ -134,22 +143,37 @@ if(typeof goma == "undefined")
 		findFieldByName: function(name, fields) {
 			fields = fields !== undefined ? fields : this.fields;
 
-			for(var i in fields) {
-				if(fields.hasOwnProperty(i)) {
-					if(fields[i].name.toLowerCase() == name.toLowerCase()) {
-						return fields[i];
-					}
-
-					if(fields[i].children !== undefined) {
-						var fieldInChildren = this.findFieldByName(name, fields[i].children);
-						if(fieldInChildren != null) {
-							return fieldInChildren;
+			if(name.indexOf(".") != -1) {
+				var names = name.split(".");
+				var currentField = {children: fields};
+				for(var a in names) {
+					if(names.hasOwnProperty(a)) {
+						if(currentField != null && currentField.children !== undefined) {
+							currentField = this.findFieldByName(names[a], currentField.children);
+						} else {
+							return null;
 						}
 					}
 				}
-			}
+				return currentField;
+			} else {
+				for (var i in fields) {
+					if (fields.hasOwnProperty(i)) {
+						if (fields[i].name.toLowerCase() == name.toLowerCase()) {
+							return fields[i];
+						}
 
-			return null;
+						if (fields[i].children !== undefined) {
+							var fieldInChildren = this.findFieldByName(name, fields[i].children);
+							if (fieldInChildren != null) {
+								return fieldInChildren;
+							}
+						}
+					}
+				}
+
+				return null;
+			}
 		}
 	};
 

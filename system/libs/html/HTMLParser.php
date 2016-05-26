@@ -142,7 +142,7 @@ class HTMLParser extends gObject
             }
 
             $href = $prependBase . $href;
-            $newframes = '<img' . $images[1][$key] . ' src="' . $href . '"' . $images[3][$key] . ' />';
+            $newframes = '<img' . $images[1][$key] . ' src="' . $href . '"' . $images[3][$key] . '>';
             $html = str_replace($images[0][$key], $newframes, $html);
         }
 

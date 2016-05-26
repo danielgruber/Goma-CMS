@@ -44,18 +44,27 @@ class CheckBox extends FormField {
 
 	}
 
+	public function addRenderData($info, $notifyField = true)
+	{
+		parent::addRenderData($info, $notifyField);
+
+		$info->addJSFile("system/libs/javascript/checkbox/gCheckBox.js");
+	}
+
 	/**
 	 * returns the javascript for this field
-	 *
-	 * @name js
-	 * @access public
 	 * @return string
 	 */
 	public function js() {
-
-		Resources::add("system/libs/javascript/checkbox/gCheckBox.js", "js", "tpl");
-
-		return 'var obj = $("#' . $this->ID() . '").gCheckBox();';
+		return 'var obj = $("#' . $this->ID() . '").gCheckBox();
+		 field.getValue = function(){
+		 	return $("#" + field.id).prop("checked");
+		 };
+		 field.setValue = function(value) {
+			$("#" + field.id).prop("checked", value);
+			$("#" + field.id).change();
+			return this;
+		 };';
 	}
 
 	/**

@@ -62,7 +62,6 @@ class AutoCompleterField extends ControllerExtension {
 			)))->groupBy($this->owner->name);
 			/** @var DataObjectSet $record */
 			foreach($filtered as $record) {
-				$record->limit(1);
 				$arr[] = array(
 					"id" => $record->first()->id,
 					"label" => $record->first()->{$this->owner->name},

@@ -9,9 +9,7 @@
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @version 2.4.2
  */
-class ObjectRadioButton extends RadioButton
-{
-
+class ObjectRadioButton extends RadioButton  {
     /**
      * these fields need javascript
      *
@@ -29,6 +27,23 @@ class ObjectRadioButton extends RadioButton
     public $hideDisabled = true;
 
     /**
+     * template.
+     */
+    protected $setTemplate = "form/FieldSet.html";
+
+    /**
+     * @var ViewAccessableData
+     */
+    protected $templateView;
+
+    public function __construct($name = null, $title = null, $options = array(), $selected = null, $form = null)
+    {
+        parent::__construct($name, $title, $options, $selected, $form);
+
+        $this->templateView = new ViewAccessableData();
+    }
+
+    /**
      * renders a option-record
      *
      * @param string $postname
@@ -36,12 +51,13 @@ class ObjectRadioButton extends RadioButton
      * @param string $title
      * @param bool|null $checked
      * @param bool|null $disabled
-     * @param FormField $field
+     * @param FormFieldRenderData $field
+     * @param FormFieldRenderData $info
      * @return HTMLNode
      * @internal param $renderOption
      * @access public
      */
-    public function renderOption($postname, $value, $title, $checked = null, $disabled = null, $field = null)
+    public function renderOption($postname, $value, $title, $checked = null, $disabled = null, $field = null, $info = null)
     {
         $node = parent::renderOption($postname, $value, $title, $checked, $disabled);
 
@@ -56,10 +72,15 @@ class ObjectRadioButton extends RadioButton
             if (!is_object($field)) {
                 throw new LogicException("Error in ObjectRadioButton '" . $value . "': Field for Option '" . $value . "' does not exist or is null.");
             }
+
             $node->append(new HTMLNode('div', array(
                 "id" => "displaycontainer_" . $id,
                 "class" => "displaycontainer"
-            ), $field));
+            ), $this->templateView->customise($info->ToRestArray())->customise(array(
+                "fields" => new DataSet(array(
+                    $field->ToRestArray(true, true)
+                ))
+            ))->renderWith($this->setTemplate)));
         }
 
         return $node;
@@ -91,7 +112,7 @@ class ObjectRadioButton extends RadioButton
             $node->addClass("inputHolder");
 
         foreach ($this->options as $value => $title) {
-            $field = null;
+            $childToRender = null;
             if (is_array($title) && isset($title[1])) {
                 $field = $this->form()->getField($title[1]);
                 $title = $title[0];
@@ -101,9 +122,8 @@ class ObjectRadioButton extends RadioButton
                     if($child->getName() == $field->name) {
                         if($this->form()->isFieldToRender($child->getName())) {
                             $child->getField()->addRenderData($child);
-                            $field = $child->getRenderedField();
-                        } else {
-                            $field = null;
+                            $childToRender = $child;
+                            break;
                         }
                     }
                 }
@@ -116,7 +136,8 @@ class ObjectRadioButton extends RadioButton
                     $title,
                     $value == $this->value,
                     $this->disabled || isset($this->disabledNodes[$value]),
-                    $field
+                    $childToRender,
+                    $info
                 )
             );
         }
@@ -188,7 +209,7 @@ class ObjectRadioButton extends RadioButton
     public function JS()
     {
         Resources::add("system/form/ObjectRadioButton.js", "js", "tpl");
-        $js = 'initObjectRadioButtons(field.divId, ' . json_encode($this->javaScriptNeeded) . ');';
+        $js = 'initObjectRadioButtons(field, field.divId, ' . json_encode($this->javaScriptNeeded) . ');';
         return $js;
     }
 }

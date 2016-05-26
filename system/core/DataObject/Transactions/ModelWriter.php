@@ -481,4 +481,12 @@ class ModelWriter extends gObject {
     {
         return $this->databaseWriter;
     }
+
+    /**
+     * @return bool
+     */
+    public function isPublish()
+    {
+        return $this->getWriteType() == IModelRepository::WRITE_TYPE_PUBLISH;
+    }
 }

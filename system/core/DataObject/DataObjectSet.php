@@ -36,11 +36,6 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	protected $sort;
 
 	/**
-	 * limits
-	 */
-	protected $limit;
-
-	/**
 	 * joins
 	 */
 	protected $join;
@@ -125,12 +120,11 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 * @param string|IDataObjectSetDataSource|IDataObjectSetModelSource|array $class
 	 * @param string|array $filter
 	 * @param string|array $sort
-	 * @param int|array $limit
 	 * @param array $join
 	 * @param string|array $search
 	 * @param string|null $version
 	 */
-	public function __construct($class = null, $filter = null, $sort = null, $limit = null, $join = null, $search = null, $version = null) {
+	public function __construct($class = null, $filter = null, $sort = null, $join = null, $search = null, $version = null) {
 		parent::__construct();
 
 		if(isset($class)) {
@@ -138,7 +132,6 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 
 			$this->filter($filter);
 			$this->sort = (isset($sort) && !empty($sort)) ? $sort : null;
-			$this->limit($limit);
 			$this->join($join);
 			$this->search($search);
 			$this->setVersion($version);
@@ -411,7 +404,24 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 * @return DataSet
 	 */
 	public function getRange($start, $length) {
-		return new DataSet($this->getRecordsByRange($start, $length));
+		$set = new DataSet($this->getRecordsByRange($start, $length));
+		$set->inExpansion = $this->inExpansion;
+		return $set;
+	}
+
+	/**
+	 * gets range within current page.
+	 *
+	 * @param int $start
+	 * @param int $length
+	 * @return DataSet
+	 */
+	public function getPaginatedRange($start, $length) {
+		$start = $this->page === null ? $start : $this->page * $this->perPage - $this->perPage + $start;
+		$length = min($length, $this->perPage);
+		$set = new DataSet($this->getRecordsByRange($start, $length));
+		$set->inExpansion = $this->inExpansion;
+		return $set;
 	}
 
 	/**
@@ -464,7 +474,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 		if(!isset($this->count)) {
 			$this->count = (int) $this->dbDataSource()->getAggregate(
 				$this->version, "count", "*", false,
-				$this->getFilterForQuery(), array(), $this->limit,
+				$this->getFilterForQuery(), array(), null,
 				$this->getJoinForQuery(), $this->search);
 		}
 
@@ -482,7 +492,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 
 		return (int) $this->dbDataSource()->getAggregate(
 			$this->version, "count", $field, true,
-			$this->getFilterForQuery(), array(), $this->limit,
+			$this->getFilterForQuery(), array(), null,
 			$this->getJoinForQuery(), $this->search) + $this->staging->count();
 	}
 
@@ -497,7 +507,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	public function Max($field) {
 		return (double) $this->dbDataSource()->getAggregate(
 			$this->version, "max", $field, false,
-			$this->getFilterForQuery(), array(), $this->limit,
+			$this->getFilterForQuery(), array(), null,
 			$this->getJoinForQuery(), $this->search);
 	}
 
@@ -513,7 +523,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	public function MaxCount($field) {
 		$data = $this->dbDataSource()->getAggregate(
 			$this->version, array("max", "count"), $field, false,
-			$this->getFilterForQuery(), array(), $this->limit,
+			$this->getFilterForQuery(), array(), null,
 			$this->getJoinForQuery(), $this->search);
 
 		return $data["max"] . "," . $data["count"];
@@ -530,7 +540,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	public function Min($field) {
 		return (double) $this->dbDataSource()->getAggregate(
 			$this->version, "min", $field, false,
-			$this->getFilterForQuery(), array(), $this->limit,
+			$this->getFilterForQuery(), array(), null,
 			$this->getJoinForQuery(), $this->search);
 	}
 
@@ -547,7 +557,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	public function Sum($field) {
 		return (double) $this->dbDataSource()->getAggregate(
 			$this->version, "Sum", $field, false,
-			$this->getFilterForQuery(), array(), $this->limit,
+			$this->getFilterForQuery(), array(), null,
 			$this->getJoinForQuery(), $this->search);
 	}
 
@@ -625,17 +635,27 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 					$this->page = $this->getPageCount();
 				}
 
-				$limit = (array) $this->limit;
+				$limit = array();
 				if ($this->page !== null) {
 					$startIndex = $this->page * $this->perPage - $this->perPage;
-					$limit[0] = isset($limit[0]) ? $limit[0] + $startIndex : $startIndex;
-					$limit[1] = isset($limit[1]) && $limit[1] < $this->perPage ? $limit[1] : $this->perPage;
+					$limit[0] = $startIndex;
+					$limit[1] = $this->perPage;
 				} else {
-					$limit[0] = isset($limit[0]) ? $limit[0] : 0;
+					$limit[0] = 0;
 				}
 
+				$offsetInsertLast = 1;
 				if(!isset($limit[1])) {
-					$limit[1] = PHP_INT_MAX;
+					if(isset($this->count)) {
+						if($this->lastCache) {
+							$offsetInsertLast = 0;
+							$limit[1] = $this->count - 1;
+						} else {
+							$limit[1] = $this->count;
+						}
+					} else {
+						$limit[1] = PHP_INT_MAX;
+					}
 				}
 
 				if(isset($this->firstCache)) {
@@ -644,7 +664,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 				}
 				$this->items = $this->getRecordsByRange($limit[0], $limit[1]);
 				if(isset($this->firstCache)) array_unshift($this->items, $this->firstCache);
-				if(isset($this->lastCache)) $this->items[count($this->items) - 1] = $this->lastCache;
+				if(isset($this->lastCache)) $this->items[count($this->items) - $offsetInsertLast] = $this->lastCache;
 
 				if ($this->page === null) {
 					$this->count = count($this->items);
@@ -685,7 +705,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 * @return array
 	 */
 	public function groupBy($field) {
-		return $this->dbDataSource()->getGroupedRecords($this->version, $field, $this->getFilterForQuery(), $this->getSortForQuery(), $this->limit, $this->getJoinForQuery(), $this->search);
+		return $this->dbDataSource()->getGroupedRecords($this->version, $field, $this->getFilterForQuery(), $this->getSortForQuery(), array(), $this->getJoinForQuery(), $this->search);
 	}
 
 	/**
@@ -720,36 +740,6 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 			$this->join = (array) $join;
 			$this->clearCache();
 		}
-		return $this;
-	}
-
-	/**
-	 * sets limits
-	 * @param array|string|null $limit
-	 * @return $this
-	 */
-	public function limit($limit = null) {
-		if((is_string($limit) && preg_match('/^[0-9]+$/', $limit)) || is_int($limit)) {
-			$limit = array((int) $limit);
-		}
-
-		if(!isset($limit) || count($limit) == 0) {
-			$this->limit = null;
-			return $this;
-		} else if(is_array($limit)) {
-			$limit = array_values($limit);
-			if(isset($limit[0], $limit[1])) {
-				$this->limit = $limit;
-			} else if(isset($limit[0])) {
-				$this->limit = array(0, $limit[0]);
-			} else {
-				throw new InvalidArgumentException("Invalid arguments for limit.");
-			}
-		} else {
-			throw new InvalidArgumentException("Invalid arguments for limit.");
-		}
-
-		$this->clearCache();
 		return $this;
 	}
 

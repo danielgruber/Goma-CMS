@@ -138,10 +138,9 @@ class ManyManyGetter extends Extension implements ArgumentsQuery
      * @param string $name
      * @param array|string $filter
      * @param array|string $sort
-     * @param array|int $limit
      * @return ManyMany_DataObjectSet
      */
-    public function getManyMany($name, $filter = null, $sort = null, $limit = null) {
+    public function getManyMany($name, $filter = null, $sort = null) {
         $name = trim(strtolower($name));
 
         // get info
@@ -162,14 +161,13 @@ class ManyManyGetter extends Extension implements ArgumentsQuery
             }
         }
 
-        if(!$filter && !$sort && !$limit) {
+        if(!$filter && !$sort) {
             return $instance;
         }
 
         $version = clone $instance;
         $version->filter($filter);
         $version->sort($sort);
-        $version->limit($limit);
 
         return $version;
     }

@@ -67,10 +67,9 @@ class HasManyGetter extends Extension {
      * @param string $name name of relationship
      * @param array|string $filter filter
      * @param array|string $sort sort
-     * @param array|string $limit
      * @return HasMany_DataObjectSet
      */
-    public function getHasMany($name, $filter = null, $sort = null, $limit = null) {
+    public function getHasMany($name, $filter = null, $sort = null) {
         $name = trim(strtolower($name));
         /** @var DataObject $owner */
         $owner = $this->getOwner();
@@ -94,14 +93,13 @@ class HasManyGetter extends Extension {
             }
         }
 
-        if(!$filter && !$sort && !$limit) {
+        if(!$filter && !$sort) {
             return $hasManyObject;
         }
 
         $objectToFilter = clone $hasManyObject;
         $objectToFilter->addFilter($filter);
         $objectToFilter->sort($sort);
-        $objectToFilter->limit($limit);
 
         return $objectToFilter;
     }

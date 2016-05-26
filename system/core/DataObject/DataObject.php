@@ -226,7 +226,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
 
         if (PROFILE) Profiler::mark("DataObject::get");
 
-        $dataSet = new DataObjectSet($class, $filter, $sort, $limits, $joins, array(), $version);
+        $dataSet = new DataObjectSet($class, $filter, $sort, $joins, array(), $version);
 
         if (isset($pagination) && $pagination !== false) {
 
@@ -397,7 +397,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
      */
     public static function search_object($class, $search = array(),$filter = array(), $sort = array(), $limits = array(), $join = array(), $pagination = false, $groupby = false)
     {
-        $DataSet = new DataObjectSet($class, $filter, $sort, $limits, $join, $search);
+        $DataSet = new DataObjectSet($class, $filter, $sort, $join, $search);
 
         if ($pagination !== false) {
             if (is_int($pagination)) {

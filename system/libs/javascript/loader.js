@@ -1205,11 +1205,11 @@ if (window.loader === undefined) {
 
 		// some response handlers
 		w.eval_script = function (html, ajaxreq, object) {
-			return goma.ui.renderResponse(html, ajaxreq, undefined, object);
+			return goma.ui.renderResponse(html, ajaxreq, undefined, object, false);
 		};
 
-		w.renderResponseTo = function (html, node, ajaxreq, object) {
-			return goma.ui.renderResponse(html, ajaxreq, node, object);
+		w.renderResponseTo = function (html, node, ajaxreq, object, unload) {
+			return goma.ui.renderResponse(html, ajaxreq, node, object, unload);
 		};
 
 		w.LoadAjaxResources = function (request) {

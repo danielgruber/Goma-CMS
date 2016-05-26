@@ -385,7 +385,7 @@ class Uploads extends DataObject {
         }
 
         if($this->collection) {
-            $collectionFiles = $this->collection->getCollectionFiles()->forceData();
+            $collectionFiles = $this->collection->getCollectionFiles();
             if($collectionFiles->count() === 0 ||
                 ($collectionFiles->first()->id == $this->id && $collectionFiles->count() == 1)) {
                 $this->collection->remove(true);
