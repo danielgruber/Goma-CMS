@@ -114,9 +114,14 @@ if(typeof goma == "undefined")
 					};
 
 					if(fields[i]["js"]) {
-						var method = new Function("field", "fieldIndex", "form", fields[i]["js"]);
+						try {
+							var method = new Function("field", "fieldIndex", "form", fields[i]["js"]);
 
-						method.call(this, fields[i], i, this);
+							method.call(this, fields[i], i, this);
+						} catch(e) {
+							console.log(fields[i]);
+							throw e;
+						}
 					}
 
 					if(fields[i]["children"]) {

@@ -10,6 +10,11 @@
  * @version        1.3.2
  */
 class HTMLEditor extends Textarea {
+
+    protected function getParams() {
+        return array("width" => $this->width, "baseUri" => BASE_URI, "lang" => Core::$lang, "css" => $this->buildEditorCSS());
+    }
+
     /**
      * generates the field
      */
@@ -33,12 +38,18 @@ class HTMLEditor extends Textarea {
             ), lang("EDITOR_TOGGLE", "Toggle Editor"))
         ));
 
-        $params = array("width" => $this->width, "baseUri" => BASE_URI, "lang" => Core::$lang, "css" => $this->buildEditorCSS());
-        $this->container->append(GomaEditor::get("html")->generateEditor($this->name, "html", $this->value, $params));
+        $this->container->append(GomaEditor::get("html")->generateEditor($this->name, "html", $this->value, $this->getParams()));
 
         $this->callExtending("afterRender");
 
         return $this->container;
+    }
+
+    public function addRenderData($info, $notifyField = true)
+    {
+        parent::addRenderData($info, $notifyField);
+
+        GomaEditor::get("html")->addEditorInfo($info);
     }
 
     /**
@@ -96,5 +107,10 @@ class HTMLEditor extends Textarea {
         }
 
         return "";
+    }
+
+    public function js()
+    {
+        return parent::js() . GomaEditor::get("html")->addEditorJS($this->name, "html", $this->value, $this->getParams());
     }
 }

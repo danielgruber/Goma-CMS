@@ -34,10 +34,13 @@ abstract class GomaEditor extends gObject {
 	public static function toDB(&$code) {
 		
 	}
-	
+
 	/**
 	 * generates a instance of GomaEditor, which can be used for given type.
-	*/
+	 *
+	 * @param string $type
+	 * @return GomaEditor
+	 */
 	public static function get($type) {
 		$type = strtolower($type);
 		self::$types = ArrayLib::map_key("strtolower", self::$types);
@@ -61,7 +64,23 @@ abstract class GomaEditor extends gObject {
 	 * @param 	string $name the name as which the data should posted to the server
 	 * @param 	string $type type for which the editor should be generated
 	 * @param 	string $text the text for the editor
+	 * @param 	array $params
 	*/
-	abstract public function generateEditor($name, $type, $text);
+	abstract public function generateEditor($name, $type, $text, $params);
+
+	/**
+	 * @param FormFieldRenderData $info
+	 * @return void
+	 */
+	abstract public function addEditorInfo($info);
+
+	/**
+	 * @param string $name
+	 * @param string $type
+	 * @param string $text
+	 * @param array $params
+	 * @return string
+	 */
+	abstract public function addEditorJS($name, $type, $text, $params = array());
 }
  

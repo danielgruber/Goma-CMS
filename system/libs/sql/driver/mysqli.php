@@ -953,7 +953,6 @@ class mysqliDriver implements SQLDriver
                 default:
                     if (PROFILE) Profiler::unmark("MySQLi::writeManipulation");
                     throw new InvalidArgumentException("Manipulation requires valid command: INSERT, DELETE or UPDATE. " . print_r($manipulation, true));
-                    break;
             }
         }
 
