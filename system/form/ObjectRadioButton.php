@@ -171,9 +171,9 @@ class ObjectRadioButton extends RadioButton  {
      */
     public function addRenderData($info)
     {
-        $this->form()->registerRendered($info->getName());
+        parent::addRenderData($info);
 
-        $info->setRenderedField($this->field($info))->setJs($this->js());
+        $info->addJSFile("system/form/ObjectRadioButton.js");
     }
 
     /**
@@ -202,14 +202,11 @@ class ObjectRadioButton extends RadioButton  {
     /**
      * generates the javascript for this field
      *
-     * @name JS
-     * @access public
      * @return string
      */
     public function JS()
     {
-        Resources::add("system/form/ObjectRadioButton.js", "js", "tpl");
         $js = 'initObjectRadioButtons(field, field.divId, ' . json_encode($this->javaScriptNeeded) . ');';
-        return $js;
+        return parent::js() . $js;
     }
 }

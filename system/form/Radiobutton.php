@@ -185,6 +185,17 @@ class RadioButton extends FormField
     }
 
     /**
+     * @param FormFieldRenderData $info
+     * @param bool $notifyField
+     */
+    public function addRenderData($info, $notifyField = true)
+    {
+        parent::addRenderData($info, $notifyField);
+
+        $info->addJSFile("system/form/radioButton.js");
+    }
+
+    /**
      * adds an option
      *
      * @name addOption
@@ -248,6 +259,11 @@ class RadioButton extends FormField
         }
 
         return true;
+    }
+
+    public function js()
+    {
+        return parent::js() . ' initRadioButton(field, field.divId);';
     }
 
     /**

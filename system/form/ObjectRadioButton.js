@@ -30,39 +30,9 @@ function initObjectRadioButtons(field, divid, radioids) {
         if (element.find(".form_field:first-child").find(".field").length > 0) {
             element.find(".form_field:first-child").find(".field").click();
         } else {
-            element.find(".form_field:first-child").find(".input").click();
+            element.find(".form_field:first-child").find(".input:not(type=checkbox)").click();
         }
     });
 
     updateRadios(false);
-
-    field.getValue = function() {
-        return $("#" + divid).find("input[type=radio]:checked").attr("value");
-    };
-    field.setValue = function(value) {
-        var field = $("#" + divid);
-        var radio =  field.find("input[value="+value+"]");
-        if(radio.length == 1 && radio.parent().css("display") != "none") {
-            field.find("input[type=radio]:checked").prop("checked", false);
-            radio.prop("checked", true);
-            updateRadios(true);
-        }
-        return this;
-    };
-    field.getPossibleValuesAsync = function() {
-        var deferred = $.Deferred();
-
-        setTimeout(function(){
-            var values = [];
-            var field = $("#" + divid);
-            field.find("input[type=radio]").each(function(){
-                if($(this).parent().css("display") != "none") {
-                    values.push($(this).attr("value"));
-                }
-            });
-            deferred.resolve(values);
-        });
-
-        return deferred.promise();
-    };
 }
