@@ -169,4 +169,129 @@ class MysqliTest extends GomaUnitTest {
 
         return $reflectionMethod->invoke($mysql, $data, $fields, "mysqli_test");
     }
+
+    public function testExtractManipulationUpdate() {
+        $this->assertThrows(function(){
+            $this->unitTestExtractManipulation(array(
+                array(
+                    "command" => "update"
+                )
+            ));
+        }, "InvalidArgumentException");
+
+        $this->assertThrows(function(){
+            $this->unitTestExtractManipulation(array(
+                array(
+                    "command"   => "update",
+                    "fields"    => array(
+                        "test" => 123
+                    )
+                )
+            ));
+        }, "InvalidArgumentException");
+
+        $this->assertThrows(function(){
+            $this->unitTestExtractManipulation(array(
+                array(
+                    "command"   => "update",
+                    "fields"    => array(
+                        "test" => 123
+                    ),
+                    "table_name"=> "blub"
+                )
+            ));
+        }, "InvalidArgumentException");
+
+        $this->assertThrows(function(){
+            $this->unitTestExtractManipulation(array(
+                array(
+                    "command"   => "update",
+                    "fields"    => array(
+                        "test" => 123
+                    ),
+                    "where" => array(
+                        "test" => 1
+                    )
+                )
+            ));
+        }, "InvalidArgumentException");
+    }
+
+    public function testExtractManipulationDelete() {
+        $this->assertThrows(function(){
+            $this->unitTestExtractManipulation(array(
+                array(
+                    "command" => "delete"
+                )
+            ));
+        }, "InvalidArgumentException");
+
+        $this->assertThrows(function(){
+            $this->unitTestExtractManipulation(array(
+                array(
+                    "command"   => "delete",
+                    "table_name"=> "blub"
+                )
+            ));
+        }, "InvalidArgumentException");
+
+        $this->assertThrows(function(){
+            $this->unitTestExtractManipulation(array(
+                array(
+                    "command"   => "delete",
+                    "where" => array(
+                        "test" => 1
+                    )
+                )
+            ));
+        }, "InvalidArgumentException");
+    }
+
+    public function testExtractManipulationInsert() {
+        $this->assertThrows(function(){
+            $this->unitTestExtractManipulation(array(
+                array(
+                    "command" => "insert"
+                )
+            ));
+        }, "InvalidArgumentException");
+
+        $this->assertThrows(function(){
+            $this->unitTestExtractManipulation(array(
+                array(
+                    "command"   => "delete",
+                    "table_name"=> "blub"
+                )
+            ));
+        }, "InvalidArgumentException");
+
+        $this->assertThrows(function(){
+            $this->unitTestExtractManipulation(array(
+                array(
+                    "command"   => "delete",
+                    "table_name"=> "blub",
+                    "fields"    => "123"
+                )
+            ));
+        }, "InvalidArgumentException");
+
+        $this->assertThrows(function(){
+            $this->unitTestExtractManipulation(array(
+                array(
+                    "command"   => "delete",
+                    "fields" => array(
+                        "test" => 1
+                    )
+                )
+            ));
+        }, "InvalidArgumentException");
+    }
+
+    public function unitTestExtractManipulation($manipulation) {
+        $method = new ReflectionMethod("MySQLiDriver", "extractManipulationSQL");
+        $method->setAccessible(true);
+
+        $mysqli = new MySQLiDriver();
+        return $method->invoke($mysqli, $manipulation);
+    }
 }

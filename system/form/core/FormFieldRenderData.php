@@ -456,11 +456,14 @@ class FormFieldRenderData extends gObject implements IRestResponse {
             "isHidden" => $this->isHidden,
             "extra" => $this->extra,
             "hasRenderData" => $this->renderedField != null,
-            "js" => $this->js,
             "disabled"  => $this->isDisabled,
             "cssRenderResources" => $this->renderResources["css"],
             "jsRenderResources" => $this->renderResources["js"]
         );
+
+        if($this->js) {
+            $data["js"] = $this->js;
+        }
 
         if($this->hasError) {
             $data["hasError"] = $this->hasError;

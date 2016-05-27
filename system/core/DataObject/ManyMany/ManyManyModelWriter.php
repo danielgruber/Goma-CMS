@@ -115,7 +115,7 @@ class ManyManyModelWriter extends Extension {
         /** @var ModelManyManyRelationShipInfo $relationship */
         foreach($owner->getModel()->ManyManyRelationships() as $relationship) {
             $manipulation[$relationship->getTableName()] = array(
-                "table" 	=> $relationship->getTableName(),
+                "table_name"=> $relationship->getTableName(),
                 "command"	=> "delete",
                 "where"		=> array(
                     $relationship->getOwnerField() => $oldId

@@ -142,10 +142,12 @@ class FileUpload extends FormField {
 				} catch (Exception $e) {
 					AddContent::addNotice($e->getCode() . ": " . $e->getMessage());
 				}
-			} else if (isset($this->form()->post[$this->PostName() . "__deletefile"])) {
-				$this->value = "";
-			} else if (isset($this->form()->post[$this->PostName() . "_file"])) {
-				$this->value = $this->form()->post[$this->PostName() . "_file"];
+			} else if($this->POST) {
+				if (isset($this->form()->post[$this->PostName() . "__deletefile"])) {
+					$this->value = "";
+				} else if (isset($this->form()->post[$this->PostName() . "_file"])) {
+					$this->value = $this->form()->post[$this->PostName() . "_file"];
+				}
 			}
 
 			if(!is_a($this->value, "Uploads")) {

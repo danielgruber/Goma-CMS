@@ -857,10 +857,27 @@ class mysqliDriver implements SQLDriver
     public function writeManipulation($manipulation)
     {
         if (PROFILE) Profiler::mark("MySQLi::writeManipulation");
+        $manipulation = $this->extractManipulationSQL($manipulation);
+
+        foreach($manipulation as $info) {
+            if(isset($info["sql"])) {
+                SQL::query($info["sql"]);
+            }
+        }
+
+        if (PROFILE) Profiler::unmark("MySQLi::writeManipulation");
+        return true;
+    }
+
+    /**
+     * @param array $manipulation
+     * @return mixed
+     */
+    protected function extractManipulationSQL($manipulation) {
         foreach ($manipulation as $class => $data) {
             switch (strtolower($data["command"])) {
                 case "update":
-                    if (isset($data["id"])) {
+                    if (isset($data["id"]) || isset($data["where"])) {
                         if (count($data["fields"]) > 0) {
                             if (
                                 (isset($data["table_name"]) && $table_name = $data["table_name"]) ||
@@ -895,12 +912,16 @@ class mysqliDriver implements SQLDriver
                                     $sql .= $where;
                                     unset($where);
                                 } else {
-                                    throw new InvalidArgumentException("Update requires id or WHERE-Clause.");
+                                    throw new InvalidArgumentException("Update requires id or WHERE-Clause." . print_r($data, true));
                                 }
 
                                 $manipulation[$class]["sql"] = $sql;
+                            } else {
+                                throw new InvalidArgumentException("Table for Update does not exist. " . print_r($data, true));
                             }
                         }
+                    } else {
+                        throw new InvalidArgumentException("Update requires specification of id or where." . print_r($data, true));
                     }
                     break;
                 case "insert":
@@ -921,7 +942,11 @@ class mysqliDriver implements SQLDriver
                             $sql = "DELETE FROM " . DB_PREFIX . $table_name . $where;
 
                             $manipulation[$class]["sql"] = $sql;
+                        } else {
+                            throw new InvalidArgumentException("Table for Delete does not exist." . print_r($data, true));
                         }
+                    } else {
+                        throw new InvalidArgumentException("Delete requires specification of id or where." . print_r($data, true));
                     }
 
                     break;
@@ -932,14 +957,7 @@ class mysqliDriver implements SQLDriver
             }
         }
 
-        foreach($manipulation as $info) {
-            if(isset($info["sql"])) {
-                SQL::query($info["sql"]);
-            }
-        }
-
-        if (PROFILE) Profiler::unmark("MySQLi::writeManipulation");
-        return true;
+        return $manipulation;
     }
 
     /**
@@ -968,7 +986,11 @@ class mysqliDriver implements SQLDriver
                 $sql .= $this->getValuesSQL($data, $fields, $table_name);
 
                 return $sql;
+            } else {
+                throw new InvalidArgumentException("Table for Insert does not exist." . print_r($data, true));
             }
+        } else {
+            throw new InvalidArgumentException("Insert requires fields." . print_r($data, true));
         }
     }
 

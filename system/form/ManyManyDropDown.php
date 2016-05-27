@@ -85,7 +85,6 @@ class ManyManyDropDown extends MultiSelectDropDown
 		parent::getValue();
 
 		if(!isset($this->dataset)) {
-
 			if(is_object($this->form()->result)) {
 				/** @var ModelManyManyRelationShipInfo[] $many_many_tables */
 				$many_many_tables = $this->form()->result->ManyManyRelationships();

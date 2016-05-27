@@ -178,9 +178,7 @@ class Permission extends DataObject
     /**
      * checks if the user has the given permission
      *
-     * @name check
-     * @access public
-     * @param $permissionCode string - permission
+     * @param string $permissionCode
      * @return bool
      */
     public static function check($permissionCode)
@@ -337,9 +335,8 @@ class Permission extends DataObject
 
     /**
      * on before manipulate
-     *
-     * @name onBeforeManipulate
-     * @access public
+     * @param array $manipulation
+     * @param string $job
      */
     public function onBeforeManipulate(&$manipulation, $job)
     {

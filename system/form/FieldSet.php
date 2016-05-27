@@ -203,9 +203,8 @@ class FieldSet extends FormField
 
     /**
      * adds an field
-     *
-     * @name add
-     * @access public
+     * @param FormField $field
+     * @param null $sort
      */
     public function add($field, $sort = null)
     {

@@ -128,6 +128,10 @@ class FormField extends RequestHandler {
      */
     protected $placeholder;
 
+    /**
+     * @var bool
+     */
+    public $hasNoValue = false;
 
     /**
      * creates field.
@@ -177,23 +181,11 @@ class FormField extends RequestHandler {
     {
         parent::__construct();
 
-        /* --- */
-
         $this->name = $name;
         $this->dbname = strtolower(trim($name));
         $this->title = $title;
         $this->placeholder = $title;
         $this->value = $value;
-        $this->parent =& $parent;
-        if ($parent) {
-            $this->form()->fields[$name] = $this;
-            if (is_a($this->parent, "form")) {
-                $this->parent->fieldList->add($this);
-            } else {
-                $this->parent->items[$name] = $this;
-                $this->parent->sort[$name] = count($this->parent->sort);
-            }
-        }
 
         $this->input = $this->createNode();
 
@@ -204,15 +196,14 @@ class FormField extends RequestHandler {
         if ($this->fullSizedField)
             $this->container->addClass("fullSize");
 
-        if ($this->parent)
-            $this->renderAfterSetForm();
+        if ($parent) {
+            $parent->add($this);
+        }
     }
 
     /**
      * creates the Node
      *
-     * @name createNode
-     * @access public
      * @return HTMLNode
      */
     public function createNode()
@@ -282,7 +273,7 @@ class FormField extends RequestHandler {
      */
     public function js()
     {
-        return "";
+        return null;
     }
 
     /**
@@ -416,10 +407,10 @@ class FormField extends RequestHandler {
                 if (!$this->disabled && isset($this->form()->post[$this->PostName()])) {
                     $this->value = $this->form()->post[$this->PostName()];
                 } else if ($this->value == null) {
-                    if(is_a($this->form()->result, "ArrayAccess") && isset($this->form()->result[$this->dbname])) {
-                        $this->value = ($this->form()->result->doObject($this->dbname)) ? $this->form()->result->doObject($this->dbname)->raw() : null;
-                    } else if (is_array($this->form()->result) && isset($this->form()->result[$this->dbname])) {
-                        $this->value = $this->form()->result[$this->dbname];
+                    if(is_a($this->form()->model, "ViewAccessableData") && isset($this->form()->model[$this->dbname])) {
+                        $this->value = ($this->form()->model->doObject($this->dbname)) ? $this->form()->model->doObject($this->dbname)->raw() : null;
+                    } else if (is_array($this->form()->model) && isset($this->form()->model[$this->dbname])) {
+                        $this->value = $this->form()->model[$this->dbname];
                     }
                 }
             }
@@ -595,6 +586,8 @@ class FormField extends RequestHandler {
 
     /**
      * adds an extra-class to the field
+     * @param string $class
+     * @return $this
      */
     public function addExtraClass($class)
     {
@@ -604,6 +597,8 @@ class FormField extends RequestHandler {
 
     /**
      * removes an extra-class from the field
+     * @param string $class
+     * @return $this
      */
     public function removeExtraClass($class)
     {

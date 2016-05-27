@@ -729,8 +729,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
                 ), lang("settings", "settings")),
                 $rightstab = new Tab('rightstab', array(
                     $read = new PermissionField("read_permission", lang("viewer_types"), null, true),
-                    $write = new PermissionField("edit_permission", lang("editors"), array("type" => "inherit"), false, array("all")),
-                    $publish = new PermissionField("publish_permission", lang("publisher"), array("type" => "inherit"), false, array("all"))
+                    $write = new PermissionField("edit_permission", lang("editors"), null, false, array("all")),
+                    $publish = new PermissionField("publish_permission", lang("publisher"), null, false, array("all"))
                 ), lang("rights", "permissions"))
 
             )

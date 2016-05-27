@@ -256,11 +256,11 @@ class Form extends gObject {
 	protected function initModel($controller, $model) {
 		// set model
 		if(isset($model)) {
-			$this->model = $model;
+			$this->setModel($model);
 		} else if(gObject::method_exists($controller, "modelInst")) {
 			if($controller->modelInst()) {
 				/** @var Controller $controller */
-				$this->model = $controller->modelInst();
+				$this->setModel($controller->modelInst());
 			}
 		}
 	}
@@ -587,8 +587,7 @@ class Form extends gObject {
 	/**
 	 * sets the result
 	 *
-	 * @name setResult
-	 * @access public
+	 * @param array|ViewAccessableData $result
 	 * @return bool
 	 */
 	public function setResult($result) {
@@ -604,6 +603,26 @@ class Form extends gObject {
 		}
 
 		return false;
+	}
+
+	/**
+	 * @return ViewAccessableData
+	 */
+	public function getModel()
+	{
+		return $this->model;
+	}
+
+	/**
+	 * @param ViewAccessableData $model
+	 */
+	public function setModel($model)
+	{
+		if(is_a($model, "viewaccessabledata")) {
+			$this->useStateData = ($model->queryVersion == "state");
+		}
+
+		$this->model = $model;
 	}
 
 	/**
@@ -740,10 +759,12 @@ class Form extends gObject {
 		// get data
 		/** @var FormField $field */
 		foreach($this->fields as $field) {
-			$fieldResult = $field->result();
+			if($field->name != "secret_" . $this->ID()) {
+				$fieldResult = $field->result();
 
-			$result[$field->dbname] = $fieldResult;
-			$allowed_result[$field->dbname] = true;
+				$result[$field->dbname] = $fieldResult;
+				$allowed_result[$field->dbname] = true;
+			}
 		}
 
 		if(is_object($result) && method_exists($result, "to_array")) {

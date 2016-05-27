@@ -1007,7 +1007,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
                 /** @var ModelManyManyRelationShipInfo $relationShip */
                 foreach($this->ManyManyRelationships() as $relationShip) {
                     $manipulation[$relationShip->getTableName()] = array(
-                        "table" 	=> $relationShip->getTableName(),
+                        "table_name"=> $relationShip->getTableName(),
                         "command"	=> "delete",
                         "where"		=> array(
                             $relationShip->getOwnerField() => $ids
@@ -1129,7 +1129,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
      */
     public function getForm(&$form)
     {
-        $form->setResult($this);
+
     }
 
     /**
@@ -1139,7 +1139,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
      */
     public function getEditForm(&$form)
     {
-        $form->setResult($this);
         $this->getForm($form);
     }
 
@@ -1151,7 +1150,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
      */
     public function getActions(&$form, $edit = false)
     {
-        $form->setResult($this);
 
     }
 
