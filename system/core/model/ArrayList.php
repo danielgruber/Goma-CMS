@@ -42,7 +42,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 	 */
 	public function DataClass() {
 		if(count($this->items) > 0)
-			return get_class($this->items[0]);
+			return strtolower(get_class($this->items[0]));
 
 		return null;
 	}
