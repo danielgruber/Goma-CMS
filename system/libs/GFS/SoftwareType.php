@@ -169,7 +169,7 @@ abstract class g_SoftwareType {
             $query = new SelectQuery("uploads", array("recordid"), array("realfile" => array("LIKE", "%/e47ddedf1c2bd2d0006eae2d2eee39b4/%")));
             if ($query->execute()) {
                 $manipulation["uploads"] = array(
-                    "table" => "uploads",
+                    "table_name" => "uploads",
                     "command" => "delete",
                     "where" => array(
                         "recordid" => array()
@@ -177,7 +177,7 @@ abstract class g_SoftwareType {
                 );
 
                 $manipulation["uploads_state"] = array(
-                    "table" => "uploads",
+                    "table_name" => "uploads",
                     "command" => "delete",
                     "where" => array(
                         "id" => array()
