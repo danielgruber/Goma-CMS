@@ -95,7 +95,7 @@ class Newsettings extends DataObject implements HistoryData {
 		$general->add(new select("timezone",lang("timezone"), ArrayLib::key_value(i18n::$timezones), PROJECT_TIMEZONE));
 		$general->add($date_format = new Select("date_format_date", lang("date_format"), $this->generateDate(), DATE_FORMAT_DATE));
 		$general->add($date_format = new Select("date_format_time", lang("time_format"), $this->generateTIME(), DATE_FORMAT_TIME));
-						
+
 		$general->add($status = new select('status',lang("site_status"),array(STATUS_ACTIVE => lang("SITE_ACTIVE"), STATUS_MAINTANANCE => lang("SITE_MAINTENANCE")), SITE_MODE));
 		
 		if(STATUS_DISABLED) {

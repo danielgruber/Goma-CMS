@@ -327,7 +327,7 @@ class DropDown extends FormField {
 		}
 
 		if($record = $this->getDataFromValue()) {
-			return array($this->getIdentifierFromValue($record));
+			return array($this->getKeyFromKey($record) => $this->getIdentifierFromValue($record));
 		}
 
 		return array();
@@ -343,11 +343,7 @@ class DropDown extends FormField {
 	public function result() {
 		$this->getValue();
 
-		if(!$this->disabled) {
-			return $this->getDataFromValue();
-		} else {
-			return $this->getModel();
-		}
+		return $this->getDataFromValue();
 	}
 
 	/**
@@ -686,8 +682,8 @@ class DropDown extends FormField {
 				unset($this->dataset[$key]);
 				Core::globalSession()->set("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
 			} else {
-				if ($this->value == $this->getParam("value"))
-					$this->value = null;
+				if ($this->model == $this->getParam("value"))
+					$this->model = null;
 			}
 		}
 
