@@ -210,11 +210,8 @@ class Form extends AbstractFormComponent {
 		$this->url = str_replace('"', '', $_SERVER["REQUEST_URI"]);
 		$this->request = isset($request) ? $request : $controller->getRequest();
 
-		if(isset($this->request)) {
-			$this->post = $this->request->post_params;
-		} else {
+		if(!isset($this->request)) {
 			$this->request = new Request(isset($_POST) ? "post" : "get", URL, $_GET, $_POST);
-			$this->post = $_POST;
 		}
 
 		if(isset($this->controller->originalNamespace) && $this->controller->originalNamespace) {

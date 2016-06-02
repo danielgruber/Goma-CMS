@@ -129,43 +129,44 @@ class FileUpload extends FormField {
 	}
 
 	/**
-	 * gets the current value
+	 * @return array|mixed|null|string|Uploads|ViewAccessableData
+	 * @throws FileCopyException
 	 */
-	public function getValue() {
-		parent::getValue();
+	public function getModel()
+	{
+		$model = parent::getModel();
 
 		if(!$this->disabled) {
-			if (is_array($this->value) && !empty($this->value["name"])) {
+			if (is_array($model) && !empty($model["name"])) {
 				try {
-					$value = $this->handleUpload($this->value);
-					$this->value = $value;
+					$this->model = $model = $this->handleUpload($model);
 				} catch (Exception $e) {
 					AddContent::addNotice($e->getCode() . ": " . $e->getMessage());
 				}
-			} else if($this->POST) {
-				if (isset($this->form()->post[$this->PostName() . "__deletefile"])) {
-					$this->value = "";
-				} else if (isset($this->form()->post[$this->PostName() . "_file"])) {
-					$this->value = $this->form()->post[$this->PostName() . "_file"];
-				}
-			}
-
-			if(!is_a($this->value, "Uploads")) {
-				if (!empty($this->value) && ($data = Uploads::getFile($this->value)) !== false) {
-					$this->value = $data;
-				} else {
-					if (!empty($this->value)) {
-						if ($data = Uploads::addFile(basename($this->value), $this->value, $this->collection)) {
-							$this->value = $data;
-
-							return true;
-						}
-					}
-
-					$this->value = null;
+			} else if ($this->POST) {
+				if (isset($this->getRequest()->post_params[$this->PostName() . "__deletefile"])) {
+					$this->model = $model = "";
+				} else if (isset($this->getRequest()->post_params[$this->PostName() . "_file"])) {
+					$this->model = $model = $this->getRequest()->post_params[$this->PostName() . "_file"];
 				}
 			}
 		}
+
+		if(!is_a($model, "Uploads")) {
+			if (!empty($model) && ($data = Uploads::getFile($model)) !== false) {
+				$this->model = $model = $data;
+			} else {
+				if (!empty($model)) {
+					if ($data = Uploads::addFile(basename($model), $model, $this->collection)) {
+						$this->model = $model = $data;
+					}
+				}
+
+				$this->model = $model = null;
+			}
+		}
+
+		return $model;
 	}
 
 	/**
