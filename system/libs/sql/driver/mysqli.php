@@ -988,8 +988,6 @@ class mysqliDriver implements SQLDriver
             } else {
                 throw new InvalidArgumentException("Table for Insert does not exist." . print_r($data, true));
             }
-        } else {
-            throw new InvalidArgumentException("Insert requires fields." . print_r($data, true));
         }
     }
 

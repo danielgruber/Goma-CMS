@@ -127,25 +127,25 @@ class DropDown extends FormField {
 	public function getValue() {
 		// if mutliselect, we have to store an array
 		if($this->multiselect) {
-			if($this->POST && isset($this->form()->post[$this->PostName()]) && Core::globalSession()->hasKey("dropdown_" . $this->PostName() . "_" . $this->form()->post[$this->PostName()])) {
-				$dataset = Core::globalSession()->get("dropdown_" . $this->PostName() . "_" . $this->form()->post[$this->PostName()]);
+			if($this->POST && $this->parent && ($postData = $this->parent->getFieldPost($this->PostName())) && Core::globalSession()->hasKey("dropdown_" . $this->PostName() . "_" . $postData)) {
+				$dataset = Core::globalSession()->get("dropdown_" . $this->PostName() . "_" . $postData);
 				if(is_array($dataset)) {
 					$this->dataset = $dataset;
-					$this->key = $this->form()->post[$this->PostName()];
+					$this->key = $postData;
 					$this->input->value = $this->key;
 					return true;
 				}
 			}
 
-			if($this->value !== null && $this->value !== false && !is_object($this->value)) {
+			if($this->model !== null && $this->model !== false && !is_object($this->model)) {
 				if(is_array($this->value)) {
-					$this->dataset = $this->value;
+					$this->dataset = $this->model;
 				} else {
-					$this->dataset = array($this->value);
+					$this->dataset = array($this->model);
 				}
 				$this->key = randomString(5);
-			} else if($this->POST && isset($this->form()->result[$this->dbname]) && $this->value == null) {
-				$this->dataset = $this->form()->result[$this->dbname];
+			} else if($this->POST && $this->parent && $this->parent->getFieldValue($this->dbname) && $this->model == null) {
+				$this->dataset = $this->parent->getFieldValue($this->dbname);
 
 				$this->key = randomString(5);
 			} else {
@@ -159,8 +159,9 @@ class DropDown extends FormField {
 			}
 
 		} else {
-			parent::getValue();
-			$this->input->value = $this->value;
+			if($model = $this->getModel()) {
+				$this->input->value = $model;
+			}
 		}
 	}
 
@@ -417,7 +418,7 @@ class DropDown extends FormField {
 	 * information about paginating.
 	 */
 	public function getDataFromModel($page = 1) {
-		$cloned = is_object($this->options) ? clone $this->options : array();
+		$cloned = is_object($this->options) ? clone $this->options : $this->options;
 		return $this->getResultFromData($page, $cloned);
 	}
 
@@ -840,5 +841,21 @@ class DropDown extends FormField {
 		}
 
 		return $value === null || isset($this->options[0]) ? in_array($value, $this->options) : isset($this->options[$value]);
+	}
+
+	/**
+	 * @return array|DataObjectSet
+	 */
+	public function getOptions()
+	{
+		return $this->options;
+	}
+
+	/**
+	 * @param array|DataObjectSet $options
+	 */
+	public function setOptions($options)
+	{
+		$this->options = $options;
 	}
 }

@@ -69,3 +69,6 @@
 .profile-ui-right {
 	float: right;
 }
+.profile-content .tabs > div {
+	clear: none;
+}

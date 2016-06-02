@@ -16,33 +16,26 @@ class ManyManyDropDown extends MultiSelectDropDown
 {
 	/**
 	 * the name of the relation of the current field
-	 *
-	 *@name relation
-	 *@access public
 	 */
 	public $relation;
 
 	/**
 	 * where clause to filter result in dropdown
 	 *
-	 *@name where
-	 *@access public
+	 * @var array
 	 */
 	public $where;
-
-	/**
-	 * base-model for querying DataBase.
-	 *
-	 * @name model
-	 * @var DataObjectSet
-	 */
-	protected $model;
 
 	/**
 	 * info about relationship.
 	 * @var ModelManyManyRelationShipInfo
 	 */
 	protected $relationInfo;
+
+	/**
+	 * @var string
+	 */
+	protected $_object;
 
 	/**
 	 * @param string $name
@@ -62,82 +55,30 @@ class ManyManyDropDown extends MultiSelectDropDown
 	}
 
 	/**
-	 * returns the model.
-	 *
-	 * @return DataObjectSet
-	 */
-	public function getModel() {
-		return $this->model;
-	}
-
-	/**
-	 * sets the base-model for queriing DB.
-	 */
-	public function setModel(DataObjectSet $model) {
-		$this->model = $model;
-	}
-
-	/**
 	 * sets the value if not set
 	 */
 	public function getValue() {
-
 		parent::getValue();
 
-		if(!isset($this->dataset)) {
-			if(is_object($this->form()->result)) {
-				/** @var ModelManyManyRelationShipInfo[] $many_many_tables */
-				$many_many_tables = $this->form()->result->ManyManyRelationships();
-			}
+		if (!isset($this->options)) {
+			/** @var ModelManyManyRelationShipInfo[] $many_many */
+			// get has-one from model
+			if (is_object($this->form()->getModel()))
+				$many_many = $this->form()->getModel()->ManyManyRelationships();
 
-			if(isset($many_many_tables[$this->relation])) {
-
-				$this->_object = $many_many_tables[$this->relation]->getTargetClass();
-				$this->dataset = call_user_func_array(array($this->form()->result, $this->relation), array())->FieldToArray("versionid");
-				$this->relationInfo = $many_many_tables[$this->relation];
-			} else if(is_object($this->form()->model)) {
-				/** @var ModelManyManyRelationShipInfo[] $many_many_tables */
-				$many_many_tables = $this->form()->model->ManyManyRelationships();
-
-				if(isset($many_many_tables[$this->relation])) {
-					$this->_object = $many_many_tables[$this->relation]->getTargetClass();
-					$this->dataset = call_user_func_array(array($this->form()->model, $this->relation), array())->FieldToArray("versionid");
-					$this->relationInfo = $many_many_tables[$this->relation];
-				} else {
-					throw new LogicException("{$this->relation} doesn't exist in this form {$this->form()->getName()}.");
-				}
+			if (isset($many_many[$this->relation])) {
+				$this->_object = $many_many[$this->relation]->getTargetClass();
+				$this->relationInfo = $many_many[$this->relation];
 			} else {
-				throw new LogicException("{$this->relation} doesn't exist in this form {$this->form()->getName()}.");
+				throw new InvalidArgumentException("Could not find ManyMany-Relationship " . $this->relation);
 			}
+
+			$this->options = DataObject::get($this->_object, $this->where);
+		} else if(is_a($this->options, "DataObjectSet") || is_a($this->options, "DataSet")) {
+			$this->_object = $this->options->DataClass();
 		} else {
-			if(is_object($this->form()->result)) {
-				// get relations from result
-				/** @var ModelManyManyRelationShipInfo[] $many_many_tables */
-				$many_many_tables = $this->form()->result->ManyManyRelationships();
-			}
-
-			if(isset($many_many_tables[$this->relation])) {
-				$this->_object = $many_many_tables[$this->relation]->getTargetClass();
-				$this->relationInfo = $many_many_tables[$this->relation];
-			} else if(is_object($this->form()->model)) {
-
-				// get relations from model of form-controller
-				/** @var ModelManyManyRelationShipInfo[] $many_many_tables */
-				$many_many_tables = $this->form()->model->ManyManyRelationships();
-
-				if(isset($many_many_tables[$this->relation])) {
-					$this->_object = $many_many_tables[$this->relation]->getTargetClass();
-					$this->relationInfo = $many_many_tables[$this->relation];
-				} else {
-					throw new LogicException("{$this->relation} doesn't exist in this form {$this->form()->getName()}.");
-				}
-			} else {
-				throw new LogicException("{$this->relation} doesn't exist in this form {$this->form()->getName()}.");
-			}
+			throw new InvalidArgumentException("Options for ManyManyDataObjectSet must be set of DataObjects.");
 		}
-
-		if(!isset($this->model))
-			$this->model = DataObject::get($this->_object);
 	}
 
 	/**
@@ -147,7 +88,7 @@ class ManyManyDropDown extends MultiSelectDropDown
 	 * @return array
 	 */
 	public function getDataFromModel($page = 1) {
-		$data = clone $this->getModel();
+		$data = clone $this->options;
 		$data->filter($this->where);
 		$data->activatePagination($page);
 
@@ -178,7 +119,7 @@ class ManyManyDropDown extends MultiSelectDropDown
 	 * @return array
 	 */
 	public function searchDataFromModel($page = 1, $search = "") {
-		$data = clone $this->getModel();
+		$data = clone $this->options;
 		$data->filter($this->where);
 		$data->search($search);
 		$data->activatePagination($page);
@@ -214,9 +155,7 @@ class ManyManyDropDown extends MultiSelectDropDown
 	 * @return array
 	 */
 	public function result() {
-		$result = parent::result();
-
-		return $result;
+		return $this->dataset;
 	}
 
 	/**
@@ -259,7 +198,7 @@ class ManyManyDropDown extends MultiSelectDropDown
 	 * @return bool
 	 */
 	protected function validateValue($value) {
-		$data = clone $this->getModel();
+		$data = clone $this->options;
 
 		$data->addFilter(array("versionid" => $value));
 

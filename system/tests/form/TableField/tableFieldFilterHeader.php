@@ -46,7 +46,7 @@ class TableFieldFilterHeaderTest extends GomaUnitTest
             "test" => "123",
             "blub" => "blah"
         );
-        $form->post["filter"] = $post;
+        $form->getRequest()->post_params["filter"] = $post;
 
         $field->manipulate($tableField, $set);
 
@@ -66,7 +66,7 @@ class TableFieldFilterHeaderTest extends GomaUnitTest
         $this->assertEqual($set->filter, array());
         $this->assertFalse($form->state->tablefieldtest->tableFieldFilterHeader->visible);
         $this->assertFalse($form->state->tablefieldtest->tableFieldFilterHeader->reset);
-        $this->assertEqual($form->post["filter"], $post);
+        $this->assertEqual($form->getRequest()->post_params["filter"], $post);
 
         $field->handleAction($tableField, "resetfields", "blub", array());
         $field->manipulate($tableField, $set);

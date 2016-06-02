@@ -13,17 +13,16 @@ class HiddenField extends FormField
 {
     /**
      * it's not allowed to use Posted Data for this field
-     *
-     * @name POST
-     * @access public
      */
     public $POST = false;
 
+    static $i = 0;
+
     /**
      * we don't need a title in this field
-     *
-     * @name __construct
-     * @access public
+     * @param string $name
+     * @param string $value
+     * @param AbstractFormComponent $form
      */
     public function __construct($name = null, $value = null, &$form = null)
     {
@@ -47,13 +46,11 @@ class HiddenField extends FormField
 
     /**
      * sets the value
-     *
-     * @name setValue
      */
     public function setValue()
     {
-        if (is_string($this->value) || is_int($this->value)) {
-            $this->input->val($this->value);
+        if(($value = $this->getModel()) && is_string($value) || is_int($value)) {
+            $this->input->val($value);
         } else {
             $this->input->val(1);
         }
@@ -74,8 +71,7 @@ class HiddenField extends FormField
 
     /**
      * renders the field
-     * @name field
-     * @access public
+     *
      * @return HTMLNode
      */
     public function field()

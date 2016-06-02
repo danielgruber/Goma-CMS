@@ -51,11 +51,6 @@ class ClusterFormField extends FormField {
     public $controller;
 
     /**
-     * post-data
-     */
-    public $post;
-
-    /**
      * state
      */
     public $state;
@@ -94,9 +89,6 @@ class ClusterFormField extends FormField {
             $this->sort[$field->name] = 1 + count($this->items);
             $this->items[] = $field;
         }
-
-        $this->result =& $this->value;
-        $this->model =& $this->value;
     }
 
     /**
@@ -250,6 +242,7 @@ class ClusterFormField extends FormField {
      * sets the form
      * @param Form $form
      * @param bool $renderAfterSetForm
+     * @return $this
      */
     public function setForm(&$form, $renderAfterSetForm = true)
     {
@@ -264,7 +257,6 @@ class ClusterFormField extends FormField {
 
         $this->url =& $form->url;
         $this->controller =& $this->orgForm()->controller;
-        $this->post =& $this->orgForm()->post;
         $this->state = $this->orgForm()->state->{$this->classname . $this->name};
 
         $this->getValue();
@@ -274,26 +266,8 @@ class ClusterFormField extends FormField {
         }
 
         if ($renderAfterSetForm) $this->renderAfterSetForm();
-    }
 
-    /**
-     * gets value if is in result or post-data
-     */
-    public function getValue()
-    {
-        if (!isset($this->hasNoValue) || !$this->hasNoValue) {
-            if($this->POST) {
-                if (!$this->disabled && isset($this->orgForm()->post[$this->PostName()])) {
-                    $this->value = $this->orgForm()->post[$this->PostName()];
-                } else if ($this->value == null) {
-                    if(is_a($this->orgForm()->model, "ViewAccessableData") && $this->orgForm()->model->{$this->dbname}) {
-                        $this->value = $this->orgForm()->model->{$this->dbname};
-                    } else if (is_array($this->orgForm()->model) && isset($this->orgForm()->model[$this->dbname])) {
-                        $this->value = $this->orgForm()->model[$this->dbname];
-                    }
-                }
-            }
-        }
+        return $this;
     }
 
     /**
@@ -369,10 +343,12 @@ class ClusterFormField extends FormField {
      */
     public function result()
     {
-        $this->result = array();
+        $this->result = $this->getModel();
+        if(!$this->result)
+            $this->result = array();
+
         /** @var FormField $field */
         foreach ($this->fields as $field) {
-
             $this->result[$field->dbname] = $field->result();
         }
 

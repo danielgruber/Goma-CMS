@@ -69,7 +69,7 @@ class AjaxSubmitButton extends FormAction {
 	public function js() {
 		// appendix to the url
 		$append = '?redirect=' . urlencode(getRedirect());
-		foreach($this->form()->request->get_params as $key => $val) {
+		foreach($this->form()->getRequest()->get_params as $key => $val) {
 			$append .= '&' . urlencode($key) . '=' . urlencode($val);
 		}
 
@@ -156,7 +156,8 @@ class AjaxSubmitButton extends FormAction {
 	 * @throws FormNotValidException
 	 */
 	protected function handleSubmit($response) {
-		$this->form()->post = $this->request->post_params;
+		$this->form()->post = $this->getRequest()->post_params;
+		$this->form()->setRequest($this->getRequest());
 
 		$result = $this->form()->gatherResultForSubmit();
 

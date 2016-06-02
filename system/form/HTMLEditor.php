@@ -38,7 +38,7 @@ class HTMLEditor extends Textarea {
             ), lang("EDITOR_TOGGLE", "Toggle Editor"))
         ));
 
-        $this->container->append(GomaEditor::get("html")->generateEditor($this->name, "html", $this->value, $this->getParams()));
+        $this->container->append(GomaEditor::get("html")->generateEditor($this->name, "html", $this->getModel(), $this->getParams()));
 
         $this->callExtending("afterRender");
 
@@ -111,6 +111,6 @@ class HTMLEditor extends Textarea {
 
     public function js()
     {
-        return parent::js() . GomaEditor::get("html")->addEditorJS($this->name, "html", $this->value, $this->getParams());
+        return parent::js() . GomaEditor::get("html")->addEditorJS($this->name, "html", $this->getModel(), $this->getParams());
     }
 }

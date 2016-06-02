@@ -72,10 +72,10 @@ class CancelButton extends FormAction
     public function redirect() {
         if ($this->redirect !== null)
             return GomaResponse::redirect($this->redirect);
-        else if (isset($this->form()->request->post_params["redirect"]))
-            return GomaResponse::redirect($this->form()->request->post_params["redirect"]);
-        else if (isset($this->form()->request->get_params["redirect"]))
-            return GomaResponse::redirect($this->form()->request->get_params["redirect"]);
+        else if (isset($this->form()->getRequest()->post_params["redirect"]))
+            return GomaResponse::redirect($this->form()->getRequest()->post_params["redirect"]);
+        else if (isset($this->form()->getRequest()->get_params["redirect"]))
+            return GomaResponse::redirect($this->form()->getRequest()->get_params["redirect"]);
         else
             return GomaResponse::redirect(BASE_URI);
 

@@ -32,6 +32,9 @@ class ContactController extends PageController
                 new FormAction("submit", lang("lp_submit"))
             ));
 
+        $form->setModel(array(
+
+        ));
 
         $form->setSubmission("submitAndSend");
         if ($this->modelInst()->requireEmailField) {

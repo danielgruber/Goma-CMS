@@ -26,18 +26,9 @@ class CheckBox extends FormField {
 
 	/**
 	 * sets the value
-	 *@name setValue
-	 *@access public
 	 */
 	public function setValue() {
-
-		if(isset($_POST["form_submit_" . $this->form()->name()]) && $this->POST && isset($_POST[$this->postname()])) {
-			$this->value = 1;
-		} else if(isset($_POST["form_submit_" . $this->form()->name()])) {
-			$this->value = 0;
-		}
-
-		if($this->value)
+		if(!!$this->getModel())
 			$this->input->checked = "checked";
 
 		$this->input->value = 1;
@@ -63,8 +54,6 @@ class CheckBox extends FormField {
 	/**
 	 * the result of the field
 	 *
-	 * @name result
-	 * @access public
 	 * @return bool
 	 */
 	public function result() {

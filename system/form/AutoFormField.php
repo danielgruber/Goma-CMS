@@ -29,17 +29,18 @@ class AutoFormField extends FormField {
 	/**
 	 * calls setForm on the form-field of this class
 	 *
-	 *@name setForm
-	 *@access public
+	 * @return $this
 	 */
 	public function setForm(&$form) {
 		parent::setForm($form);
 		if(is_object($this->form()->result))
 			$this->field = $this->form()->result->doObject($this->name)->formField($this->title);
 		else
-			$this->field = $this->form()->model->doObject($this->name)->formField($this->name);
+			$this->field = $this->form()->getModel()->doObject($this->name)->formField($this->name);
 
 		$this->field->setForm($form);
+
+		return $this;
 	}
 
 	/**

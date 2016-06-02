@@ -569,7 +569,6 @@ class Controller extends RequestHandler
                 $description = '<a href="' . $this->namespace . '/edit/' . $toDelete->id . URLEND . '" target="_blank">' . $description . '</a>';
 
             if ($this->confirm(lang("delete_confirm", "Do you really want to delete this record?"), null, null, $description)) {
-
                 $data = clone $toDelete;
                 $toDelete->remove();
                 if ($this->getRequest()->isJSResponse() || isset($this->getRequest()->get_params["dropdownDialog"])) {
@@ -630,7 +629,7 @@ class Controller extends RequestHandler
      */
     public function safe($data, $form = null, $controller = null, $overrideCreated = false, $priority = 1, $action = 'save_success')
     {
-        $givenModel = isset($form) ? $form->model : null;
+        $givenModel = isset($form) ? $form->getModel() : null;
         // TODO: Add test if $model is Object
         if (($model = $this->save($data, $priority, false, false, $overrideCreated, $givenModel)) !== false) {
             return $this->actionComplete($action, $model);

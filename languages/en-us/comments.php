@@ -12,7 +12,6 @@ $co_lang = array(
 	'on'                => "at",
 	"comments"			=> "Comments",
 	"edit"				=> "edit comment",
-	"comments"			=> "comment"
 );
 foreach($co_lang as $key => $value)
 {

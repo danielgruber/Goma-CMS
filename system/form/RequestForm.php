@@ -165,8 +165,8 @@ class RequestForm extends gObject {
 
 		$data = $this->realform->render();
 
-		if(is_array($data)) {
-			return $data;
+		if(!is_string($data)) {
+			return Director::serve($data);
 		}
 
 		$this->dialog->closeButton = false;

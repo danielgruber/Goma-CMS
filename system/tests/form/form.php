@@ -94,7 +94,7 @@ class FormTest extends GomaUnitTest implements TestAble {
 		self::$testCalled = false;
 		$this->assertFalse(self::$testCalled);
 
-		$form->post = array(
+		$form->getRequest()->post_params = array(
 			"test" => null,
 			$action->PostName() => 1
 		);
@@ -136,7 +136,7 @@ class FormTest extends GomaUnitTest implements TestAble {
 
 		$this->validationCalled = $this->handlerCalled = false;
 
-		$form->post = array(
+		$form->getRequest()->post_params = array(
 			"field1" => $this->fieldValue1,
 			"field2" => $this->fieldValue2
 		);

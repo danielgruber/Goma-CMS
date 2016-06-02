@@ -373,6 +373,7 @@ function loadApplication($directory) {
 			define('DATE_FORMAT_TIME', $domaininfo['date_format_time']);
 			define("SITE_MODE", $domaininfo["status"]);
 			define("PROJECT_LANG", $domaininfo["lang"]);
+			define("PROJECT_TIMEZONE", $domaininfo["timezone"]);
 
 			Core::setCMSVar("TIMEZONE", $domaininfo["timezone"]);
 			Core::$site_mode = SITE_MODE;

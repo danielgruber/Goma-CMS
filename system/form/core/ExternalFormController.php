@@ -43,16 +43,16 @@ class ExternalFormController extends RequestHandler {
         /** @var Form $formInstance */
         if($formInstance = GlobalSessionManager::globalSession()->get(Form::SESSION_PREFIX . "." . strtolower($form))) {
             if(isset($formInstance->$field)) {
-                $oldRequest = $formInstance->request;
+                $oldRequest = $formInstance->getRequest();
                 $oldControllerRequest = $formInstance->controller->getRequest();
 
-                $formInstance->request = $this->request;
+                $formInstance->setRequest($this->request);
                 $formInstance->post = $this->request->post_params;
                 $formInstance->controller->setRequest($this->request);
 
                 $data = $formInstance->$field->handleRequest($this->request);
 
-                $formInstance->request = $oldRequest;
+                $formInstance->setRequest($oldRequest);
                 $formInstance->controller->setRequest($oldControllerRequest);
                 GlobalSessionManager::globalSession()->set(Form::SESSION_PREFIX . "." . strtolower($form), $formInstance);
                 GlobalSessionManager::globalSession()->set("form_state_" . $form, $formInstance->state->ToArray());

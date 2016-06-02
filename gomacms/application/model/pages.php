@@ -846,7 +846,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
                 $form->addAction(new AjaxSubmitButton("save_draft",lang("draft_save", "Save draft"),"AjaxSave"));
 
             if($this->can("Publish"))
-                $form->addAction(new AjaxSubmitButton('publish',lang("publish", "Save & Publish"),"AjaxPublish", "Publish", array("green")));
+                $form->addAction(new FormAction('publish',lang("publish", "Save & Publish"), "Publish", array("green")));
 
         } else {
             $form->addAction(new button('cancel',lang("cancel"), "LoadTreeItem(0);"));

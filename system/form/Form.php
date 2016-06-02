@@ -22,18 +22,12 @@ require_once (FRAMEWORK_ROOT . "form/Hiddenfield.php");
  * @method enableActions
  * @method disableActions
  */
-class Form extends gObject {
+class Form extends AbstractFormComponent {
 
 	/**
 	 * session-prefix for form.
 	 */
 	const SESSION_PREFIX = "form";
-
-	/**
-	 * name of the form
-	 * @var string
-	 */
-	protected $name;
 
 	/**
 	 * you can use data-handlers, to edit data before it is given to the
@@ -93,11 +87,6 @@ class Form extends gObject {
 	public $controller;
 
 	/**
-	 * the model, which belongs to this form
-	 */
-	public $model;
-
-	/**
 	 * form-secret-key
 	 *
 	 * @var string
@@ -125,23 +114,9 @@ class Form extends gObject {
 	public $url;
 
 	/**
-	 * post-data
-	 *
-	 * @var array
-	 */
-	public $post;
-
-	/**
 	 * restore-class
 	 */
 	public $restorer;
-
-	/**
-	 * defines if we should use state-data in sub-queries of this Form
-	 *
-	 * @var bool
-	 */
-	public $useStateData = false;
 
 	/**
 	 * current state of this form
@@ -149,18 +124,6 @@ class Form extends gObject {
 	 * @var FormState
 	 */
 	public $state;
-
-	/**
-	 * request
-	 *
-	 * @var Request
-	 */
-	public $request;
-
-	/**
-	 * @var bool
-	 */
-	public $disabled = false;
 
 	/**
 	 * leave-check.
@@ -177,9 +140,12 @@ class Form extends gObject {
 	 * @param Request|null $request
 	 * @param ViewAccessableData|null $model
 	 */
-	public function __construct($controller, $name, $fields = array(), $actions = array(), $validators = array(), $request = null, $model = null) {
+	public function __construct($controller = null, $name = null, $fields = array(), $actions = array(), $validators = array(), $request = null, $model = null) {
 
 		parent::__construct();
+
+		if(!isset($controller))
+			return;
 
 		if(PROFILE)
 			Profiler::mark("form::__construct");
@@ -190,11 +156,11 @@ class Form extends gObject {
 
 		$this->initWithRequest($controller, $request);
 
-		$this->initModel($controller, $model);
-
-		$this->checkForRestore();
+		$this->setModel($model);
 
 		$this->addFields($fields, $actions, $validators);
+
+		$this->checkForRestore();
 
 		// create form tag
 		$this->form = $this->createFormTag();
@@ -205,6 +171,9 @@ class Form extends gObject {
 
 	/**
 	 * adds field to the form.
+	 * @param FormField[] $fields
+	 * @param FormAction[] $actions
+	 * @param FormValidator[] $validators
 	 */
 	public function addFields($fields, $actions, $validators) {
 		// register fields
@@ -229,6 +198,7 @@ class Form extends gObject {
 	 *
 	 * @param RequestHandler $controller
 	 * @param Request $request
+	 * @return string
 	 */
 	protected function initWithRequest($controller, $request) {
 		if(!is_a($controller, "RequestHandler")) {
@@ -243,25 +213,14 @@ class Form extends gObject {
 		if(isset($this->request)) {
 			$this->post = $this->request->post_params;
 		} else {
+			$this->request = new Request(isset($_POST) ? "post" : "get", URL, $_GET, $_POST);
 			$this->post = $_POST;
 		}
-	}
 
-	/**
-	 * inits model.
-	 *
-	 * @param RequestHandler $controller
-	 * @param ViewAccessableData|null $model
-	 */
-	protected function initModel($controller, $model) {
-		// set model
-		if(isset($model)) {
-			$this->setModel($model);
-		} else if(gObject::method_exists($controller, "modelInst")) {
-			if($controller->modelInst()) {
-				/** @var Controller $controller */
-				$this->setModel($controller->modelInst());
-			}
+		if(isset($this->controller->originalNamespace) && $this->controller->originalNamespace) {
+			$this->namespace = ROOT_PATH . BASE_SCRIPT . $this->controller->originalNamespace . "/forms/form/" . $this->name;
+		} else {
+			$this->namespace = ROOT_PATH . BASE_SCRIPT . "system/forms/" . $this->name;
 		}
 	}
 
@@ -288,7 +247,7 @@ class Form extends gObject {
 			GlobalSessionManager::globalSession()->remove("form_restore." . $this->name());
 		} else {
 			// get form-state
-			if(GlobalSessionManager::globalSession()->hasKey("form_state_" . $this->name) && isset($this->post)) {
+			if(GlobalSessionManager::globalSession()->hasKey("form_state_" . $this->name) && $this->getRequest()->post_params) {
 				$this->state = new FormState(GlobalSessionManager::globalSession()->get("form_state_" . $this->name));
 				$this->activateSecret($this->state->secret);
 			} else {
@@ -360,16 +319,18 @@ class Form extends gObject {
 		Resources::add("form.less", "css");
 
 		// check for submit or append info for user to resubmit.
-		if(isset($this->post["form_submit_" . $this->name()]) && GlobalSessionManager::globalSession()->hasKey(self::SESSION_PREFIX . "." . strtolower($this->name))) {
+		if(isset($this->getRequest()->post_params["form_submit_" . $this->name()]) &&
+			GlobalSessionManager::globalSession()->hasKey(self::SESSION_PREFIX . "." . strtolower($this->name))) {
 			// check secret
-			if($this->secretKey && isset($this->post["secret_" . $this->ID()]) && $this->post["secret_" . $this->ID()] == $this->state->secret) {
+			if($this->secretKey && isset($this->getRequest()->post_params["secret_" . $this->ID()]) &&
+				$this->getRequest()->post_params["secret_" . $this->ID()] == $this->state->secret) {
 				$this->defaultFields();
 				return $this->trySubmit();
 			} else if(!$this->secretKey) {
 				$this->defaultFields();
 				return $this->trySubmit();
 			} else {
-				$this->form->append(new HTMLNode("div", array("class" => "notice form", ), lang("form_not_saved_yet", "The Data hasn't saved yet.")));
+				$this->form->append(new HTMLNode("div", array("class" => "notice form"), lang("form_not_saved_yet", "The Data hasn't saved yet.")));
 			}
 		}
 
@@ -606,30 +567,10 @@ class Form extends gObject {
 	}
 
 	/**
-	 * @return ViewAccessableData
-	 */
-	public function getModel()
-	{
-		return $this->model;
-	}
-
-	/**
-	 * @param ViewAccessableData $model
-	 */
-	public function setModel($model)
-	{
-		if(is_a($model, "viewaccessabledata")) {
-			$this->useStateData = ($model->queryVersion == "state");
-		}
-
-		$this->model = $model;
-	}
-
-	/**
 	 * tries to submit.
 	 */
 	public function trySubmit() {
-		foreach($this->post as $key => $value) {
+		foreach($this->request->post_params as $key => $value) {
 			if(preg_match("/^field_action_([a-zA-Z0-9_]+)_([a-zA-Z_0-9]+)$/", $key, $matches)) {
 				if(isset($this->fields[$matches[1]]) && $this->fields[$matches[1]]->hasAction($matches[2])) {
 					$this->activateRestore();
@@ -644,7 +585,7 @@ class Form extends gObject {
 
 		/** @var Form $data */
 		$data = GlobalSessionManager::globalSession()->get(self::SESSION_PREFIX . "." . strtolower($this->name));
-		$data->post = $this->post;
+		$data->request = $this->request;
 
 		$this->saveToSession();
 
@@ -684,13 +625,13 @@ class Form extends gObject {
 	 * @throws FormNotValidException
 	 */
 	protected function handleSubmit() {
-		$submissionWithoutValidation = self::findSubmission($this, $this->post, null);
+		$submissionWithoutValidation = self::findSubmission($this, $this->getRequest()->post_params, null);
 
 		$result = $this->gatherResultForSubmit(is_null($submissionWithoutValidation));
 
 		$submission = isset($submissionWithoutValidation) ?
 			$submissionWithoutValidation :
-			self::findSubmission($this, $this->post, $result);
+			self::findSubmission($this, $this->getRequest()->post_params, $result);
 
 		if(!$submission) {
 			throw new FormNotSubmittedException();
@@ -856,13 +797,6 @@ class Form extends gObject {
 	}
 
 	/**
-	 * returns name.
-	 */
-	public function getName() {
-		return $this->name;
-	}
-
-	/**
 	 * @return RequestHandler
 	 */
 	public function getController()
@@ -871,17 +805,8 @@ class Form extends gObject {
 	}
 
 	/**
-	 * @return Request
-	 */
-	public function getRequest()
-	{
-		return $this->request;
-	}
-
-	/**
 	 * sets the default submission
-	 *@name setSubmission
-	 *@access public
+	 * @param string|array $submission
 	 */
 	public function setSubmission($submission) {
 		if (is_callable($submission) || gObject::method_exists($this->controller, $submission)) {
@@ -893,8 +818,7 @@ class Form extends gObject {
 
 	/**
 	 * removes a field
-	 *@name remove
-	 *@access public
+	 * @param string $field
 	 */
 	public function remove($field) {
 		if(isset($this->fields[$field])) {
@@ -1145,6 +1069,11 @@ class Form extends gObject {
 	 * within a ClusterFormField
 	 */
 	public function __get($offset) {
+		if($offset == "result") {
+			Core::Deprecate(2.0, "getResult");
+
+			return $this->result;
+		}
 		return $this->getField($offset);
 	}
 
@@ -1184,17 +1113,6 @@ class Form extends gObject {
 	}
 
 	/**
-	 * external url of this form
-	 */
-	public function externalURL() {
-		if(isset($this->controller->originalNamespace) && $this->controller->originalNamespace) {
-			return ROOT_PATH . BASE_SCRIPT . $this->controller->originalNamespace . "/forms/form/" . $this->name;
-		} else {
-			return ROOT_PATH . BASE_SCRIPT . "system/forms/" . $this->name;
-		}
-	}
-
-	/**
 	 * sorts the items
 	 */
 	public function sort($a, $b) {
@@ -1204,15 +1122,6 @@ class Form extends gObject {
 
 		return ($this->fieldSort[$a->name] > $this->fieldSort[$b->name]) ? 1 : -1;
 	}
-
-	/**
-	 * returns the current real form-object
-	 */
-	public function &form() {
-		return $this;
-	}
-
-
 
 	/**
 	 * genrates an id for this form

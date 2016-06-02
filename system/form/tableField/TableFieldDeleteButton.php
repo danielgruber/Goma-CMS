@@ -164,7 +164,7 @@ class TableFieldDeleteButton implements TableField_ColumnProvider, TableField_Ac
 			Core::setTitle($title);
 			/** @var Controller $controller */
 			$controller = is_a($tableField->form()->controller, "Controller") ?
-				$tableField->form()->controller : ControllerResolver::instanceForModel($obj);
+				$tableField->form()->controller : ControllerResolver::instanceForModel($data->first());
 
 			Core::$requestController = $controller;
 			$content = $controller->getWithModel($data->first())->delete();

@@ -13,26 +13,16 @@ class FieldSet extends FormField
 {
     /**
      * items of this fieldset
-     *
-     * @name items
-     * @access public
      */
     protected $items = array();
 
     /**
      * sort of the items
-     *
-     * @name sort
-     * @access public
      */
     public $sort = array();
 
     /**
      * fields of this FieldSet
-     *
-     * @name fields
-     * @access public
-     * @var array
      */
     public $fields = array();
 
@@ -93,6 +83,7 @@ class FieldSet extends FormField
      *
      * @param Form $form
      * @param bool $renderAfterSetForm
+     * @return $this
      */
     public function setForm(&$form, $renderAfterSetForm = true)
     {
@@ -106,6 +97,8 @@ class FieldSet extends FormField
         }
 
         if($renderAfterSetForm) $this->renderAfterSetForm();
+
+        return $this;
     }
 
     /**
@@ -312,5 +305,13 @@ class FieldSet extends FormField
     public function setTemplateView($templateView)
     {
         $this->templateView = $templateView;
+    }
+
+    /**
+     * @return array|null|string|ViewAccessableData
+     */
+    public function getModel()
+    {
+        return isset($this->model) ? $this->model : (isset($this->parent) ? $this->parent->getModel() : null);
     }
 }

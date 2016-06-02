@@ -291,9 +291,9 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
     public function filter($tableField) {
         $state = $tableField->state->tableFieldFilterHeader;
 
-        if (isset($tableField->form()->post['filter']) && !$state->reset) {
+        if (isset($tableField->getRequest()->post_params['filter']) && !$state->reset) {
             $hasValue = false;
-            foreach ($tableField->form()->post['filter'] as $key => $filter) {
+            foreach ($tableField->getRequest()->post_params['filter'] as $key => $filter) {
                 if($this->isValueValid($filter) && $state->resetColumn != $key) {
                     $hasValue = true;
                     $state->columns->$key = $filter;

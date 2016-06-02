@@ -25,15 +25,15 @@ class CheckBoxFieldTests extends GomaUnitTest implements TestAble
             $checkbox = new CheckBox("name", "Name")
         ));
 
-        $form->post["name"] = 0;
+        $form->getRequest()->post_params["name"] = 0;
 
         $this->assertEqual($checkbox->result(), false);
 
-        $form->post["name"] = 1;
+        $form->getRequest()->post_params["name"] = 1;
 
         $this->assertEqual($checkbox->result(), true);
 
-        $checkbox->value = 0;
+        $checkbox->setModel(0);
         $form->disabled = true;
         $this->assertEqual($checkbox->result(), false);
 

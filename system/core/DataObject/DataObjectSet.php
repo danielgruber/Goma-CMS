@@ -789,6 +789,12 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 * @return $this
 	 */
 	public function sort($column, $type = "") {
+		if(!isset($column)) {
+			$this->sort = null;
+			$this->clearCache();
+			return $this;
+		}
+
 		if(!is_string($column))
 			throw new InvalidArgumentException("First argument of sort must be a string.");
 

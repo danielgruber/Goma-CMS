@@ -24,8 +24,9 @@ class Captcha extends FormField {
 
 	/**
 	 * sets the validator
-	 *@name setForm
-	 *@access public
+	 * @name setForm
+	 * @access public
+	 * @return $this
 	 */
 	public function setForm(&$form) {
 		parent::setForm($form);
@@ -33,6 +34,8 @@ class Captcha extends FormField {
 			$this,
 			"validate"
 		)), "captcha");
+
+		return $this;
 	}
 
 	/**

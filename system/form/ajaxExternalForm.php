@@ -47,8 +47,6 @@ class AjaxExternalForm extends FormField {
 
 	/**
 	 * renders the field
-	 *@name field
-	 *@access public
 	 */
 	public function field() {
 		$this->callExtending("beforeField");
@@ -57,7 +55,7 @@ class AjaxExternalForm extends FormField {
 
 		$this->container->append($this->input);
 		$this->input->append(array(
-			$this->value,
+			$this->getModel(),
 			"&nbsp;&nbsp;&nbsp;&nbsp;",
 			new HTMLNode("a", array(
 				"href" => $this->externalURL() . "/render/?redirect=" . urlencode(getredirect()),
@@ -78,8 +76,6 @@ class AjaxExternalForm extends FormField {
 
 	/**
 	 * renders the bluebox
-	 *@name render
-	 *@access public
 	 */
 	public function render() {
 		// create a deep copy

@@ -13,25 +13,16 @@ class RadioButton extends FormField
 {
     /**
      * options for this set
-     *
-     * @name options
-     * @access public
-     */
+    */
     public $options;
 
     /**
      * which radio-buttons are disabled
-     *
-     * @name disabledNodes
-     * @access public
      */
     public $disabledNodes = array();
 
     /**
      * defines if we hide disabled nodes
-     *
-     * @name hideDisabled
-     * @access public
      */
     public $hideDisabled = false;
 
@@ -132,7 +123,7 @@ class RadioButton extends FormField
                 $this->PostName(),
                 $value,
                 $title,
-                $this->valueMatches($value, $this->value),
+                $this->valueMatches($value, $this->model),
                 $this->disabled || isset($this->disabledNodes[$value])
             ));
         }
@@ -142,23 +133,6 @@ class RadioButton extends FormField
         $this->callExtending("afterField");
 
         return $this->container;
-    }
-
-    /**
-     * this function generates some JSON for using client side stuff.
-     *
-     * @name exportJSON
-     * @param array|null $fieldErrors
-     * @return FormFieldRenderData
-     */
-    public function exportFieldInfo($fieldErrors = null) {
-        $info = $this->exportBasicInfo($fieldErrors)
-            ->setRenderedField($this->field())
-            ->setJs($this->js());
-
-        $this->callExtending("afterRenderFormResponse", $info);
-
-        return $info;
     }
 
     /**

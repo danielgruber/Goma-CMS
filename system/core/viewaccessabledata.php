@@ -368,7 +368,6 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 	private $position = 0;
 	/**
 	 * rewind $position to 0
-	 *@name rewind
 	 */
 	public function rewind() {
 		if(is_array($this->data)) {
@@ -379,7 +378,6 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 
 	/**
 	 * check if data exists
-	 *@name valid
 	 */
 	public function valid() {
 		return ($this->position < count($this->data));
@@ -387,7 +385,6 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 
 	/**
 	 * gets the key
-	 *@name key
 	 */
 	public function key() {
 		return key($this->data);
@@ -395,7 +392,6 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 
 	/**
 	 * gets the next one
-	 *@name next
 	 */
 	public function next() {
 
@@ -465,8 +461,6 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 
     /**
      * checks if the offset exists
-     * @name offsetExists
-     * @return bool
      */
 	public function offsetExists($offset) {
 		// third call
@@ -558,7 +552,7 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 	}
 
     public function __isset($offset) {
-        return $this->__cancall($offset);
+        return $this->__cancall($offset) || gObject::method_exists($this->classname, $offset);
     }
 
 	/**
@@ -1090,6 +1084,11 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 			return $data;
 		}
 	}
+
+
+	public function raw() {
+		return $this->data;
+	}
 }
 
 
@@ -1134,6 +1133,5 @@ abstract class Extension extends gObject implements ExtensionModel {
 	public function getOwner() {
 		return $this->owner;
 	}
-
 }
 

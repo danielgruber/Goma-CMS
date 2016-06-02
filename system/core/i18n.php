@@ -97,7 +97,8 @@ class i18n extends gObject {
 					require_once (ROOT . LANGUAGE_DIRECTORY . '/' . Core::$lang . '/' . $file . '.php');
 				} else if(isset(self::$defaultLanguagefiles[$file])) {
 					if(file_exists(ROOT . LANGUAGE_DIRECTORY . '/' . self::$defaultLanguagefiles[$file] . '/' . $file . '.php')) {
-						require_once (ROOT . LANGUAGE_DIRECTORY . '/' . self::$defaultLanguagefiles[$file] . '/' . $file . '.php');
+						copy(ROOT . LANGUAGE_DIRECTORY . '/' . self::$defaultLanguagefiles[$file] . '/' . $file . '.php', ROOT . LANGUAGE_DIRECTORY . '/' . Core::$lang . '/' . $file . '.php');
+						require_once (ROOT . LANGUAGE_DIRECTORY . '/' . Core::$lang . '/' . $file . '.php');
 					}
 				}
 			}

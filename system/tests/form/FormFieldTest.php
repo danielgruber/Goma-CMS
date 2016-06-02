@@ -25,22 +25,20 @@ class FormFieldTest extends GomaUnitTest implements TestAble {
         $this->unitTestCreate("test", "blah", "blub", null);
         $this->unitTestCreate("test2", "blah", "blub", $form);
 
-        $this->assertEqual($form->test2->name, "test2");
+        $this->assertEqual($form->test2->getName(), "test2");
     }
 
     public function unitTestCreate($name, $title, $value, $parent) {
         $field = FormField::create($name, $title, $value, $parent);
 
-        $this->assertEqual($field->name, $name);
+        $this->assertEqual($field->getName(), $name);
         $this->assertEqual($field->value, $value);
         $this->assertEqual($field->getTitle(), $title);
 
         if($parent != null) {
             $this->assertEqual($field->form(), $parent);
         } else {
-            $this->assertThrows(function() use($field) {
-                $field->form();
-            }, "LogicException");
+            $this->assertEqual($field->form(), $field);
         }
 
         $this->assertEqual($field->PostName(), $name);
@@ -68,7 +66,7 @@ class FormFieldTest extends GomaUnitTest implements TestAble {
 
         $field = new FormField("test", "", "1234", $form);
 
-        $form->post = array(
+        $form->getRequest()->post_params = array(
             "test" => "123"
         );
 
