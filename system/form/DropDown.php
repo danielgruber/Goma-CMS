@@ -696,7 +696,7 @@ class DropDown extends FormField {
 	 * @return HTMLNode|void
 	 */
 	protected function redirectToFormOrRespond() {
-		if(Core::is_ajax()) {
+		if($this->getRequest()->is_ajax()) {
 			return $this->renderInputWidget();
 		} else {
 			if($this->multiselect)

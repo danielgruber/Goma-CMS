@@ -45,4 +45,42 @@ class DropdownTest extends GomaUnitTest {
 
         return $method->invoke($dropdown, $dataSource, $key, $value);
     }
+
+    public function testCheckValue() {
+        $dropdown = new DropDown("test", "test", array(
+            1 => "blub",
+            2 => "blah",
+            3 => "test"
+        ), 3);
+        $dropdown->setRequest(new Request("post", "blub"));
+
+        $this->assertEqual($dropdown->getModel(), 3);
+        $this->assertEqual($dropdown->result(), 3);
+
+        $dropdown->getRequest()->params["value"] = 2;
+        $dropdown->getRequest()->params["ajax"] = true;
+        $dropdown->checkValue();
+
+        $this->assertEqual($dropdown->getModel(), 2);
+        $this->assertEqual($dropdown->result(), 2);
+
+        $dropdown->disable();
+        $dropdown->getRequest()->params["value"] = 3;
+        $dropdown->checkValue();
+
+        $this->assertEqual($dropdown->getModel(), 2);
+        $this->assertEqual($dropdown->result(), 2);
+
+        $dropdown->enable();
+        $dropdown->uncheckValue();
+
+        $this->assertEqual($dropdown->getModel(), 2);
+        $this->assertEqual($dropdown->result(), 2);
+
+        $dropdown->getRequest()->params["value"] = 2;
+        $dropdown->uncheckValue();
+
+        $this->assertEqual($dropdown->getModel(), null);
+        $this->assertEqual($dropdown->result(), null);
+    }
 }
