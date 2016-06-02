@@ -266,15 +266,15 @@ class DropDown extends FormField {
 
 				return $info;
 			} else {
-				$info->addFilter(array("id" => $this->value));
+				$info->addFilter(array("id" => $this->getModel()));
 
-				return $info->first(false);
+				return $info->first();
 			}
 		} else {
 			if($this->multiselect) {
 				return $this->dataset;
 			} else {
-				return $this->value;
+				return $this->getModel();
 			}
 		}
 	}
@@ -336,7 +336,6 @@ class DropDown extends FormField {
 	/**
 	 * generates the result of this form-field.
 	 *
-	 * @access public
 	 * @return mixed it is an array in case of multiselect-field or string in
 	 * single-select-mode.
 	 * @throws FormInvalidDataException
@@ -347,7 +346,7 @@ class DropDown extends FormField {
 		if(!$this->disabled) {
 			return $this->getDataFromValue();
 		} else {
-			return $this->value;
+			return $this->getModel();
 		}
 	}
 
@@ -606,7 +605,7 @@ class DropDown extends FormField {
 		$arr = $data["data"];
 
 		//print_r($this);
-		$value = ($this->multiselect) ? array_values($this->dataset) : array($this->value);
+		$value = ($this->multiselect) ? array_values($this->dataset) : array($this->getKeyFromKey($this->getModel()));
 
 		if(empty($value) || $value[0] === null) {
 			$value = array();
@@ -667,7 +666,7 @@ class DropDown extends FormField {
 						throw new FormInvalidDataException($this->name, "Value not allowed.");
 					}
 				} else {
-					$this->value = $this->getParam("value");
+					$this->model = $this->getParam("value");
 				}
 			}
 		}
@@ -705,10 +704,10 @@ class DropDown extends FormField {
 			return $this->renderInputWidget();
 		} else {
 			if($this->multiselect)
-				$this->form()->post[$this->PostName()] = $this->key;
+				$this->getRequest()->post_params[$this->PostName()] = $this->key;
 			else
-				$this->form()->post[$this->PostName()] = $this->value;
-			$this->form()->redirectToForm();
+				$this->getRequest()->post_params[$this->PostName()] = $this->value;
+			return $this->form()->redirectToForm();
 		}
 	}
 

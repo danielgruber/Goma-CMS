@@ -349,22 +349,23 @@ DropDown.prototype = {
 					// render data
 					if(data.data) {
 						content += "<ul>";
-						i = -1;
-						for(i in data.data) {
-							var val = data.data[i];
+						for(var i in data.data) {
+							if(data.data.hasOwnProperty(i)) {
+								var val = data.data[i];
 
-							content += "<li>";
+								content += "<li>";
 
-							if(data.value[val.key] || data.value[val.key] === 0)
-								content += "<a href=\"javascript:;\" class=\"checked\" id=\"dropdown_"+that.id+"_"+val.key+"\"><span title=\""+val.value.replace('"', '\\"')+"\">"+val.value+"</span></a>";
-							else
-								content += "<a href=\"javascript:;\" id=\"dropdown_"+that.id+"_"+val.key+"\"><span title=\""+val.value.replace('"', '\\"')+"\">"+val.value+"</span></a>";
+								if (data.value[val.key] || data.value[val.key] === 0)
+									content += "<a href=\"javascript:;\" class=\"checked\" id=\"dropdown_" + that.id + "_" + val.key + "\"><span title=\"" + val.value.replace('"', '\\"') + "\">" + val.value + "</span></a>";
+								else
+									content += "<a href=\"javascript:;\" id=\"dropdown_" + that.id + "_" + val.key + "\"><span title=\"" + val.value.replace('"', '\\"') + "\">" + val.value + "</span></a>";
 
-							if(typeof val.smallText == "string") {
-								content += "<span class=\"record_info\">"+val.smallText+"</span>";
+								if (typeof val.smallText == "string") {
+									content += "<span class=\"record_info\">" + val.smallText + "</span>";
+								}
+
+								content += "</li>";
 							}
-
-							content += "</li>";
 						}
 
 						content += "</ul>";

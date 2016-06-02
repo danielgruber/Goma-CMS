@@ -158,8 +158,6 @@ class HasOneDropdown extends SingleSelectDropDown
 	 */
 	public function result()
 	{
-		/** @var DataObject $object */
-		$object = parent::result();
-		return $object ? $object->id : 0;
+		return $this->getModel();
 	}
 }

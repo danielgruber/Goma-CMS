@@ -154,15 +154,15 @@ class FileUpload extends FormField {
 
 		if(!is_a($model, "Uploads")) {
 			if (!empty($model) && ($data = Uploads::getFile($model)) !== false) {
-				$this->model = $model = $data;
+				return $this->model = $data;
 			} else {
 				if (!empty($model)) {
 					if ($data = Uploads::addFile(basename($model), $model, $this->collection)) {
-						$this->model = $model = $data;
+						return $this->model = $data;
 					}
 				}
 
-				$this->model = $model = null;
+				return $this->model = null;
 			}
 		}
 
