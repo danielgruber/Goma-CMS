@@ -91,15 +91,17 @@ class TreeNode extends ArrayList {
 	 * the callback over which this node is rendered.
 	*/
 	protected $linkCallback;
-	
+
 	/**
 	 * generates a new treenode.
 	 *
-	 * @param 	string $nodeid id of this node
-	 * @param 	int $recordid
-	 * @param 	string $title text of this node
-	 * @param 	string $class_name class-name for this node
-	*/
+	 * @param    string $nodeid id of this node
+	 * @param 	 int|null $recordid
+	 * @param    int $recordid
+	 * @param    string $title text of this node
+	 * @param    string $class_name class-name for this node
+	 * @param    null|string $icon
+	 */
 	public function __construct($nodeid = null, $recordid = null, $title = null, $class_name = null, $icon = null) {
 		
 		parent::__construct(null);
@@ -122,8 +124,6 @@ class TreeNode extends ArrayList {
 	/**
 	 * returns the icon
 	 *
-	 * @name getIcon
-	 * @access public
 	 * @return string|null
 	 */
 	public function getIcon() {
@@ -147,9 +147,7 @@ class TreeNode extends ArrayList {
 	/**
 	 * adds a bubble
 	 *
-	 * @name addBubble
-	 * @access public
-	 * @param text
+	 * @param string $text
 	 * @param string $color : green, yellow, red, blue, grey, orange, purple
 	 * @return $this
 	 */
@@ -173,8 +171,6 @@ class TreeNode extends ArrayList {
 	/**
 	 * returns all bubbles
 	 *
-	 * @name Bubbles
-	 * @access public
 	 * @param text
 	 * @return array
 	 */
@@ -193,12 +189,13 @@ class TreeNode extends ArrayList {
 			$this->push($child);
 		}
 	}
-	
+
 	/**
 	 * sets lazy-loading-child-callback.
 	 *
-	 * @param 	callback $callback
-	*/
+	 * @param callback $callback
+	 * @param array $params
+	 */
 	public function setChildCallback($callback, $params = array()) {
 		if(is_callable($callback)) {
 			$this->childCallback = $callback;
@@ -248,7 +245,7 @@ class TreeNode extends ArrayList {
 	/**
 	 * gets all children as ArrayList.
 	 *
-	 * @return	Array
+	 * @return array
 	*/
 	public function Children() {
 		return $this->items;
@@ -326,7 +323,7 @@ class TreeNode extends ArrayList {
 		if(isset($this->model))
 			return $this->model;
 		
-		$this->model = DataObject::Get_by_id($this->treeclass, $this->recordid);
+		$this->model = DataObject::get_by_id($this->treeclass, $this->recordid);
 		return $this->model;
 	}
 

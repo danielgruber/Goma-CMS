@@ -308,10 +308,12 @@ class TreeRenderer extends gObject {
 			}
 		}
 	}
-	
+
 	/**
 	 * renders the bubbles.
-	*/
+	 * @param array $bubbles
+	 * @return HTMLNode
+	 */
 	public function renderBubbles($bubbles) {
 		$node = new HTMLNode("span", array("class" => "tree-bubbles"));
 		foreach($bubbles as $bubble) {
@@ -319,20 +321,22 @@ class TreeRenderer extends gObject {
 		}
 		return $node;
 	}
-	
+
 	/**
 	 * marks a node.
-	*/
+	 * @param TreeNode $node
+	 */
 	public function mark($node) {
 		if(is_object($node))
 			$this->marked[$node->nodeid] = true;
 		else
 			$this->marked[$node] = true;
 	}
-	
+
 	/**
 	 * unmarks a node.
-	*/
+	 * @param TreeNode $node
+	 */
 	public function unmark($node) {
 		if(is_object($node))
 			unset($this->marked[$node->nodeid]);

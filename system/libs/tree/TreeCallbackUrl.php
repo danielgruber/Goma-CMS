@@ -74,9 +74,8 @@ class TreeCallbackUrl extends RequestHandler {
 				setcookie("tree_" . $model . "_" . $parent, 0);
 			else
 				setcookie("tree_" . $model . "_" . $parent, 1);
-			
-			HTTPResponse::redirect(getRedirect());
-			exit;
+
+			return GomaResponse::redirect(getRedirect());
 		}
 	}
 	
@@ -100,9 +99,8 @@ class TreeCallbackUrl extends RequestHandler {
 					setcookie("tree_" .  $node->treeclass . "_" . $node->recordid, 0, 0, '/');
 				else
 					setcookie("tree_" .  $node->treeclass . "_" . $node->recordid, 1, 0, "/");
-				
-				HTTPResponse::redirect(getRedirect());
-				exit;
+
+				return GomaResponse::redirect(getRedirect());
 			}
 		}
 		
