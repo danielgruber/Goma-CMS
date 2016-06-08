@@ -86,6 +86,17 @@ class GomaResponse extends gObject {
      *
      * @param array|null $header
      * @param string|null $body
+     * @return GomaResponse
+     */
+    public static function create($header = null, $body = null) {
+        return new static($header, $body);
+    }
+
+    /**
+     * GomaResponse constructor.
+     *
+     * @param array|null $header
+     * @param string|null $body
      */
     public function __construct($header = null, $body = null)
     {
@@ -114,13 +125,16 @@ class GomaResponse extends gObject {
      *
      * @param string $name
      * @param string $value
+     * @return $this
      */
     public function setHeader($name, $value) {
         $this->header[strtolower($name)] = $value;
+        return $this;
     }
 
     public function removeHeader($name) {
         unset($this->header[strtolower($name)]);
+        return $this;
     }
 
     /**
@@ -145,6 +159,7 @@ class GomaResponse extends gObject {
 
     /**
      * @param string|GomaResponseBody $body
+     * @return $this
      */
     public function setBody($body)
     {
@@ -157,13 +172,16 @@ class GomaResponse extends gObject {
                 $this->body->setBody($body);
             }
         }
+        return $this;
     }
 
     /**
      * @param string $body
+     * @return $this
      */
     public function setBodyString($body) {
         $this->body->setBody($body);
+        return $this;
     }
 
     /**
@@ -250,6 +268,7 @@ class GomaResponse extends gObject {
      * @param int $expires
      * @param int $lastModfied
      * @param bool $includeProxy
+     * @return $this
      */
     public function setCacheHeader($expires, $lastModfied, $includeProxy = false)
     {
@@ -263,6 +282,7 @@ class GomaResponse extends gObject {
         $this->setHeader("Expires", gmdate('D, d M Y H:i:s', $expires).' GMT');
         $age = $expires - time();
         $this->setHeader("cache-control", "public; max-age=".$age."");
+        return $this;
     }
 
     /**
@@ -275,6 +295,7 @@ class GomaResponse extends gObject {
         $this->setHeader("Last-Modified", '');
         $this->setHeader("Expires", '0');
         $this->setHeader("cache-control", " no-cache, max-age=0, must-revalidate, no-store");
+        return $this;
     }
 
     /**
@@ -348,6 +369,7 @@ class GomaResponse extends gObject {
         foreach($this->header as $key => $value) {
             header($key . ": " . $value);
         }
+        return $this;
     }
 
     /**
@@ -368,10 +390,12 @@ class GomaResponse extends gObject {
 
     /**
      * @param bool $shouldServe
+     * @return $this
      */
     public function setShouldServe($shouldServe)
     {
         $this->shouldServe = $shouldServe;
+        return $this;
     }
 
     /**

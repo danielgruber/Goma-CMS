@@ -336,19 +336,21 @@ class LeftAndMain extends AdminItem {
 	
 	/**
 	 * saves sort
-	 *
-	 *@name savesort
-	 *@access public
 	*/
 	public function savesort() {
-		$field = $this->sort_field;
-		foreach($_POST["treenode"] as $key => $value) {
-			DataObject::update($this->tree_class, array($field => $key), array("recordid" => $value), "", true);
+		if(isset($this->request->post_params["treenode"])) {
+			$field = $this->sort_field;
+			foreach ($this->request->post_params["treenode"] as $key => $value) {
+				DataObject::update($this->tree_class, array($field => $key), array("recordid" => $value), "", true);
+			}
+			$this->marked = $this->getParam("id");
+
+			return GomaResponse::create()->setShouldServe(false)->setBody(
+				GomaResponseBody::create($this->createTree())->setParseHTML(false)
+			);
 		}
-		$this->marked = $this->getParam("id");
-		HTTPResponse::setBody($this->createTree());
-		HTTPResponse::output();
-		exit;
+
+		throw new BadRequestException();
 	}
 	
 	/**

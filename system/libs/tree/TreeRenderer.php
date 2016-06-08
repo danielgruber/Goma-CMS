@@ -11,6 +11,7 @@
 class TreeRenderer extends gObject {
 	/**
 	 * the current tree.
+	 * @var TreeNode|null
 	*/
 	public $tree;
 	
@@ -33,7 +34,10 @@ class TreeRenderer extends gObject {
 	 * marked nodes.
 	*/
 	public $marked = array();
-	
+
+	/**
+	 * @var bool
+	 */
 	static $isFirefox8;
 	
 	/**
@@ -123,7 +127,6 @@ class TreeRenderer extends gObject {
 	 * @return String
 	 */
 	public function render($includeUL = false, $parentID = 0) {
-		
 		Resources::add("tree.css", "css", "tpl");
 		Resources::add("system/libs/tree/gTree.js", "js", "tpl");
 		
@@ -324,7 +327,7 @@ class TreeRenderer extends gObject {
 
 	/**
 	 * marks a node.
-	 * @param TreeNode $node
+	 * @param TreeNode|string $node
 	 */
 	public function mark($node) {
 		if(is_object($node))
@@ -335,7 +338,7 @@ class TreeRenderer extends gObject {
 
 	/**
 	 * unmarks a node.
-	 * @param TreeNode $node
+	 * @param TreeNode|string $node
 	 */
 	public function unmark($node) {
 		if(is_object($node))

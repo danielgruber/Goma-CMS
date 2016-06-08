@@ -30,6 +30,14 @@ class GomaResponseBody extends gObject {
     protected $parseHTML = true;
 
     /**
+     * @param null $body
+     * @return static
+     */
+    public static function create($body = null) {
+        return new static($body);
+    }
+
+    /**
      * GomaResponseBody constructor.
      * @param string $body
      */
@@ -50,10 +58,12 @@ class GomaResponseBody extends gObject {
 
     /**
      * @param string $body
+     * @return $this
      */
     public function setBody($body)
     {
         $this->body = $body;
+        return $this;
     }
 
     /**
@@ -74,10 +84,12 @@ class GomaResponseBody extends gObject {
 
     /**
      * @param mixed $includeResourcesInBody
+     * @return $this
      */
     public function setIncludeResourcesInBody($includeResourcesInBody)
     {
         $this->includeResourcesInBody = $includeResourcesInBody;
+        return $this;
     }
 
     /**
@@ -90,10 +102,12 @@ class GomaResponseBody extends gObject {
 
     /**
      * @param mixed $parseHTML
+     * @return $this
      */
     public function setParseHTML($parseHTML)
     {
         $this->parseHTML = $parseHTML;
+        return $this;
     }
 
     /**

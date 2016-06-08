@@ -20,5 +20,12 @@ class TreeRendererTest extends GomaUnitTest {
      */
     public $name = "TreeRenderer";
 
+    public function testCreate() {
+        $renderer = new TreeRenderer($node1 = new TreeNode(1));
 
+        $this->assertEqual($renderer->tree, $node1);
+
+        $renderer2 = new TreeRenderer($node2 = new TreeNode(1));
+        $this->assertEqual($renderer2->tree, $node2);
+    }
 }

@@ -76,6 +76,11 @@ class TreeNode extends ArrayList {
 	 * stores the callback, which is called when children are needed.
 	*/
 	protected $childCallback;
+
+	/**
+	 * @var bool
+	 */
+	protected $childCallbackFetched = false;
 	
 	/**
 	 * child-params.
@@ -171,7 +176,6 @@ class TreeNode extends ArrayList {
 	/**
 	 * returns all bubbles
 	 *
-	 * @param text
 	 * @return array
 	 */
 	public function bubbles() {
@@ -180,7 +184,7 @@ class TreeNode extends ArrayList {
 
 	/**
 	 * sets children
-	 * @param TreeNode $children
+	 * @param TreeNode[] $children
 	 */
 	public function setChildren($children) {
 		// validate and stack it in
@@ -200,6 +204,7 @@ class TreeNode extends ArrayList {
 		if(is_callable($callback)) {
 			$this->childCallback = $callback;
 			$this->childParams = $params;
+			$this->childCallbackFetched = false;
 		} else
 			throw new LogicException("TreeNode::setChildCallback: first argument must be a valid callback.");
 	}
@@ -210,32 +215,25 @@ class TreeNode extends ArrayList {
 	public function getChildCallback() {
 		return $this->childCallback;
 	}
-	
+
 	/**
 	 * adds a child
-	 *
-	 *@name addChild
-	 *@access public
-	*/
-	public function addChild(TreeNode $child) {
-		if($this->childCallback) {
-			if(!isset($this->items))
-				$this->items = array();
-			
+	 * @param TreeNode $child
+	 */
+	public function addChild($child) {
+		if(!$this->childCallback) {
 			$this->push($child);
 		} else {
 			throw new LogicException("This is a lazy loading TreeNode, you cannot add a child.");
 		}
 	}
-	
+
 	/**
 	 * removes a child
-	 *
-	 *@name removeChild
-	 *@access public
-	*/
-	public function removeChild(TreeNode $child) {
-		if(is_array($this->items)) {
+	 * @param TreeNode $child
+	 */
+	public function removeChild($child) {
+		if(!$this->childCallback) {
 			$this->remove($child);
 		} else {
 			throw new LogicException("This is a lazy loading TreeNode, you cannot remove a child.");
@@ -245,7 +243,7 @@ class TreeNode extends ArrayList {
 	/**
 	 * gets all children as ArrayList.
 	 *
-	 * @return array
+	 * @return TreeNode[]
 	*/
 	public function Children() {
 		return $this->items;
@@ -253,6 +251,7 @@ class TreeNode extends ArrayList {
 	
 	/**
 	 * gets all children as Array.
+	 * @return TreeNode[]
 	*/
 	public function getChildren() {
 		return $this->children();
@@ -261,13 +260,19 @@ class TreeNode extends ArrayList {
 	/**
 	 * forces to get children
 	 * it will call callback if not available
+	 * @return TreeNode[]
 	*/ 
 	public function forceChildren() {
 		if($this->childCallback) {
-			if($this->items) {
+			if($this->childCallbackFetched) {
 				return $this->children();
 			} else {
 				$this->items = call_user_func_array($this->childCallback, array($this, (array) $this->childParams));
+				if(!is_array($this->items)) {
+					throw new InvalidArgumentException("Childcallback is required to give back an array of TreeNodes.");
+				}
+				$this->childCallbackFetched = true;
+
 				return $this->children();
 			}
 		} else {
@@ -353,10 +358,12 @@ class TreeNode extends ArrayList {
 	public function getClasses() {
 		return $this->htmlClasses;
 	}
-	
+
 	/**
 	 * sets the linkCallback, which should generate the link of the tree-item.
-	*/
+	 * @param $callback
+	 * @return $this
+	 */
 	public function setLinkCallback($callback) {
 		$this->linkCallback = $callback;
 		return $this;
