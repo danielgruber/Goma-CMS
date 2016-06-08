@@ -487,10 +487,5 @@ function parseUrl() {
 
 	$url = str_replace('//', '/', $url);
 
-	if(isset($_SERVER["REDIRECT_STATUS"]) && $_SERVER["REDIRECT_STATUS"] == 404 && MOD_REWRITE == true && !preg_match('/nginx/i', $_SERVER["SERVER_SOFTWARE"])) {
-		header("Location: " . BASE_URI . "index.php/" . $url);
-		exit;
-	}
-
 	return $url;
 }
