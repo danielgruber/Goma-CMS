@@ -15,17 +15,11 @@ class LeftAndMain extends AdminItem {
 	
 	/**
 	 * the base template of the view
-	 *
-	 *@name baseTemplate
-	 *@access public
 	*/
 	public $baseTemplate = "admin/leftandmain.html";
 	
 	/**
 	 * defines the url-handlers
-	 *
-	 *@name url_handlers
-	 *@access public
 	*/
 	public $url_handlers = array(
 		"updateTree/\$search"			=> "updateTree",
@@ -37,9 +31,6 @@ class LeftAndMain extends AdminItem {
 	
 	/**
 	 * defines the allowed actions
-	 *
-	 *@name allowed_actions
-	 *@access public
 	*/
 	public $allowed_actions = array(
 		"cms_edit", "cms_add", "cms_del", "updateTree", "savesort", "versions"
@@ -47,25 +38,16 @@ class LeftAndMain extends AdminItem {
 	
 	/**
 	 * this var defines the tree-class
-	 *
-	 *@name tree_class
-	 *@access public
 	*/
 	public $tree_class = "";
 	
 	/**
 	 * marked node
-	 *
-	 *@name marked
-	 *@access public
 	*/
 	public $marked = 0;
 	
 	/**
 	 * sort-field
-	 *
-	 *@name sort_field
-	 *@access protected
 	*/
 	protected $sort_field;
 	
@@ -77,8 +59,6 @@ class LeftAndMain extends AdminItem {
 	/**
 	 * gets the title of the root node
 	 *
-	 * @name getRootNode
-	 * @access public
 	 * @return string
 	 */
 	protected function getRootNode() {
@@ -88,8 +68,6 @@ class LeftAndMain extends AdminItem {
 	/**
 	 * generates the options for the create-select-field
 	 *
-	 * @name CreateOptions
-	 * @access public
 	 * @return array
 	 */
 	public function createOptions() {
@@ -105,13 +83,11 @@ class LeftAndMain extends AdminItem {
 	/**
 	 * inserts the data in the leftandmain-template
 	 *
-	 * @name serve
-	 * @access public
+	 * @param string $content
 	 * @return mixed|string
 	 */
 	public function serve($content) {
-
-		if(Core::is_ajax()) {
+		if($this->request->is_ajax()) {
 			return $content;
 		}
 		
@@ -123,9 +99,6 @@ class LeftAndMain extends AdminItem {
 		} else {
 			Resources::addData("var LaMsort = false;");
 		}
-		
-		$search = isset($_GET["searchtree"]) ? text::protect($_GET["searchtree"]) : "";
-		
 
 		Resources::addData("var adminURI = '".$this->adminURI()."'; var marked_node = '".$this->marked."';");
 		
@@ -139,7 +112,7 @@ class LeftAndMain extends AdminItem {
 				"CONTENT"	=> $content,
 				"activeAdd" => $this->getParam("model"),
 				"SITETREE" => $this->createTree($search),
-				"searchtree" => $search,
+				"searchtree" => $this->getParam("searchtree"),
 				"ROOT_NODE" => $this->getRootNode(),
 				"TREEOPTIONS" => $this->generateTreeOptions()
 			)
@@ -218,6 +191,35 @@ class LeftAndMain extends AdminItem {
 	}
 
 	/**
+	 * @param gObject $instance
+	 * @param array $options
+	 * @return array|mixed
+	 */
+	protected function callArgumentTree($instance, $options) {
+		$newParams = call_user_func_array(array($instance, "argumentTree"), array($this, $options));
+		if(is_array($newParams) && isset($newParams["version"]) && isset($newParams["filter"])) {
+			$options = $newParams;
+		}
+		return $options;
+	}
+
+	/**
+	 * @param TreeRenderer $treeRenderer
+	 * @param string $id
+     */
+	protected function setExpanded($treeRenderer, $id) {
+		// here we check for Ajax-Opening. It is given to the leftandmain-js-api.
+		/** @var DataObject $current */
+		if($current = DataObject::get_versioned("pages", "state", array("id" => $id))->first()) {
+			$treeRenderer->setExpanded($current->id);
+			while($current->parent) {
+				$current = $current->parent;
+				$treeRenderer->setExpanded($current->id);
+			}
+		}
+	}
+
+	/**
 	 * creates the Tree
 	 *
 	 * @param string $search
@@ -238,26 +240,18 @@ class LeftAndMain extends AdminItem {
 			
 		// give the tree-class the ability to modify the options.
 		if(gObject::method_exists($tree_class, "argumentTree")) {
-			$newParams = call_user_func_array(array($tree_class, "argumentTree"), array($this, $options));
-			if(is_array($newParams) && isset($newParams["version"]) && isset($newParams["filter"])) {
-				$options = $newParams;
-			}
-			unset($newParams);
+			$options = $this->callArgumentTree($tree_class, $options);
 		}
 		
 		// iterate through extensions to give them the ability to change the options.
-		$t = new $tree_class;
-		foreach($t->getextensions() as $ext)
+		$treeClassInstance = new $tree_class;
+		foreach($treeClassInstance->getextensions() as $ext)
 		{
 			if (ClassInfo::hasInterface($ext, "TreeArgumenter")) {
-				$newParams = $t->getinstance($ext)->argumentTree($this, $options);
-				if(is_array($newParams) && isset($newParams["version"]) && isset($newParams["filter"])) {
-					$options = $newParams;
-				}
-				unset($newParams);
+				$options = $this->callArgumentTree($treeClassInstance->getinstance($ext), $options);
 			}
 		}
-		unset($t);
+		unset($treeClassInstance);
 		
 		// generate tree
 		$tree = call_user_func_array(array($tree_class, "build_tree"), array(0, $options));
@@ -269,57 +263,36 @@ class LeftAndMain extends AdminItem {
 		
 		// check for logical opened tree-items.
 		if(isset($this->getRequest()->get_params["edit_id"])) {
-			// here we check for Ajax-Opening. It is given to the leftandmain-js-api.
-			if($current = DataObject::get_versioned("pages", "state", array("id" => $this->getRequest()->get_params["edit_id"]))->first()) {
-				$treeRenderer->setExpanded($current->id);
-				while($current->parent) {
-					$current = $current->parent;
-					$treeRenderer->setExpanded($current->id);
-				}
-			}
-		} else
-		
-		// here we check for complete generated pages.
-		if($this->getParam("id")) {
-			if($current = DataObject::get_versioned("pages", "state", array("id" => $this->getParam("id")))->first()) {
-				$treeRenderer->setExpanded($current->id);
-				while($current->parent) {
-					$current = $current->parent;
-					$treeRenderer->setExpanded($current->id);
-				}
-			}
+			$this->setExpanded($treeRenderer, $this->getRequest()->get_params["edit_id"]);
+		} else if($this->getParam("id")) {
+			$this->setExpanded($treeRenderer, $this->getParam("id"));
 		}
 		
 		return $treeRenderer->render(true);
 	}
 	/**
 	 * gets updated data of tree for searching or normal things
-	 *
-	 *@name updateTree
-	 *@access public
 	*/
 	public function updateTree() {
-		
 		$this->marked = $this->getParam("marked");
 		$search = $this->getParam("search");
 
-		HTTPResponse::setBody($this->createTree($search));
-		HTTPResponse::output();
-		exit;
+		return GomaResponse::create()->setShouldServe(false)->setBody(
+			GomaResponseBody::create($this->createTree($search))->setParseHTML(false)
+		);
 	}
 	
 	/**
 	 * Actions of editing 
 	*/
-	
+
 	/**
 	 * saves data for editing a site via ajax
 	 *
-	 *@name ajaxSave
-	 *@access public
-	 *@param array - data
-	 *@param object - response
-	*/
+	 * @param array $data
+	 * @param FormAjaxResponse $response
+	 * @return FormAjaxResponse
+	 */
 	public function ajaxSave($data, $response, $form = null, $controller = null, $forceInsert = false, $forceWrite = false, $overrideCreated = false) {
 		if($model = $this->save($data, 1, $forceInsert, $forceWrite, $overrideCreated)) {
 			// notify the user
@@ -355,9 +328,6 @@ class LeftAndMain extends AdminItem {
 	
 	/**
 	 * hides the deleted object
-	 *
-	 *@name hideDeletedObject
-	 *@access public
 	*/
 	public function hideDeletedObject($response, $data) {
 		$response->exec("reloadTree(function(){ goma.ui.ajax(undefined, {url: '".$this->originalNamespace."'}); });");
@@ -406,8 +376,6 @@ class LeftAndMain extends AdminItem {
 	/**
 	 * gets the options for add
 	 *
-	 * @name Types
-	 * @access public
 	 * @return DataSet
 	 */
 	public function Types() {
@@ -418,30 +386,17 @@ class LeftAndMain extends AdminItem {
 		}
 		return $arr;
 	}
-	
-	/**
-	 * hook in this function to decorate a created record of record()-method
-	 *
-	 *@name decorateRecord
-	 *@access public
-	*/
-	public function decorateRecord(&$record) {
-		if(!$record->getVersion()) $record->version = "state";
-		$this->marked = $record->class_name . "_" . $record->recordid;
-	}
 
 	/**
-	 * view all versions
-	 *
-	 * @return string
+	 * hook in this function to decorate a created record of record()-method
+	 * @param DataObjectSet|DataObject $record
 	 */
-	public function versions() {
-		if($this->ModelInst() && DataObject::Versioned($this->ModelInst()->dataClass)) {
-			$controller = new VersionsViewController($this->ModelInst());
-			$controller->subController = true;
-			return $controller->handleRequest($this->request);
+	public function decorateRecord(&$record) {
+		if(is_a($record, "DataObjectSet")) {
+			if (!$record->getVersion()) $record->setVersion("state");
 		}
-		return false;
+
+		$this->marked = $record->class_name . "_" . $record->recordid;
 	}
 
 	/**
