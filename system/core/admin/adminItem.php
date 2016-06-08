@@ -13,22 +13,16 @@
 class adminItem extends AdminController implements PermProvider {
 	/**
 	 * rights of this item
-	 *@name rights
-	 *@access public
 	*/
 	public $rights = 7;
 	
 	/**
 	 * sort
-	 *@name sort
-	 *@access public
 	*/
 	public $sort = 0;
 	
 	/**
 	 * text of the link
-	 *@name text
-	 *@var lang
 	*/
 	public $text;
 	
@@ -41,7 +35,6 @@ class adminItem extends AdminController implements PermProvider {
 	
 	/**
 	 * allowed_actions
-	 *@access public
 	*/
 	public $allowed_actions = array
 	(
@@ -50,58 +43,42 @@ class adminItem extends AdminController implements PermProvider {
 	
 	/**
 	 * this property contains all models, this model uses
-	 *@name models
-	 *@access public
-	 *@var array
+	 * @var array
 	*/
 	public $models = array();
 	
 	/**
 	 * instances of the models
-	 *
-	 *@name modelInstances
-	 *@access public
 	*/
 	public $modelInstances = array();
 	
 	/**
 	 * controller inst of the model if set
-	 *
-	 *@name controllerInst
-	 *@access public
 	*/ 
 	public $controllerInst;
 	
 	/**
-	 * the template 
-	 *@name template
-	 *@access public
-	 *@var string
+	 * the template
+	 * @var string
 	*/
 	public $template = "";
 	
 	/**
 	  * where
-	  *@name where
-	  *@access public
 	*/
 	public $filter = array();
 	
 	/**
 	 * if is visible
-	 *@name visible
-	 *@return bool
 	*/
 	public function visible()
 	{
-			return true;
+		return true;
 	}
 
 	/**
 	 * gives back the url of this admin-item
 	 *
-	 * @name url
-	 * @access public
 	 * @return string
 	 */
 	public function url() {
@@ -114,20 +91,16 @@ class adminItem extends AdminController implements PermProvider {
 	
 	/**
 	 * gives back the title of this module
-	 *
-	 *@name adminItem
-	 *@access public
 	*/
 	public function Title() {
 		return parse_lang($this->text);	
 	}
-	
+
 	/**
 	 * returns the current model
-	 *
-	 *@name model
-	 *@access public
-	*/
+	 * @param ViewAccessableData|null $model
+	 * @return null|string
+	 */
 	public function model($model = null) {
 		if(!is_object($this->model_inst))
 			$this->modelInst($model);
@@ -138,13 +111,10 @@ class adminItem extends AdminController implements PermProvider {
 	/**
 	 * creates model-inst
 	 *
-	 * @name createModelInst
-	 * @access public
-	 * @return DataObject|null|gObject|ViewAccessAbleData
+	 * @param ViewAccessableData|null $firstModel
+	 * @return DataObject|gObject|null|ViewAccessAbleData
 	 */
 	public function modelInst($firstModel = null) {
-		
-		
 		if(isset($firstModel) && is_object($firstModel)) {
 			$this->autoSelectModel(true, $firstModel);
 			return $this->model_inst;
@@ -154,7 +124,6 @@ class adminItem extends AdminController implements PermProvider {
 		
 		if(count($this->models) == 1)
 		{
-
 			$firstModel = ArrayLib::first($this->models);
 			if(!is_object($this->model_inst))
 				$this->model_inst = $this->decorateModel(DataObject::get($firstModel, $this->filter), array(), $this);
@@ -186,14 +155,11 @@ class adminItem extends AdminController implements PermProvider {
 	/**
 	 * gives back a instance if this controller with the given model
 	 *
-	 * @name selectModel
-	 * @access public
 	 * @param string $name
 	 * @param bool $onThis set model for this instance or create new instance.
 	 * @return adminItem
 	 */
 	public function selectModel($name, $onThis = false) {
-		
 		if(!is_object($name)) {
 			if(!isset($this->modelInstances[$name])) {
 				return $this;
@@ -295,7 +261,6 @@ class adminItem extends AdminController implements PermProvider {
 	 * we provide all methods of the model-controller, too
 	 * method_exists-overloading-api of @see Object
 	 *
-	 * @name    __cancall
 	 * @param    string $methodName
 	 * @return bool
 	 */
@@ -321,12 +286,9 @@ class adminItem extends AdminController implements PermProvider {
 	/**
 	 * add-form
 	 *
-	 * @name cms_add
-	 * @access public
 	 * @return mixed|string
 	 */
-	public function cms_add() {	
-		
+	public function cms_add() {
 		$model = clone $this->modelInst();
 		
 		if($this->getParam("model")) {
@@ -371,8 +333,6 @@ class adminItem extends AdminController implements PermProvider {
 	/**
 	 * alias for cms_add
 	 *
-	 * @name add
-	 * @access public
 	 * @return mixed|string
 	 */
 	public function add() {
@@ -382,8 +342,6 @@ class adminItem extends AdminController implements PermProvider {
 	/**
 	 *  provides no perms
 	 *
-	 * @name providePerms
-	 * @access public
 	 * @return array
 	 */
 	public function providePerms()
@@ -394,8 +352,6 @@ class adminItem extends AdminController implements PermProvider {
 	/**
 	 * generates the normal controller for the model inst
 	 *
-	 * @name getControllerInst
-	 * @access public
 	 * @return bool|Controller|null
 	 */
 	public function getControllerInst() {
@@ -410,8 +366,6 @@ class adminItem extends AdminController implements PermProvider {
 	/**
 	 * action-handler with implemented auto-model-selecting
 	 *
-	 * @name handleAction
-	 * @access public
 	 * @param string $actionName
 	 * @return false|mixed|null
 	 */
@@ -428,8 +382,6 @@ class adminItem extends AdminController implements PermProvider {
 	/**
 	 * gets a controller for a record in a given model
 	 *
-	 * @name handleRecordForModel
-	 * @access public
 	 * @return string
 	 */
 	public function handleRecordForModel() {
@@ -457,8 +409,6 @@ class adminItem extends AdminController implements PermProvider {
 	/**
 	 * handles a request with a given record in it's controller
 	 *
-	 * @name record
-	 * @access public
 	 * @return string
 	 */
 	public function record() {

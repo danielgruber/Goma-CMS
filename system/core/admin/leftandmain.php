@@ -103,15 +103,18 @@ class LeftAndMain extends AdminItem {
 		Resources::addData("var adminURI = '".$this->adminURI()."'; var marked_node = '".$this->marked."';");
 		
 		$data = $this->ModelInst();
-		
-		if(defined("LAM_CMS_ADD"))
-			$this->ModelInst()->addmode = 1;
-		
+
+		if(is_array($content)) {
+			echo "<pre>";
+			print_r(debug_backtrace());
+			exit;
+		}
+
 		$output = $data->customise(
 			array(
 				"CONTENT"	=> $content,
 				"activeAdd" => $this->getParam("model"),
-				"SITETREE" => $this->createTree($search),
+				"SITETREE" => $this->createTree($this->getParam("searchtree")),
 				"searchtree" => $this->getParam("searchtree"),
 				"ROOT_NODE" => $this->getRootNode(),
 				"TREEOPTIONS" => $this->generateTreeOptions()
@@ -362,9 +365,9 @@ class LeftAndMain extends AdminItem {
 	 *
 	 * @name decorateModel
 	 * @access public
-	 * @param object - model
-	 * @param array additional
-	 * @param gObject|null controller
+	 * @param object $model
+	 * @param array $add
+	 * @param gObject|null $controller
 	 * @return DataObject
 	 */
 	public function decorateModel($model, $add = array(), $controller = null) {
@@ -402,8 +405,6 @@ class LeftAndMain extends AdminItem {
 	/**
 	 * adds content-class left-and-main to content-div
 	 *
-	 * @name contentClass
-	 * @access public
 	 * @return string
 	 */
 	public function contentClass() {
@@ -413,14 +414,9 @@ class LeftAndMain extends AdminItem {
 	/**
 	 * add-form
 	 *
-	 * @name cms_add
-	 * @access public
 	 * @return string
 	 */
-	public function cms_add() {	
-		
-		define("LAM_CMS_ADD", 1);
-		
+	public function cms_add() {
 		$model = clone $this->modelInst();
 		
 		if($this->getParam("model")) {
@@ -444,7 +440,6 @@ class LeftAndMain extends AdminItem {
 	/**
 	 * index-method
 	 *
-	 * @name index
 	 * @return string
 	 */
 	public function index() {

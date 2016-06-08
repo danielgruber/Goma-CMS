@@ -10,6 +10,7 @@
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
+// TODO: Improve this
 class RequestForm extends gObject {
 	/**
 	 * title of the form
@@ -166,7 +167,7 @@ class RequestForm extends gObject {
 		$data = $this->realform->render();
 
 		if(!is_string($data)) {
-			return Director::serve($data);
+			return $data;
 		}
 
 		$this->dialog->closeButton = false;
@@ -186,7 +187,6 @@ class RequestForm extends gObject {
 	}
 
 	public function submit($data) {
-
 		$arr = array();
 		foreach($this->fields as $field) {
 			if(isset($data[$field->name])) {

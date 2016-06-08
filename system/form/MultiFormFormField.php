@@ -13,6 +13,12 @@ defined("IN_GOMA") OR die();
  * @version 1.0
  */
 class MultiFormFormField extends ClusterFormField {
+
+    /**
+     * @param
+     */
+    const SESSION_PREFIX = "MultiFormField";
+
     /**
      * @var bool
      */
@@ -24,12 +30,45 @@ class MultiFormFormField extends ClusterFormField {
     protected $allowAddOfKind = false;
 
     /**
+     * @return HTMLNode
+     */
+    public function createNode()
+    {
+        $node = parent::createNode();
+        $node->type = "hidden";
+        $node->val(1);
+
+        return $node;
+    }
+
+    /**
+     * @return array|string|ViewAccessableData
+     */
+    public function getModel() {
+        if (!isset($this->hasNoValue) || !$this->hasNoValue) {
+            if($this->POST) {
+                if (!$this->isDisabled() && $this->parent && ($postData = $this->parent->getFieldPost($this->PostName()))) {
+                    if($model = Core::globalSession()->get(self::SESSION_PREFIX . $this->PostName())) {
+                        return $this->model = $model;
+                    }
+                }
+
+                if ($this->model == null) {
+                    return $this->parent ? $this->parent->getFieldValue($this->dbname) : null;
+                }
+            }
+        }
+
+        return $this->model;
+    }
+
+    /**
      * validates value.
      */
     public function getValue() {
         parent::getValue();
 
-        if(!is_a($this->value, "DataSet") || !is_a($this->value, "DataObjectSet")) {
+        if(!is_a($this->value, "DataSet") && !is_a($this->value, "DataObjectSet")) {
             throw new InvalidArgumentException("Value for MultiFormFormField must be DataSet or DataObjectSet.");
         }
 
@@ -48,6 +87,19 @@ class MultiFormFormField extends ClusterFormField {
 
             $this->add($field);
         }
+
+        Core::globalSession()->set(self::SESSION_PREFIX . $this->PostName(), $this->value);
+    }
+
+    /**
+     * @param FormFieldRenderData $info
+     * @return HTMLNode
+     */
+    public function field($info = null)
+    {
+
+
+        return $this->container;
     }
 
     /**

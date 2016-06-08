@@ -834,18 +834,19 @@ class Controller extends RequestHandler
     /**
      * prompts the user
      *
-     * @name prompt
-     * @param string - message
-     * @param array - validators
-     * @param string - default value
-     * @param string|null - redirect on cancel button
+     * @param $messsage
+     * @param array $validators
+     * @param string $defaultValue
+     * @param null|bool $redirectOnCancel
+     * @param null|bool $usePwdField
+     * @return RequestForm
      */
-    public function prompt($title, $validators = array(), $value = null, $redirectOnCancel = null, $usePwdField = null)
+    public function prompt($messsage, $validators = array(), $defaultValue = null, $redirectOnCancel = null, $usePwdField = null)
     {
-        $field = ($usePwdField) ? new PasswordField("prompt_text", $title, $value) : new TextField("prompt_text", $title, $value);
+        $field = ($usePwdField) ? new PasswordField("prompt_text", $messsage, $defaultValue) : new TextField("prompt_text", $messsage, $defaultValue);
         $form = new RequestForm($this, array(
             $field
-        ), lang("prompt", "Insert Text..."), md5("prompt_" . $title . $this->classname), $validators, null, $redirectOnCancel);
+        ), lang("prompt", "Insert Text..."), md5("prompt_" . $messsage . $this->classname), $validators, null, $redirectOnCancel);
         $data = $form->get();
         return $data["prompt_text"];
     }
