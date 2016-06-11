@@ -47,8 +47,10 @@ class AjaxExternalForm extends FormField {
 
 	/**
 	 * renders the field
+	 * @param FormFieldRenderData $info
+	 * @return HTMLNode
 	 */
-	public function field() {
+	public function field($info) {
 		$this->callExtending("beforeField");
 
 		$this->container->append(new HTMLNode("label", array(), $this->title));

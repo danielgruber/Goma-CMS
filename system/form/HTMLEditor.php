@@ -17,8 +17,10 @@ class HTMLEditor extends Textarea {
 
     /**
      * generates the field
+     * @param FormFieldRenderData $info
+     * @return HTMLNode
      */
-    public function field()
+    public function field($info)
     {
         $this->callExtending("beforeField");
 

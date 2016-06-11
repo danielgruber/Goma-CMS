@@ -16,18 +16,14 @@ class templateInfo extends gObject
 	
 	/**
 	 * cache for plists.
-	 *
-	 * @name 	plists
-	 * @access 	public
 	*/
 	protected static $plists = array();
 
 	/**
 	 * get contents of a plist-file of a template.
 	 *
-	 * @access 	public
 	 * @param 	string - name of the template
-	 * @return 	plist object
+	 * @return 	array object
 	*/
 	public static function get_plist_contents($template)
 	{
@@ -41,7 +37,6 @@ class templateInfo extends gObject
 	 * get array of a plist file
 	 * it also searchs for a screenshot.
 	 *
-	 * @access 	public
 	 * @param 	string - path to plist file
 	 * @return 	array - [key] = string
 	*/
@@ -121,9 +116,6 @@ class templateInfo extends gObject
 	
 	/**
 	 * gets all templates as an array not checking dependencies.
-	 *
-	 * @name 	getTemplates
-	 * @access 	public
 	*/
 	public static function getTemplates() 
 	{

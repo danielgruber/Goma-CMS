@@ -13,9 +13,7 @@ class AutoFormField extends FormField {
 	/**
 	 * real field
 	 *
-	 *@name field
-	 *@access public
-	 *@var gObject
+	 * @var AbstractFormComponent
 	 */
 	public $field;
 
@@ -29,12 +27,13 @@ class AutoFormField extends FormField {
 	/**
 	 * calls setForm on the form-field of this class
 	 *
+	 * @param AbstractFormComponentWithChildren $form
 	 * @return $this
 	 */
 	public function setForm(&$form) {
 		parent::setForm($form);
-		if(is_object($this->form()->result))
-			$this->field = $this->form()->result->doObject($this->name)->formField($this->title);
+		if(is_object($this->form()->model))
+			$this->field = $this->form()->model->doObject($this->name)->formField($this->title);
 		else
 			$this->field = $this->form()->getModel()->doObject($this->name)->formField($this->name);
 
@@ -45,12 +44,11 @@ class AutoFormField extends FormField {
 
 	/**
 	 * generates a field
-	 *
-	 *@name field
-	 *@access public
+	 * @param FormFieldRenderData $info
+	 * @return HTMLNode
 	 */
-	public function field() {
-		return $this->field->field();
+	public function field($info) {
+		return $this->field->field($info);
 	}
 
 }

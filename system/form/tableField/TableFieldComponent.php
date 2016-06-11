@@ -24,19 +24,19 @@ interface TableField_HTMLProvider extends TableFieldComponent {
 	/**
 	 * provides HTML-fragments
 	 *
-	 * @name provideFragments
-     * @param TableField $tableField
-     * @return array
-	*/
+	 * @param TableField $tableField
+	 * @return array
+	 */
 	public function provideFragments($tableField);
 }
 
 interface TableField_DataManipulator extends TableFieldComponent {
 	/**
 	 * manipulates the dataobjectset
-	 *
-	 *@name manipulate
-	*/
+	 * @param TableField $tableField
+	 * @param DataSet|DataObjectSet $data
+	 * @return
+	 */
 	public function manipulate($tableField, $data);
 }
 
@@ -44,42 +44,43 @@ interface TableField_ColumnProvider extends TableFieldComponent {
 	/**
 	 * add columns in the order you want to have them in the table
 	 * you have full control over all the columns through the reference of $columns
-	 *
-	 *@name augmentColumns
-	 *@access public
-	*/
+	 * @param TableField $tableField
+	 * @param array $columns
+	 * @return
+	 */
 	public function augmentColumns($tableField, &$columns);
 	
 	/**
 	 * similiar to augmentColumns, but with the difference that you just give back an unsorted list of all the columns you handle in this class
 	 *
-	 *@name getColumnsHandled
-	 *@access public
+	 * @param TableField $tableField
 	*/
 	public function getColumnsHandled($tableField);
-	
+
 	/**
 	 * returns the content of the given column to the given record
-	 *
-	 *@name getColumnContent
-	 *@access public
-	*/
+	 * @param TableField $tableField
+	 * @param DataObject $record
+	 * @param string $columnName
+	 * @return
+	 */
 	public function getColumnContent($tableField, $record, $columnName);
-	
+
 	/**
 	 * returns the attributes of the given column to the given record
-	 *
-	 *@name getColumnAttributes
-	 *@access public
-	*/
+	 * @param TableField $tableField
+	 * @param string $columnName
+	 * @param DataObject $record
+	 * @return
+	 */
 	public function getColumnAttributes($tableField, $columnName, $record);
-	
+
 	/**
 	 * returns the meta-data of the given column for all records
-	 *
-	 *@name getColumnMetadata
-	 *@access public
-	*/
+	 * @param TableField $tableField
+	 * @param string $columnName
+	 * @return
+	 */
 	public function getColumnMetadata($tableField, $columnName);
 }
 
@@ -88,20 +89,26 @@ interface TableField_URLHandler extends TableFieldComponent {
 	 * provides url-handlers as in controller, but without any permissions-functionallity
 	 *
 	 * this is NOT namespaced, so please be unique
-	 *
-	 *@name getURLHandlers
-	 *@access public
-	*/
+	 * @param TableField $tableField
+	 * @return
+	 */
 	public function getURLHandlers($tableField);
 }
 
 interface TableField_ActionProvider extends TableFieldComponent {
 	/**
 	 * provide some actions of this tablefield
-	 *
-	 *@name getActions
-	 *@access public
-	*/
+	 * @param TableField $tableField
+	 * @return
+	 */
 	public function getActions($tableField);
+
+	/**
+	 * @param TableField $tableField
+	 * @param string $actionName
+	 * @param array $arguments
+	 * @param DatAObject $data
+	 * @return mixed
+	 */
 	public function handleAction($tableField, $actionName, $arguments, $data);
 }

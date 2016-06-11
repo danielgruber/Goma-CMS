@@ -34,8 +34,10 @@ class HTMLAction extends FormAction
 
     /**
      * renders the field
-    */
-    public function field()
+     * @param FormFieldRenderData $info
+     * @return HTMLNode
+     */
+    public function field($info)
     {
         if (PROFILE) Profiler::mark("FormAction::field");
 

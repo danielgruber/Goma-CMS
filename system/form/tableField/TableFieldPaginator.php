@@ -52,7 +52,7 @@ class TableFieldPaginator implements TableField_HTMLProvider, TableField_DataMan
 		foreach($tableField->getData()->getPages() as $key => $data) {
 			if($data["black"] == false) {
 				$action = new TableField_FormAction($tableField, "setPage" . $data["page"], $data["page"], "setPage", array("page" => $data["page"]));
-				$view->push(array("field" => $action->field()));
+				$view->push(array("fieldbutton" => $action->exportFieldInfo()->ToRestArray(true)));
 			} else {
 				if($data["page"] == "...") {
 					$view->push(array("field" => '<span class="left-out-pages">' . $data["page"] . '</span>'));

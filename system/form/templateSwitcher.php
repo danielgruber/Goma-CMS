@@ -33,8 +33,6 @@ class TemplateSwitcher extends FormField {
 	
 	/**
 	 * creates the hidden field to store the value
-	 *
-	 *@name createNode
 	*/
 	public function createNode() {
 		$node = parent::createNode();
@@ -60,13 +58,13 @@ class TemplateSwitcher extends FormField {
 		
 		$this->content = $templates->customise(array("id" => $this->ID(), "containerid" => $this->divID()))->renderWith("form/templateSwitcher/templateSwitcher.html");
 	}
-	
+
 	/**
 	 * build the field
-	 *
-	 *@name field
-	*/
-	public function field() {
+	 * @param FormFieldRenderData $info
+	 * @return HTMLNode
+	 */
+	public function field($info) {
 		if(PROFILE) Profiler::mark("FormField::field");
 				
 		$this->callExtending("beforeField");

@@ -3,7 +3,15 @@
 		<div class="pages">	
 		</div>
 		<div class="actions">
-			$field
+			<% CONTROL field.jsRenderResources() as $resource %>
+				<% INCLUDE_JS $resource %>
+			<% ENDCONTROL %>
+
+			<% CONTROL field.cssRenderResources() as $resource %>
+				<% INCLUDE_CSS $resource %>
+			<% ENDCONTROL %>
+
+			$field.field
 		</div>
 		<div lass="clear"></div>
 	</th>

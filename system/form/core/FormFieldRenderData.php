@@ -181,7 +181,7 @@ class FormFieldRenderData extends gObject implements IRestResponse {
     }
 
     /**
-     * @param FormField $field
+     * @param AbstractFormComponent $field
      * @return $this
      */
     public function setField($field)

@@ -34,7 +34,7 @@ class JavaScriptField extends FormField
 				parent::__construct($name, null, null, $form);
 				$this->js = $js;
 		}
-		public function field()
+		public function field($info)
 		{
 				return null;
 		}

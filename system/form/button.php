@@ -44,15 +44,10 @@ class Button extends FormAction {
 
 	/**
 	 * renders the field
-	 *@name field
-	 *@access public
+	 * @param FormFieldRenderData $info
+	 * @return HTMLNode
 	 */
-	/**
-	 * renders the field
-	 *@name field
-	 *@access public
-	 */
-	public function field() {
+	public function field($info) {
 		if(PROFILE)
 			Profiler::mark("FormAction::field");
 

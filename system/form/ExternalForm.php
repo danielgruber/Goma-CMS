@@ -48,8 +48,6 @@ class ExternalForm extends FormField {
 	}
 
 	/**
-	 *@name createNode
-	 *@access public
 	 */
 	public function createNode() {
 		$node = new HTMLNode("span", array("class" => "value"));
@@ -59,10 +57,10 @@ class ExternalForm extends FormField {
 
 	/**
 	 * renders the field
-	 *@name field
-	 *@access public
+	 * @param FormFieldRenderData $info
+	 * @return HTMLNode
 	 */
-	public function field() {
+	public function field($info) {
 		$this->callExtending("beforeField");
 
 		$this->container->append(new HTMLNode("label", array(), $this->title));

@@ -60,9 +60,9 @@ class HiddenField extends FormField
      * @param array|null $fieldErrors
      * @return FormFieldRenderData
      */
-    public function exportFieldInfo($fieldErrors = null)
+    public function exportBasicInfo($fieldErrors = null)
     {
-        $info = parent::exportFieldInfo($fieldErrors);
+        $info = parent::exportBasicInfo($fieldErrors);
 
         $info->setIsHidden(true);
 
@@ -72,9 +72,10 @@ class HiddenField extends FormField
     /**
      * renders the field
      *
+     * @param FormFieldRenderData $info
      * @return HTMLNode
      */
-    public function field()
+    public function field($info)
     {
         if (PROFILE) Profiler::mark("FormField::field");
 

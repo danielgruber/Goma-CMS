@@ -124,7 +124,7 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
             }
             $field->setForm($tableField->Form());
 
-            $fields->push(array("field" => $field->exportFieldInfo()->getRenderedField(), "name" => $columnField, "title" => $title));
+            $fields->push(array("field" => $field->exportFieldInfo()->ToRestArray(true), "name" => $columnField, "title" => $title));
         }
 
         return array(

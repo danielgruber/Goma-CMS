@@ -60,8 +60,10 @@ class LinkAction extends FormAction
 
     /**
      * renders the field
+     * @param FormFieldRenderData $info
+     * @return HTMLNode
      */
-    public function field()
+    public function field($info)
     {
         if (PROFILE) Profiler::mark("FormAction::field");
 

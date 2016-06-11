@@ -83,7 +83,7 @@ class PermissionField extends ClusterFormField {
      * @param FormFieldRenderData|null $info
      * @return HTMLNode
      */
-    public function field($info = null)
+    public function field($info)
     {
         if (is_object($this->inheritFrom) && is_a($this->inheritFrom, "Permission") && $this->inheritFrom->id != $this->value->id) {
             $title = isset($this->inheritTitle) ? ' (' . $this->inheritTitle . ')' : null;

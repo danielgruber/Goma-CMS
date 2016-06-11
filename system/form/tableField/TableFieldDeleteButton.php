@@ -105,7 +105,7 @@ class TableFieldDeleteButton implements TableField_ColumnProvider, TableField_Ac
 		$action->addClass("red button-clear");
 
 		$data = new ViewAccessableData();
-		return $data->customise(array("field" => $action->field()))->renderWith("form/tableField/deleteButton.html");
+		return $data->customise(array("field" => $action->exportFieldInfo()->ToRestArray(true)))->renderWith("form/tableField/deleteButton.html");
 	}
 
 	/**
@@ -136,6 +136,11 @@ class TableFieldDeleteButton implements TableField_ColumnProvider, TableField_Ac
 
 	/**
 	 * handles the actions
+	 * @param TableField $tableField
+	 * @param string $actionName
+	 * @param array $arguments
+	 * @param DatAObject $data
+	 * @return bool|GomaResponse
 	 */
 	public function handleAction($tableField, $actionName, $arguments, $data) {
 		if($actionName == "deletebtn_redirect") {

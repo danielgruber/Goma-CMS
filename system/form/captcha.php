@@ -23,27 +23,11 @@ class Captcha extends FormField {
 	}
 
 	/**
-	 * sets the validator
-	 * @name setForm
-	 * @access public
-	 * @return $this
-	 */
-	public function setForm(&$form) {
-		parent::setForm($form);
-		$this->form()->addValidator(new FormValidator( array(
-			$this,
-			"validate"
-		)), "captcha");
-
-		return $this;
-	}
-
-	/**
 	 * generates the field
-	 *@name field
-	 *@access public
+	 * @param FormFieldRenderData $info
+	 * @return HTMLNode
 	 */
-	public function field() {
+	public function field($info) {
 		$this->callExtending("beforeField");
 
 		$container = new HTMLNode("div");
@@ -72,8 +56,18 @@ class Captcha extends FormField {
 	}
 
 	/**
+	 * @throws FormInvalidDataException
+	 */
+	public function result()
+	{
+		if(!isset($_SESSION['goma_captcha_spam'], $this->getRequest()->post_params[$this->name]) || $_SESSION['goma_captcha_spam'] != $this->getRequest()->post_params[$this->name]) {
+			throw new FormInvalidDataException($this->name, lang("captcha_wrong", "The Code was wrong"));
+		}
+		return null;
+	}
+
+	/**
 	 * validates the captcha
-	 *@name validate
 	 */
 	public function validate() {
 		return (isset($_SESSION['goma_captcha_spam'], $_POST[$this->name]) && $_SESSION['goma_captcha_spam'] == $_POST[$this->name]) ? true : lang("captcha_wrong", "The Code was wrong");
@@ -81,9 +75,6 @@ class Captcha extends FormField {
 
 	/**
 	 * bind events
-	 *
-	 *@name JS
-	 *@access public
 	 */
 	public function JS() {
 		return '$(function(){
@@ -93,5 +84,4 @@ class Captcha extends FormField {
 				});
 			});';
 	}
-
 }

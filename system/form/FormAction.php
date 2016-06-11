@@ -84,11 +84,10 @@ class FormAction extends FormField implements FormActionHandler
     /**
      * renders the field
      *
-     * @name field
-     * @access public
+     * @param FormFieldRenderData $info
      * @return HTMLNode
      */
-    public function field()
+    public function field($info)
     {
         if (PROFILE) Profiler::mark("FormAction::field");
 

@@ -3,9 +3,17 @@
 <% ELSE %>
 <tr class="filter-header hidden">
 <% END %>
-	<% CONTROL Fields() %>
-		<td name="$fields.name.text()">
-			$fields.field
+	<% CONTROL Fields() as $field %>
+		<td name="$field.name">
+			<% CONTROL field.field.jsRenderResources() as $resource %>
+				<% INCLUDE_JS $resource %>
+			<% ENDCONTROL %>
+
+			<% CONTROL field.field.cssRenderResources() as $resource %>
+				<% INCLUDE_CSS $resource %>
+			<% ENDCONTROL %>
+
+			$field.field.field
 		</td>
 	<% ENDCONTROL %>
 </tr>

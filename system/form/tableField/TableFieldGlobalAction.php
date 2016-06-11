@@ -46,10 +46,10 @@ class TableFieldGlobalAction implements TableField_HTMLProvider, TableField_Acti
 		$view = new ViewAccessableData();
 		if($tableField->getConfig()->getComponentByType('TableFieldPaginator')) {
 			return array(
-				"pagination-footer-right" => $view->customise(array("field" => $action->field()))->renderWith("form/tableField/globalAction.html")
+				"pagination-footer-right" => $view->customise(array("field" => $action->exportFieldInfo()->ToRestArray(true)))->renderWith("form/tableField/globalAction.html")
 			);
 		} else {
-			return array("footer" => $view->customise(array("field" => $action->field()))->renderWith("form/tableField/globalActionWithFooter.html"));
+			return array("footer" => $view->customise(array("field" => $action->exportFieldInfo()->ToRestArray(true)))->renderWith("form/tableField/globalActionWithFooter.html"));
 		}
 	}
 

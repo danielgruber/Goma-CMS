@@ -17,25 +17,18 @@
 class tableField extends FormField {
 	/**
 	 * configuration of this field
-	 *
-	 *@name config
-	 *@access protected
 	*/
 	protected $config;
 	
 	/**
 	 * dataset
 	 *
-	 *@name data
-	 *@access protected
+	 * @var DataSet|DataObjectSet
 	*/
 	protected $data;
 	
 	/**
 	 * if you want to override dataclass $this->data->dataClass
-	 *
-	 *@name modelClass
-	 *@access protected
 	*/
 	protected $modelClass;
 	
@@ -49,18 +42,17 @@ class tableField extends FormField {
 	
 	/**
 	 * data-manipulators
-	 *
-	 *@name customDataFields
-	 *@access protected
 	*/
 	protected $customDataFields = array();
-	
+
 	/**
 	 * constructor
-	 *
-	 *@name __construct
-	 *@access public
-	*/
+	 * @param string|null $name
+	 * @param string|null $title
+	 * @param DataSet|DataObjectSet|null $dataset
+	 * @param TableFieldConfig|null $config
+	 * @param AbstractFormComponentWithChildren|null $parent
+	 */
 	public function __construct($name = null, $title = null, $dataset = null, $config = null, $parent = null) {
 		if(isset($config) && is_a($config, "tableFieldConfig")) {
 			$this->config = $config;
@@ -122,24 +114,19 @@ class tableField extends FormField {
 	
 	/**
 	 * gets the name of the model the tablefield holds
-	 *
-	 *@name getModel
-	 *@access public
 	*/
-	public function getModel() {
+	public function getModelClass() {
 		if(isset($this->modelClass))
 			return $this->modelClass;
 		
-		return $this->data->dataClass;
+		return $this->data->dataClass();
 	}
-	
+
 	/**
 	 * sets the modelClass
-	 *
-	 *@name setModel
-	 *@access public
-	*/
-	public function setModel($model = null) {
+	 * @param null $model
+	 */
+	public function setModelClass($model = null) {
 		$this->modelClass = $model;
 	}
 
@@ -320,17 +307,23 @@ class tableField extends FormField {
 		return count($this->columnDispatch);
 	}
 
-    /**
-     * renders the field
-     *
-     * @return HTMLNode|string
-     */
-	public function field() {
-		
-		Resources::add("tablefield.less", "css");
-		Resources::add("system/form/tableField/tableField.js");
-		Resources::add("font-awsome/font-awesome.css", "css");
-		
+	public function addRenderData($info, $notifyField = true)
+	{
+		parent::addRenderData($info, $notifyField);
+
+		$info->addCSSFile("tablefield.less");
+		$info->addCSSFile("font-awsome/font-awesome.css");
+		$info->addJSFile("system/form/tableField/tableField.js");
+	}
+
+	/**
+	 * renders the field
+	 *
+	 * @param FormFieldRenderData $info
+	 * @return HTMLNode|string
+	 * @throws Exception
+	 */
+	public function field($info) {
 		$columns = $this->getColumns();
 		
 		// first init all
@@ -357,9 +350,10 @@ class tableField extends FormField {
 
 		
 		// get fragments
-		foreach($this->getComponents() as $item) {			
+		foreach($this->getComponents() as $item) {
 			if($item instanceof TableField_HTMLProvider) {
-                /** @var array $item */
+				/** @var TableField_HTMLProvider $item */
+                /** @var array $fragments */
                 $fragments = $item->provideFragments($this);
 				if($fragments) foreach($fragments as $k => $v) {
 					$k = strtolower($k);
@@ -584,16 +578,5 @@ class tableField extends FormField {
 		}
 
 		throw new LogicException("Can't handle action $actionName, hasAction should have catched this.");
-	}
-
-    /**
-     * used for deserialization of objects in goma.
-     */
-    public function __wakeup() {
-		parent::__wakeup();
-		
-		/*if(is_object($this->data) && method_exists($this->data, "__wakeup")) {
-			$this->data->__wakeup();
-		}*/
 	}
 }

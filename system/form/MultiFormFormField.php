@@ -95,10 +95,8 @@ class MultiFormFormField extends ClusterFormField {
      * @param FormFieldRenderData $info
      * @return HTMLNode
      */
-    public function field($info = null)
+    public function field($info)
     {
-
-
         return $this->container;
     }
 

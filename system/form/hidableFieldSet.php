@@ -1,23 +1,21 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma form framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 21.07.2014
-  * $Version: 1.1
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * Fieldset which can be hidden.
+ *
+ * @package        Goma\libs\WYSIWYG
+ *
+ * @author        Goma-Team
+ * @license        GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @version        1.3.2
+ */
 class HidableFieldSet extends FieldSet {
 	/**
 	 * adds the javascript and other resources to this field
-	 *
-	 *@name field
-	 *@access public
-	*/
-	public function field() {
+	 * @param FormFieldRenderData $info
+	 * @return HTMLNode
+	 */
+	public function field($info) {
 		$this->container->addClass("hidableFieldSet");
 		$this->input->setTag("label");
 		
@@ -26,19 +24,16 @@ class HidableFieldSet extends FieldSet {
 
 		Resources::add("hidableFieldSet.css", "css", "tpl");
 		
-		return parent::field();
+		return parent::field($info);
 	}
 	
 	/**
 	 * javascript
-	 *
-	 *@name JS
-	 *@access public
 	*/
 	public function JS() {
 		$js = parent::JS();
 		
-		$open = ($this->POST && isset($this->form()->post[$this->PostName()]) && $this->form()->post[$this->PostName()] == 1);
+		$open = ($this->POST && isset($this->form()->getRequest()->post_params[$this->PostName()]) && $this->form()->getRequest()->post_params[$this->PostName()] == 1);
 
 
 		$js .= '$(function(){

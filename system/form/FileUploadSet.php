@@ -497,7 +497,7 @@ class FileUploadSet extends FormField
      * @param FileUploadSetRenderData|null $info
      * @return HTMLNode
      */
-    public function field($info = null)
+    public function field($info)
     {
         if (PROFILE) Profiler::mark("FormField::field");
 

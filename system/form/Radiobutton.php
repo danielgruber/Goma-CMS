@@ -102,11 +102,10 @@ class RadioButton extends FormField
     /**
      * renders the field
      *
-     * @name field
-     * @access public
+     * @param FormFieldRenderData $info
      * @return HTMLNode
      */
-    public function field()
+    public function field($info)
     {
         $this->callExtending("beforeField");
 

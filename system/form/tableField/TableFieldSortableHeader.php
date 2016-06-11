@@ -69,7 +69,7 @@ class TableFieldSortableHeader implements TableField_HTMLProvider, TableField_Da
 				$field = new HTMLField($columnField, '<span class="non-sortable">' . $title . '</span>');
 			}
 
-			$fields->push(array("field" => $field->field(), "name" => $columnField, "title" => $title));
+			$fields->push(array("field" => $field->exportFieldInfo()->ToRestArray(true), "name" => $columnField, "title" => $title));
 		}
 
 		return array(
@@ -79,8 +79,9 @@ class TableFieldSortableHeader implements TableField_HTMLProvider, TableField_Da
 
 	/**
 	 * manipulates the dataobjectset
-	 *
-	 *@name manipulate
+	 * @param TableField $tableField
+	 * @param DataObjectSet|DataSet $data
+	 * @return $this|DataObjectSet|DataSet
 	 */
 	public function manipulate($tableField, $data) {
 		$state = $tableField->state->tableFieldSortableHeader;

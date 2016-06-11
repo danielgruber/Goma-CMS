@@ -150,30 +150,17 @@ class ObjectRadioButton extends RadioButton  {
     }
 
     /**
-     * this function generates some JSON for using client side stuff.
-     *
-     * @name exportJSON
-     * @param array|null $fieldErrors
-     * @return FormFieldRenderData
-     */
-    public function exportFieldInfo($fieldErrors = null) {
-        $info = $this->exportBasicInfo($fieldErrors);
-        $this->addRenderData($info);
-
-        $this->callExtending("afterRenderFormResponse", $info);
-
-        return $info;
-    }
-
-    /**
      * adds render data.
      * @param FormFieldRenderData $info
+     * @param bool $notifyField
      */
-    public function addRenderData($info)
+    public function addRenderData($info, $notifyField = true)
     {
-        parent::addRenderData($info);
+        parent::addRenderData($info, false);
 
         $info->addJSFile("system/form/ObjectRadioButton.js");
+
+        $this->callExtending("afterRenderFormResponse", $info);
     }
 
     /**

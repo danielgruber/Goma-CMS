@@ -35,9 +35,10 @@ class infoField extends HTMLField
     /**
      * generates the field
      *
+     * @param FormFieldRenderData $info
      * @return HTMLNode
      */
-    public function field()
+    public function field($info)
     {
         if (PROFILE) Profiler::mark("FormField::field");
 

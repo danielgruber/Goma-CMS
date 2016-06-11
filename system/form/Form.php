@@ -22,7 +22,7 @@ require_once (FRAMEWORK_ROOT . "form/Hiddenfield.php");
  * @method enableActions
  * @method disableActions
  */
-class Form extends AbstractFormComponent {
+class Form extends AbstractFormComponentWithChildren {
 
 	/**
 	 * session-prefix for form.
@@ -34,31 +34,6 @@ class Form extends AbstractFormComponent {
 	 * submission-method
 	 */
 	protected $dataHandlers = array();
-
-	/**
-	 * all available fields in this form
-	 *
-	 * @var array
-	 */
-	public $fields = array();
-
-	/**
-	 * already rendered fields
-	 */
-	public $renderedFields = array();
-
-	/**
-	 * all fields the form has to generate from this object
-	 * @var arrayList
-	 */
-	public $showFields;
-
-	public $fieldSort;
-
-	/**
-	 * @var ArrayList<FormField>
-	 */
-	public $fieldList;
 
 	/**
 	 * actions
@@ -142,7 +117,7 @@ class Form extends AbstractFormComponent {
 	 */
 	public function __construct($controller = null, $name = null, $fields = array(), $actions = array(), $validators = array(), $request = null, $model = null) {
 
-		parent::__construct();
+		parent::__construct($name, $fields, $model);
 
 		if(!isset($controller))
 			return;
@@ -150,15 +125,9 @@ class Form extends AbstractFormComponent {
 		if(PROFILE)
 			Profiler::mark("form::__construct");
 
-		$this->fieldList = new ArrayList();
-
-		$this->name = strtolower($name);
-
 		$this->initWithRequest($controller, $request);
 
-		$this->setModel($model);
-
-		$this->addFields($fields, $actions, $validators);
+		$this->addFields(array(), $actions, $validators);
 
 		$this->checkForRestore();
 
@@ -233,7 +202,6 @@ class Form extends AbstractFormComponent {
 			$data = GlobalSessionManager::globalSession()->get(self::SESSION_PREFIX . "." . strtolower($this->name));
 			$this->useStateData = $data->useStateData;
 			$this->result = $data->result;
-			$this->post = $data->post;
 			$this->state = $data->state;
 			$this->restorer = $data;
 
@@ -814,77 +782,6 @@ class Form extends AbstractFormComponent {
 	}
 
 	/**
-	 * removes a field
-	 * @param string $field
-	 */
-	public function remove($field) {
-		if(isset($this->fields[$field])) {
-			unset($this->fields[$field]);
-		}
-
-		if(is_string($field)) {
-			$this->fieldList->remove($this->fieldList->find("name", $field, true));
-		}
-
-		if(isset($this->actions[$field])) {
-			unset($this->actions[$field]);
-		}
-
-		foreach($this->fieldList as $_field) {
-			if(is_subclass_of($_field, "FieldSet")) {
-				$_field->remove($field);
-			}
-		}
-	}
-
-	/**
-	 * adds a field.
-	 *
-	 * @param 	FormField $field
-	 * @param 	integer $sort sort, 0 is on top, and count means after which field the
-	 * field is rendered, null means default
-	 * @param 	String $to where the field is added, for example as a subfield to a
-	 * tab
-	 */
-	public function add($field, $sort = null, $to = null) {
-		if($to == "this" || !isset($to)) {
-			// if it already exists, we should remove it.
-			if($this->fieldList->find("name", $field->name)) {
-				$this->fieldList->remove($this->fieldList->find("name", $field->name));
-			}
-
-			if(isset($sort))
-				$this->fieldList->move($field, $sort, true);
-			else
-				$this->fieldList->add($field);
-
-			$field->setForm($this);
-		} else {
-			if(isset($this->$to)) {
-				$this->$to->add($field, $sort);
-			}
-		}
-	}
-
-	/**
-	 * adds a field. alias to @see Form::add.
-	 */
-	public function addField($field, $sort = null, $to = null) {
-		$this->add($field, $sort, $to);
-	}
-
-	/**
-	 * adds a field to a given fieldset.
-	 *
-	 * @param 	String $fieldname fieldset
-	 * @param 	FormField $field the field
-	 * @param 	int $sort
-	 */
-	public function addToField($fieldname, $field, $sort = 0) {
-		$this->add($field, $sort, $fieldname);
-	}
-
-	/**
 	 * adds an action
 	 *@name addAction
 	 *@access public
@@ -973,133 +870,6 @@ class Form extends AbstractFormComponent {
 		return !!$this->secretKey;
 	}
 
-	/**
-	 * gets the field by the given name or returns null.
-	 *
-	 * @param string $name
-	 * @return FormField|null
-	 */
-	public function getField($name) {
-
-		return (isset($this->fields[strtolower($name)])) ? $this->fields[strtolower($name)] : null;
-	}
-
-	/**
-	 * returns if a field exists in this form
-	 *
-	 * @param string $name
-	 * @return bool
-	 */
-	public function hasField($name) {
-		return (isset($this->fields[strtolower($name)]));
-	}
-
-	/**
-	 * returns if a field exists and wasn't rendered in this form
-	 *
-	 * @name isField
-	 * @access public
-	 * @return bool
-	 */
-	public function isFieldToRender($name) {
-		return ((isset($this->fields[strtolower($name)])) && !isset($this->renderedFields[strtolower($name)]));
-	}
-
-	/**
-	 * registers a field in this form
-	 *
-	 * @param string $name
-	 * @param FormField $field
-	 */
-	public function registerField($name, $field) {
-		$this->fields[strtolower($name)] = $field;
-	}
-
-	/**
-	 * unregisters the field from this form
-	 * this means that the field will not be rendered
-	 *
-	 * @param string $name
-	 */
-	public function unRegister($name) {
-		unset($this->fields[strtolower($name)]);
-	}
-
-	/**
-	 * registers the field as rendered
-	 *
-	 * @param string $name
-	 */
-	public function registerRendered($name) {
-		$this->renderedFields[strtolower($name)] = true;
-	}
-
-	/**
-	 * removes the registration as rendered
-	 *
-	 * @param string $name
-	 */
-	public function unregisterRendered($name) {
-		unset($this->renderedFields[strtolower($name)]);
-	}
-
-	/**
-	 * unregisters a field.
-	 *
-	 * @param string $name
-	 * @return void
-	 */
-	public function unregisterField($name) {
-		if(isset($this->fields[$name])) {
-			unset($this->fields[$name]);
-		}
-	}
-
-	//!Overloading
-	/**
-	 * Overloading
-	 */
-
-	/**
-	 * returns a field in this form by name
-	 * it's not relevant how deep the field is in this form if the field is *not*
-	 * within a ClusterFormField
-	 */
-	public function __get($offset) {
-		if($offset == "result") {
-			Core::Deprecate(2.0, "getResult");
-
-			return $this->result;
-		}
-		return $this->getField($offset);
-	}
-
-	/**
-	 * currently set doesn't do anything
-	 *
-	 *@name __set
-	 *@access public
-	 */
-	public function __set($offset, $value) {
-		// currently there is no option to overload a form with fields
-	}
-
-	/**
-	 * returns if a field exists in this form
-	 *
-	 * @param string $offset
-	 * @return bool
-	 */
-	public function __isset($offset) {
-		return $this->hasField($offset);
-	}
-
-	/**
-	 * removes a field from this form
-	 */
-	public function __unset($offset) {
-		unset($this->fields[$offset]);
-	}
 
 	//!Mostly internal APIs
 	/**
@@ -1107,17 +877,6 @@ class Form extends AbstractFormComponent {
 	 */
 	public function saveToSession() {
 		GlobalSessionManager::globalSession()->set(self::SESSION_PREFIX . "." . strtolower($this->name), $this);
-	}
-
-	/**
-	 * sorts the items
-	 */
-	public function sort($a, $b) {
-		if($this->fieldSort[$a->name] == $this->fieldSort[$b->name]) {
-			return 0;
-		}
-
-		return ($this->fieldSort[$a->name] > $this->fieldSort[$b->name]) ? 1 : -1;
 	}
 
 	/**
@@ -1158,5 +917,15 @@ class Form extends AbstractFormComponent {
 	public function getSecretKey()
 	{
 		return $this->secretKey;
+	}
+
+	public function field($info)
+	{
+		throw new InvalidArgumentException("Can't add Form to a Form below.");
+	}
+
+	public function js()
+	{
+		// TODO: Implement js() method.
 	}
 }

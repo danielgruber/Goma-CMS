@@ -100,6 +100,7 @@ class FormField extends AbstractFormComponent {
      * creates field with maxlength.
      * @param string $name
      * @param string $title
+     * @param int $maxLength
      * @param mixed $value
      * @param Form|null $parent
      * @return static
@@ -130,13 +131,10 @@ class FormField extends AbstractFormComponent {
      */
     public function __construct($name = null, $title = null, $value = null, &$parent = null)
     {
-        parent::__construct();
+        parent::__construct($name, $value, $parent);
 
-        $this->name = $name;
-        $this->dbname = strtolower(trim($name));
         $this->title = $title;
         $this->placeholder = $title;
-        $this->model = $this->value = $value;
 
         $this->input = $this->createNode();
 
@@ -146,10 +144,6 @@ class FormField extends AbstractFormComponent {
 
         if ($this->fullSizedField)
             $this->container->addClass("fullSize");
-
-        if ($parent) {
-            $parent->add($this);
-        }
     }
 
     /**
@@ -182,11 +176,11 @@ class FormField extends AbstractFormComponent {
     /**
      * renders the field
      *
-     * @param FormFieldRenderData|null $info
+     * @param FormFieldRenderData $info
      * @return HTMLNode
      * @internal
      */
-    public function field($info = null)
+    public function field($info)
     {
         if (PROFILE) Profiler::mark("FormField::field");
 
@@ -230,46 +224,6 @@ class FormField extends AbstractFormComponent {
     }
 
     /**
-     * this function generates some JSON for using client side stuff.
-     *
-     * @param array|null $fieldErrors
-     * @return FormFieldRenderData
-     */
-    public function exportFieldInfo($fieldErrors = null) {
-        $info = $this->exportBasicInfo($fieldErrors);
-
-        $this->addRenderData($info);
-
-        return $info;
-    }
-
-    /**
-     * @param FormFieldRenderData $info
-     * @param bool $notifyField
-     */
-    public function addRenderData($info, $notifyField = true) {
-        try {
-            $this->form()->registerRendered($info->getName());
-
-            $this->callExtending("beforeRender", $info);
-
-            $fieldData = $this->field($info);
-
-            $info->setRenderedField($fieldData)
-                ->setJs($this->js());
-
-            if ($notifyField) {
-                $this->callExtending("afterRenderFormResponse", $info);
-            }
-        } catch(Exception $e) {
-            if($info->getRenderedField() == null) {
-                $info->setRenderedField(new HTMLNode("div", array("class" => "form_field")));
-            }
-            $info->getRenderedField()->append('<div class="error">' . $e->getMessage() . '</div>');
-        }
-    }
-
-    /**
      * exports basic field info.
      *
      * @param array|null $fieldErrors
@@ -280,20 +234,10 @@ class FormField extends AbstractFormComponent {
             $this->errors = $fieldErrors[strtolower($this->name)];
         }
 
-        return $this->createsRenderDataClass()
+        return parent::exportBasicInfo($fieldErrors)
             -> setMaxLength($this->maxLength)
             -> setRegexp($this->regexp)
-            -> setTitle($this->title)
-            -> setIsDisabled($this->disabled)
-            -> setField($this)
-            -> setHasError(count($this->errors) > 0);
-    }
-
-    /**
-     * @return FormFieldRenderData
-     */
-    protected function createsRenderDataClass() {
-        return FormFieldRenderData::create($this->name, $this->classname, $this->ID(), $this->divID());
+            -> setTitle($this->title);
     }
 
     /**
@@ -317,15 +261,13 @@ class FormField extends AbstractFormComponent {
 
     /**
      * sets the parent form-object
-     * @param Form $form
+     * @param AbstractFormComponentWithChildren $form
      * @param bool $renderAfterSetForm
      * @return $this
      */
     public function setForm(&$form, $renderAfterSetForm = true)
     {
         parent::setForm($form);
-
-        $this->form()->registerField($this->name, $this);
         if (is_object($this->input)) {
             $this->input->name = $this->PostName();
         }
@@ -356,93 +298,6 @@ class FormField extends AbstractFormComponent {
     {
         if (is_object($this->input)) $this->input->id = $this->ID();
         if (is_object($this->container)) $this->container->id = $this->divID();
-    }
-
-    /**
-     * removes this field
-     */
-    public function remove()
-    {
-        $this->form()->remove($this->name);
-    }
-
-    /**
-     * generates an id for the field
-     *
-     * @return string
-     */
-    public function ID()
-    {
-        return "form_field_" . $this->classname . "_" . md5($this->form()->name() . $this->title) . "_" . $this->name;
-    }
-
-    /**
-     * generates an id for the div
-     *
-     * @return string
-     */
-    public function divID()
-    {
-        return $this->ID() . "_div";
-    }
-
-    /**
-     * the url for ajax
-     *
-     * @return string
-     */
-    public function externalURL()
-    {
-        return $this->form()->externalURL() . "/" . $this->name;
-    }
-
-    /**
-     * returns the post-name
-     *
-     * @return string
-     */
-    public function PostName()
-    {
-        return isset($this->overridePostName) ? strtolower($this->overridePostName) : strtolower($this->name);
-    }
-
-    /**
-     * disables this field
-     */
-    public function disable()
-    {
-        if (is_object($this->input))
-            $this->input->disabled = "disabled";
-
-        $this->disabled = true;
-        return $this;
-    }
-
-    /**
-     * reenables the field
-     */
-    public function enable()
-    {
-        unset($this->input->disabled);
-        $this->disabled = false;
-
-        return $this;
-    }
-
-    /**
-     * getter-method for state
-     * @param string $name
-     * @return mixed
-     */
-    public function __get($name)
-    {
-        if (strtolower($name) == "state") {
-            return $this->form()->state->{$this->classname . $this->name};
-        } else if (property_exists($this, $name)) {
-            return $this->$name;
-        } else {
-            throw new LogicException("\$" . $name . " is not defined in " . $this->classname . " with name " . $this->name . ".");
-        }
     }
 
     /**

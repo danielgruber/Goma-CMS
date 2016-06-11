@@ -45,10 +45,11 @@ class Select extends RadioButton
 	}
 
 	/**
+	 * @param FormFieldRenderData $info
 	 * @return HTMLNode
 	 */
-	public function field() {
-		$container = parent::field();
+	public function field($info) {
+		$container = parent::field($info);
 
 		$node = $container->getNode(1);
 		$node->removeClass("inputHolder");

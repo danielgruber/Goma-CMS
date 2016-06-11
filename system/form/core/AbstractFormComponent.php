@@ -41,11 +41,10 @@ abstract class AbstractFormComponent extends RequestHandler {
      */
     public $useStateData = false;
 
-
     /**
      * the parent field of this field, e.g. a form or a fieldset
      *
-     * @var AbstractFormComponent
+     * @var AbstractFormComponentWithChildren
      */
     protected $parent;
 
@@ -83,14 +82,43 @@ abstract class AbstractFormComponent extends RequestHandler {
     public $hasNoValue = false;
 
     /**
+     * @var array[]
+     */
+    protected $errors;
+
+    /**
+     * created field.
+     *
+     * @param string $name
+     * @param mixed $model
+     * @param Form|null $parent
+     */
+    public function __construct($name = null, $model = null, &$parent = null)
+    {
+        parent::__construct();
+
+        $this->name = $name;
+        $this->dbname = strtolower(trim($name));
+        $this->setModel($model);
+
+        if ($parent) {
+            $parent->add($this);
+        }
+    }
+
+    /**
      * sets the parent form-object
-     * @param AbstractFormComponent $form
+     * @param AbstractFormComponentWithChildren $form
      * @param bool $renderAfterSetForm
      * @return $this
      */
-    public function setForm(&$form, $renderAfterSetForm = true)
-    {
+    public function setForm(&$form, $renderAfterSetForm = true) {
+        if(!is_a($form, "AbstractFormComponentWithChildren")) {
+            throw new InvalidArgumentException("Form must be a AbstractFormComponentWithChildren");
+        }
+
         $this->parent =& $form;
+        $this->parent->registerField($this->name, $this);
 
         return $this;
     }
@@ -162,10 +190,14 @@ abstract class AbstractFormComponent extends RequestHandler {
     }
 
     /**
-     * @return AbstractFormComponent
+     * @return AbstractFormComponentWithChildren
      */
     public function form() {
-        return $this->parent ? $this->parent->form() : $this;
+        if($this->parent) {
+            return $this->parent->form();
+        }
+
+        throw new LogicException("Field " . $this->name . " requires a form.");
     }
 
     /**
@@ -175,11 +207,10 @@ abstract class AbstractFormComponent extends RequestHandler {
      */
     public function externalURL()
     {
-        if($this->parent) {
-            return $this->form()->externalURL() . "/" . $this->name;
-        }
+        if($this->namespace)
+            return $this->namespace;
 
-        return $this->namespace;
+        return $this->form()->externalURL() . "/" . $this->name;
     }
 
     /**
@@ -189,6 +220,36 @@ abstract class AbstractFormComponent extends RequestHandler {
      */
     public function result() {
         return $this->getModel();
+    }
+
+    /**
+     * generates an id for the field
+     *
+     * @return string
+     */
+    public function ID()
+    {
+        $formId = $this->parent ? $this->parent->getName() : "";
+        return "form_field_" . $this->classname . "_" . $formId . "_" . $this->name;
+    }
+
+    /**
+     * generates an id for the div
+     *
+     * @return string
+     */
+    public function divID()
+    {
+        return $this->ID() . "_div";
+    }
+
+    /**
+     *
+     */
+    public function remove() {
+        if($this->parent) {
+            $this->parent->remove($this->name);
+        }
     }
 
     /**
@@ -264,5 +325,96 @@ abstract class AbstractFormComponent extends RequestHandler {
         $this->request = $oldRequest;
 
         return $output;
+    }
+
+    /**
+     * exports basic field info.
+     *
+     * @param array|null $fieldErrors
+     * @return FormFieldRenderData
+     */
+    public function exportBasicInfo($fieldErrors = null) {
+        if(isset($fieldErrors[strtolower($this->name)])) {
+            $this->errors = $fieldErrors[strtolower($this->name)];
+        }
+
+        return $this->createsRenderDataClass()
+            -> setIsDisabled($this->disabled)
+            -> setField($this)
+            -> setHasError(count($this->errors) > 0);
+    }
+
+    /**
+     * @param FormFieldRenderData $info
+     * @param bool $notifyField
+     */
+    public function addRenderData($info, $notifyField = true) {
+        try {
+            $this->form()->registerRendered($info->getName());
+
+            $this->callExtending("beforeRender", $info);
+
+            $fieldData = $this->field($info);
+
+            $info->setRenderedField($fieldData)
+                ->setJs($this->js());
+
+            if ($notifyField) {
+                $this->callExtending("afterRenderFormResponse", $info);
+            }
+        } catch(Exception $e) {
+            if($info->getRenderedField() == null) {
+                $info->setRenderedField(new HTMLNode("div", array("class" => "form_field")));
+            }
+            $info->getRenderedField()->append('<div class="error">' . $e->getMessage() . '</div>');
+        }
+    }
+
+    /**
+     * this function generates some JSON for using client side stuff.
+     *
+     * @param array|null $fieldErrors
+     * @return FormFieldRenderData
+     */
+    final public function exportFieldInfo($fieldErrors = null) {
+        $info = $this->exportBasicInfo($fieldErrors);
+
+        $this->addRenderData($info);
+
+        return $info;
+    }
+
+    /**
+     * @param FormFieldRenderData $info
+     * @return HTMLNode
+     */
+    abstract public function field($info);
+
+    /**
+     * @return string
+     */
+    abstract public function js();
+
+    /**
+     * @return FormFieldRenderData
+     */
+    protected function createsRenderDataClass() {
+        return FormFieldRenderData::create($this->name, $this->classname, $this->ID(), $this->divID());
+    }
+
+    /**
+     * getter-method for state
+     * @param string $name
+     * @return mixed
+     */
+    public function __get($name)
+    {
+        if (strtolower($name) == "state") {
+            return $this->form()->state->{$this->classname . $this->name};
+        } else if (property_exists($this, $name)) {
+            return $this->$name;
+        } else {
+            throw new LogicException("\$" . $name . " is not defined in " . $this->classname . " with name " . $this->name . ".");
+        }
     }
 }

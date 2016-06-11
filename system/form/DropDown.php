@@ -349,11 +349,11 @@ class DropDown extends FormField {
 	/**
 	 * renders the field for the Form-renderer.
 	 *
-	 * @access public
+	 * @param FormFieldRenderData $info
 	 * @return HTMLNode Object of HTMLNode, which can be rendered with @link
 	 * HTMLNode::render
 	 */
-	public function field() {
+	public function field($info) {
 		if(PROFILE)
 			Profiler::mark("FormField::field");
 
