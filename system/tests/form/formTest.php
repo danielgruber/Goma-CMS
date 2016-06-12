@@ -233,4 +233,33 @@ class FormTest extends GomaUnitTest implements TestAble {
 			}
 		}
 	}
+
+	public function testcheckForRestore() {
+		$session = GlobalSessionManager::globalSession();
+		$mock = new MockSessionManager();
+		GlobalSessionManager::__setSession($mock);
+
+		$form = new Form(new Controller(), "blub");
+		$this->assertEqual($mock->functionCalls, array(
+			array("hasKey", array("form_restore.blub")),
+			array("hasKey", array("form_state_blub"))
+		));
+
+		$this->assertIsA($form->state, "FormState");
+
+		$mock->functionCalls = array();
+		$mock->session["form_state_blah"] = array(
+			"test" => 1
+		);
+		$form = new Form(new Controller(), "blah");
+		$this->assertEqual($mock->functionCalls, array(
+			array("hasKey", array("form_restore.blah")),
+			array("hasKey", array("form_state_blah")),
+			array("get", array("form_state_blah"))
+		));
+		$this->assertIsA($form->state, "FormState");
+		$this->assertEqual($form->state->test, 1);
+
+		GlobalSessionManager::__setSession($session);
+	}
 }

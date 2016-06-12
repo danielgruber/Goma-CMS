@@ -12,13 +12,19 @@
 class FormState extends gObject {
     protected $data;
 
+    /**
+     * FormState constructor.
+     * @param array $data
+     */
     function __construct($data = array()) {
+        if(!is_array($data))
+            throw new InvalidArgumentException("FormState Constructor requires first argument to be array.");
         $this->data = $data;
     }
 
     function __get($name) {
         if(!isset($this->data[$name]))
-            $this->data[$name] = new FormState;
+            $this->data[$name] = new FormState();
         if(is_array($this->data[$name]))
             $this->data[$name] = new FormState($this->data[$name]);
         return $this->data[$name];
@@ -39,6 +45,9 @@ class FormState extends gObject {
             return json_encode($this->toArray());
     }
 
+    /**
+     * @return array
+     */
     function toArray() {
         $output = array();
         foreach($this->data as $k => $v) {
