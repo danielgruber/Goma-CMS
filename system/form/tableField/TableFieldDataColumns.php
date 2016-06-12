@@ -71,14 +71,13 @@ class TableFieldDataColumns implements TableField_ColumnProvider
 	/**
 	 * returns the display-fields
 	 *
-	 * @name getDisplayFields
-	 * @access public
+	 * @param TableField $tableField
 	 * @return array
 	 */
-	public function getDisplayFields(TableField $tableField)
+	public function getDisplayFields($tableField)
 	{
-		if (empty($this->displayFields) && gObject::method_exists($tableField->getModel(), "summaryFields")) {
-			return gObject::instance($tableField->getModel())->summaryFields();
+		if (empty($this->displayFields) && gObject::method_exists($tableField->getModelClass(), "summaryFields")) {
+			return gObject::instance($tableField->getModelClass())->summaryFields();
 		}
 
 		return $this->displayFields;
@@ -123,9 +122,8 @@ class TableFieldDataColumns implements TableField_ColumnProvider
 	/**
 	 * add columns in the order you want to have them in the table
 	 * you have full control over all the columns through the reference of $columns
-	 *
-	 * @name augmentColumns
-	 * @access public
+	 * @param TableField $tableField
+	 * @param array $columns
 	 */
 	public function augmentColumns($tableField, &$columns)
 	{
@@ -137,8 +135,7 @@ class TableFieldDataColumns implements TableField_ColumnProvider
 	/**
 	 * similiar to augmentColumns, but with the difference that you just give back an unsorted list of all the columns you handle in this class
 	 *
-	 * @name getColumnsHandled
-	 * @access public
+	 * @param TableField $tableField
 	 * @return array
 	 */
 	public function getColumnsHandled($tableField)

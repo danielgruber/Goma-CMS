@@ -142,7 +142,7 @@ abstract class gObject
     public static function method_exists($class, $method)
     {
         if(!$method || !$class) {
-            throw new InvalidArgumentException("Method must be set and a string.");
+            throw new InvalidArgumentException("Method must be set and a string. " . $class . "::" . $method . " asked for.");
         }
 
         if (PROFILE) {
