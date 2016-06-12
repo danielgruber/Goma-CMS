@@ -141,7 +141,8 @@ class AjaxSubmitButton extends FormAction {
 					$response->addErrorField($error->getField());
 				} else {
 					if($error->getMessage()) {
-						$response->addError(lang($error->getMessage(), $error->getMessage()));
+						$prev = $error->getPrevious() ?  " " . $error->getPrevious()->getMessage() : "";
+						$response->addError(lang($error->getMessage(), $error->getMessage()) . $prev);
 					}
 				}
 			}

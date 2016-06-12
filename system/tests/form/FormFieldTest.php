@@ -32,13 +32,15 @@ class FormFieldTest extends GomaUnitTest implements TestAble {
         $field = FormField::create($name, $title, $value, $parent);
 
         $this->assertEqual($field->getName(), $name);
-        $this->assertEqual($field->value, $value);
+        $this->assertEqual($field->getModel(), $value);
         $this->assertEqual($field->getTitle(), $title);
 
         if($parent != null) {
             $this->assertEqual($field->form(), $parent);
         } else {
-            $this->assertEqual($field->form(), $field);
+            $this->assertThrows(function() use($field) {
+                $field->form();
+            }, "LogicException");
         }
 
         $this->assertEqual($field->PostName(), $name);

@@ -1,15 +1,14 @@
 <?php
+defined("IN_GOMA") OR die();
+
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@Copyright (C) 2009 -  2012 Goma-Team
-  * last modified: 17.02.13
-  * $Version 1.0
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * Template-Switcher.
+ *
+ * @author Goma-Team
+ * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package Goma\Form
+ * @version 1.0.5
+ */
 class TemplateSwitcher extends FormField {
 	/**
 	 * constructor
@@ -42,9 +41,6 @@ class TemplateSwitcher extends FormField {
 	
 	/**
 	 * renders the field
-	 *
-	 *@name renderAfterSetForm
-	 *@access public
 	*/
 	public function renderAfterSetForm() {
 		$templates = new DataSet();

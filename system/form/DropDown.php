@@ -138,7 +138,7 @@ class DropDown extends FormField {
 			}
 
 			if($this->model !== null && $this->model !== false && !is_object($this->model)) {
-				if(is_array($this->value)) {
+				if(is_array($this->model)) {
 					$this->dataset = $this->model;
 				} else {
 					$this->dataset = array($this->model);

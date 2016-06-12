@@ -1,4 +1,5 @@
 <?php defined("IN_GOMA") OR die();
+
 /**
  * this class provides some methods to check permissions of the current activated group or user
  *
@@ -13,9 +14,14 @@
  * @property int id
  * @property string type
  * @property string password
+ * @property string name
+ * @property int invert_groups
+ * @property ManyMany_DataObjectSet groups
  */
 class Permission extends DataObject
 {
+    const ID = "Permission";
+
     /**
      * disable sort
      * @var bool
@@ -24,9 +30,6 @@ class Permission extends DataObject
 
     /**
      * defaults
-     *
-     * @name defaults
-     * @access public
      */
     static $default = array(
         "type" => "admins"
@@ -34,9 +37,6 @@ class Permission extends DataObject
 
     /**
      * all permissions, which are available in this object
-     *
-     * @name providedPermissions
-     * @access public
      */
     public static $providedPermissions = array(
         "superadmin" => array(
@@ -50,16 +50,11 @@ class Permission extends DataObject
 
     /**
      * cache for reordered permissions
-     *
-     * @name reorderedPermissions
      */
     static $reorderedPermissions;
 
     /**
      * fields of this set
-     *
-     * @name db_fields
-     * @access public
      */
     static $db = array(
         "name" => "varchar(100)",
@@ -71,9 +66,6 @@ class Permission extends DataObject
 
     /**
      * groups-relation of this set
-     *
-     * @name many_many
-     * @access public
      */
     static $many_many = array(
         "groups" => "group"
@@ -81,9 +73,6 @@ class Permission extends DataObject
 
     /**
      * indexes
-     *
-     * @name indexes
-     * @access public
      */
     static $index = array(
         "name" => "INDEX"
@@ -98,17 +87,12 @@ class Permission extends DataObject
 
     /**
      * perm-cache
-     *
-     * @name perm_cache
-     * @access private
      */
     private static $perm_cache = array();
 
     /**
      * adds available Permission-groups
-     *
-     * @name addPermissions
-     * @access public
+     * @param $perms
      */
     public static function addPermissions($perms)
     {
@@ -118,7 +102,6 @@ class Permission extends DataObject
     /**
      * reorders all permissions as in hierarchy
      *
-     * @name reOrderedPermissions
      * @return array
      */
     public static function reorderedPermissions()
@@ -153,8 +136,6 @@ class Permission extends DataObject
     /**
      * helper which gets all children for given permission
      *
-     * @name reorderedPermissionsHelper
-     * @access protected
      * @return array
      */
     protected static function reorderedPermissionsHelper($perm)
@@ -290,7 +271,8 @@ class Permission extends DataObject
     public function setParentID($parentid)
     {
         $this->setField("parentid", $parentid);
-        if ($this->parentid != 0 && $perm = DataObject::get_by_id("Permission", $this->parentid)) {
+        /** @var Permission $perm */
+        if ($this->parentid != 0 && $perm = DataObject::get_by_id(self::ID, $this->parentid)) {
             if ($this->hasChanged()) {
                 $this->type = $perm->type;
                 $this->password = $perm->password;
@@ -305,9 +287,8 @@ class Permission extends DataObject
 
     /**
      * writing
-     *
-     * @name onBeforeWrite
-     * @access public
+     * @param ModelWriter $modelWriter
+     * @throws FormInvalidDataException
      */
     public function onBeforeWrite($modelWriter)
     {
@@ -328,6 +309,10 @@ class Permission extends DataObject
                 $this->groups = $this->groups();
                 $this->type = "groups";
             }
+        }
+
+        if(!in_array($this->type, array("all", "users", "groups", "admins", "password"))) {
+            throw new FormInvalidDataException("type", "Type of permission must be a valid type. " . $this->type . " given.");
         }
 
         parent::onBeforeWrite($modelWriter);
@@ -432,8 +417,6 @@ class Permission extends DataObject
     /**
      * preserve Defaults
      *
-     * @name preserveDefaults
-     * @åccess public
      * @return bool|void
      */
     public function preserveDefaults($prefix = DB_PREFIX, &$log)
@@ -447,9 +430,7 @@ class Permission extends DataObject
 
     /**
      * sets the type
-     *
-     * @name setType
-     * @access public
+     * @param string $type
      */
     public function setType($type)
     {
@@ -479,10 +460,6 @@ class Permission extends DataObject
             case "users":
                 $type = "users";
                 break;
-
-            default:
-                $type = "users";
-                break;
         }
 
         $this->setField("type", $type);
@@ -490,8 +467,7 @@ class Permission extends DataObject
 
     /**
      * checks whether a user have the rights for an action
-     * @name rechte
-     * @param numeric - needed rights
+     * @param int $needed rights
      * @return bool
      */
     function right($needed)
@@ -520,8 +496,6 @@ class Permission extends DataObject
     /**
      * checks if the current user has the permission to do this
      *
-     * @name hasPermission
-     * @access public
      * @return bool
      */
     public function hasPermission()
@@ -563,31 +537,6 @@ class Permission extends DataObject
         }
 
         return (member::$groupType > 0);
-    }
-
-    // DEPRECATED API!
-    public function inheritor()
-    {
-        Core::deprecate("2.1", "inheritor is deprecated, use parent instead");
-        return $this->parent;
-    }
-
-    public function inheritorid()
-    {
-        Core::deprecate("2.1", "inheritorid is deprecated, use parentid instead");
-        return $this->parentid;
-    }
-
-    public function setinheritor($parent)
-    {
-        Core::deprecate("2.1", "inheritor is deprecated, use parent instead");
-        $this->setField("parent", $parent);
-    }
-
-    public function setinheritorid($parentid)
-    {
-        Core::deprecate("2.1", "inheritorid is deprecated, use parentid instead");
-        $this->setField("parentid", $parentid);
     }
 }
 StaticsManager::addSaveVar("Permission", "providedPermissions");

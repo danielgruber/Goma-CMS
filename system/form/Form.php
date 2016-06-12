@@ -17,8 +17,6 @@ require_once (FRAMEWORK_ROOT . "form/Hiddenfield.php");
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @version 2.4.2
  *
- * @method disable
- * @method reenable
  * @method enableActions
  * @method disableActions
  */
@@ -80,13 +78,6 @@ class Form extends AbstractFormComponentWithChildren {
 	 * @var array
 	 */
 	public $result = array();
-
-	/**
-	 * url of this form
-	 *
-	 * @var string
-	 */
-	public $url;
 
 	/**
 	 * restore-class
@@ -175,13 +166,13 @@ class Form extends AbstractFormComponentWithChildren {
 		}
 
 		$this->controller = $controller;
-
-		$this->url = str_replace('"', '', $_SERVER["REQUEST_URI"]);
 		$this->request = isset($request) ? $request : $controller->getRequest();
 
 		if(!isset($this->request)) {
 			$this->request = new Request(isset($_POST) ? "post" : "get", URL, $_GET, $_POST);
 		}
+
+		$this->url = str_replace('"', '', ROOT_PATH . BASE_SCRIPT . $this->getRequest()->url . URLEND);
 
 		if(isset($this->controller->originalNamespace) && $this->controller->originalNamespace) {
 			$this->namespace = ROOT_PATH . BASE_SCRIPT . $this->controller->originalNamespace . "/forms/form/" . $this->name;
@@ -659,40 +650,23 @@ class Form extends AbstractFormComponentWithChildren {
 	 * @return array
 	 */
 	protected function fetchResultWithDataHandlers() {
-		$allowed_result = array();
 		$result = array();
 
 		// get data
-		/** @var FormField $field */
-		foreach($this->fields as $field) {
+		/** @var AbstractFormComponent $field */
+		foreach($this->fieldList as $field) {
 			if($field->name != "secret_" . $this->ID()) {
-				$fieldResult = $field->result();
-
-				$result[$field->dbname] = $fieldResult;
-				$allowed_result[$field->dbname] = true;
+				$field->argumentResult($result);
 			}
 		}
 
-		if(is_object($result) && method_exists($result, "to_array")) {
-			$result = $result->to_array();
-		}
-
-		// validate result
-		$realresult = array();
-		// now check which fields has edited
-		foreach($result as $key => $value) {
-			if(isset($allowed_result[$key])) {
-				$realresult[$key] = $value;
-			}
-		}
-
-		$this->callExtending("getResult", $realresult);
+		$this->callExtending("getResult", $result);
 
 		foreach($this->getDataHandlers() as $callback) {
-			$realresult = call_user_func_array($callback, array($realresult, $this));
+			$result = call_user_func_array($callback, array($result, $this));
 		}
 
-		return $realresult;
+		return $result;
 	}
 
 	/**

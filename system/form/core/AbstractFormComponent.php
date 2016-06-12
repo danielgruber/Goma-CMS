@@ -109,10 +109,9 @@ abstract class AbstractFormComponent extends RequestHandler {
     /**
      * sets the parent form-object
      * @param AbstractFormComponentWithChildren $form
-     * @param bool $renderAfterSetForm
      * @return $this
      */
-    public function setForm(&$form, $renderAfterSetForm = true) {
+    public function setForm(&$form) {
         if(!is_a($form, "AbstractFormComponentWithChildren")) {
             throw new InvalidArgumentException("Form must be a AbstractFormComponentWithChildren");
         }
@@ -169,6 +168,8 @@ abstract class AbstractFormComponent extends RequestHandler {
         return null;
     }
 
+    static $i = 0;
+
     /**
      * @param string $field
      * @return null
@@ -177,6 +178,7 @@ abstract class AbstractFormComponent extends RequestHandler {
         if($this->parent) {
             return $this->parent->getFieldPost($field);
         }
+
 
         return isset($this->getRequest()->post_params[$field]) ? $this->getRequest()->post_params[$field] : null;
     }
@@ -197,7 +199,7 @@ abstract class AbstractFormComponent extends RequestHandler {
             return $this->parent->form();
         }
 
-        throw new LogicException("Field " . $this->name . " requires a form.");
+        throw new LogicException("Field " . $this->name . " requires a form. ");
     }
 
     /**
@@ -223,13 +225,20 @@ abstract class AbstractFormComponent extends RequestHandler {
     }
 
     /**
+     * @var array $result
+     */
+    public function argumentResult(&$result) {
+        $result[$this->dbname] = $this->result();
+    }
+
+    /**
      * generates an id for the field
      *
      * @return string
      */
     public function ID()
     {
-        $formId = $this->parent ? $this->parent->getName() : "";
+        $formId = $this->parent ? $this->form()->getName() : "";
         return "form_field_" . $this->classname . "_" . $formId . "_" . $this->name;
     }
 
@@ -284,7 +293,7 @@ abstract class AbstractFormComponent extends RequestHandler {
      */
     public function PostName()
     {
-        return isset($this->overridePostName) ? strtolower($this->overridePostName) : strtolower($this->name);
+        return isset($this->overridePostName) ? strtolower($this->overridePostName) : $this->dbname;
     }
 
     /**
@@ -350,7 +359,9 @@ abstract class AbstractFormComponent extends RequestHandler {
      */
     public function addRenderData($info, $notifyField = true) {
         try {
-            $this->form()->registerRendered($info->getName());
+            if($this->parent) {
+                $this->parent->registerRendered($info->getName());
+            }
 
             $this->callExtending("beforeRender", $info);
 
@@ -416,5 +427,21 @@ abstract class AbstractFormComponent extends RequestHandler {
         } else {
             throw new LogicException("\$" . $name . " is not defined in " . $this->classname . " with name " . $this->name . ".");
         }
+    }
+
+    /**
+     * @return string
+     */
+    public function getDbname()
+    {
+        return $this->dbname;
+    }
+
+    /**
+     * @return AbstractFormComponentWithChildren
+     */
+    public function getParent()
+    {
+        return $this->parent;
     }
 }

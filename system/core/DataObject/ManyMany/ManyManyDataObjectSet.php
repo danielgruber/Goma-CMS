@@ -85,11 +85,11 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
      * @param array $data
      */
     public function setSourceData($data) {
-        if(!is_array($data))
-            throw new InvalidArgumentException("Source-Data of ManyManySet must be type of array.");
+        if(!is_array($data) && !is_null($data))
+            throw new InvalidArgumentException("Source-Data of ManyManySet must be type of array, but was " . gettype($data) . ".");
 
         $this->manyManyData = array();
-        foreach($data as $possibleId => $recordData) {
+        foreach((array) $data as $possibleId => $recordData) {
             if(is_array($recordData)) {
                 $this->manyManyData[$possibleId] = $recordData;
             } else {

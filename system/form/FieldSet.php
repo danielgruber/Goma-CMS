@@ -26,11 +26,16 @@ class FieldSet extends AbstractFormComponentWithChildren
     public $input;
 
     /**
+     * @var string
+     */
+    protected $title;
+
+    /**
      * creates field.
      * @param string $name
-     * @param array $fields
+     * @param AbstractFormComponent[] $fields
      * @param string $label
-     * @param null $parent
+     * @param AbstractFormComponentWithChildren $parent
      * @return static
      */
     public static function create($name, $fields, $label = null, $parent = null) {
@@ -38,15 +43,16 @@ class FieldSet extends AbstractFormComponentWithChildren
     }
 
     /**
-     * @name __construct
-     * @param string - name
-     * @param string - title
-     * @param mixed - value
-     * @param object - form
+     * @param string $name
+     * @param AbstractFormComponent[] $fields
+     * @param string $label
+     * @param AbstractFormComponentWithChildren $parent
      */
     public function __construct($name = null, $fields = array(), $label = null, &$parent = null)
     {
         parent::__construct($name, $fields, null, $parent);
+
+        $this->title = $label;
 
         $this->container = new HTMLNode("fieldset", array(
             "class" => "form_field " . $this->classname . " form_field_" . $name . ""
@@ -66,6 +72,15 @@ class FieldSet extends AbstractFormComponentWithChildren
     }
 
     /**
+     * @param null $fieldErrors
+     * @return $this
+     */
+    public function exportBasicInfo($fieldErrors = null)
+    {
+        return parent::exportBasicInfo($fieldErrors)->setTitle($this->title);
+    }
+
+    /**
      * renders the field
      *
      * @param FormFieldRenderData $info
@@ -78,6 +93,7 @@ class FieldSet extends AbstractFormComponentWithChildren
         $this->callExtending("beforeField");
 
         $this->container->append($this->input);
+        $this->container->attr("id", $this->divID());
 
         $this->callExtending("afterField");
 
@@ -101,5 +117,21 @@ class FieldSet extends AbstractFormComponentWithChildren
     public function js()
     {
         return null;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
+
+    /**
+     * @param string $title
+     */
+    public function setTitle($title)
+    {
+        $this->title = $title;
     }
 }

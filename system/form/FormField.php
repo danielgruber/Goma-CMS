@@ -241,6 +241,18 @@ class FormField extends AbstractFormComponent {
     }
 
     /**
+     * @param FormFieldRenderData $info
+     * @param bool $notifyField
+     */
+    public function addRenderData($info, $notifyField = true)
+    {
+        $this->getValue();
+        $this->renderAfterSetForm();
+
+        parent::addRenderData($info, $notifyField);
+    }
+
+    /**
      * this is the validation for this field if it is required
      *
      * @return bool
@@ -262,19 +274,14 @@ class FormField extends AbstractFormComponent {
     /**
      * sets the parent form-object
      * @param AbstractFormComponentWithChildren $form
-     * @param bool $renderAfterSetForm
      * @return $this
      */
-    public function setForm(&$form, $renderAfterSetForm = true)
+    public function setForm(&$form)
     {
         parent::setForm($form);
         if (is_object($this->input)) {
             $this->input->name = $this->PostName();
         }
-
-
-        $this->getValue();
-        if($renderAfterSetForm) $this->renderAfterSetForm();
 
         return $this;
     }
@@ -402,5 +409,28 @@ class FormField extends AbstractFormComponent {
     {
         $this->placeholder = $placeholder;
         return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function disable()
+    {
+        if(is_a($this->input, "HTMLNode")) {
+            $this->input->disabled = "disabled";
+        }
+
+        return parent::disable();
+    }
+
+    /**
+     * @return $this
+     */
+    public function enable()
+    {
+        if(is_a($this->input, "HTMLNode")) {
+            $this->input->removeAttr("disabled");
+        }
+        return parent::enable();
     }
 }

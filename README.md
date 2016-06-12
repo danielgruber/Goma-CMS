@@ -33,9 +33,6 @@ Team
 #### Quality & User-Experience
 * PatrickLemke - Patrick Lemke
 
-#### Server-Management
-* Nick - Dominik Hardtke
-
 Important External Libraries
 ------------------
 * jQuery - http://jquery.com

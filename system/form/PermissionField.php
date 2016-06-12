@@ -20,6 +20,7 @@ class PermissionField extends ClusterFormField {
 
     /**
      * inherit-from
+     * @var Permission
      */
     public $inheritFrom;
 
@@ -78,26 +79,20 @@ class PermissionField extends ClusterFormField {
     }
 
     /**
-     * generates the field
-     *
-     * @param FormFieldRenderData|null $info
-     * @return HTMLNode
+     * @param FormFieldRenderData $info
+     * @param bool $notifyField
      */
-    public function field($info)
+    public function addRenderData($info, $notifyField = true)
     {
-        if (is_object($this->inheritFrom) && is_a($this->inheritFrom, "Permission") && $this->inheritFrom->id != $this->value->id) {
+        if (is_object($this->inheritFrom) && is_a($this->inheritFrom, "Permission") && $this->inheritFrom->id != $this->getModel()->id) {
             $title = isset($this->inheritTitle) ? ' (' . $this->inheritTitle . ')' : null;
             $this->type->addOption("inherit", lang("inherit_from_parent") . $title, true);
-            if (is_object($this->inheritFrom) && $this->inheritFrom->id == $this->value->parentid) {
-                $this->type->value = "inherit";
+            if (is_object($this->inheritFrom) && $this->inheritFrom->id == $this->getModel()->parentid) {
+                $this->getField("type")->setModel("inherit");
             }
         }
 
-        if ($this->disabled) {
-            $this->fields["password"]->value = "*****";
-        }
-
-        return parent::field($info);
+        parent::addRenderData($info, $notifyField);
     }
 
     /**
@@ -112,29 +107,56 @@ class PermissionField extends ClusterFormField {
     }
 
     /**
+     * @return Permission
+     */
+    public function getModel()
+    {
+        $model = parent::getModel();
+
+        if(!isset($model)) {
+            $model = new Permission();
+        }
+
+        if(!is_a($model, "Permission")) {
+            throw new InvalidArgumentException("Model for Permissionfield must be Permission or null.");
+        }
+
+        return $model;
+    }
+
+    /**
+     * @param Permission $model
+     * @return mixed
+     */
+    protected function setInheritOnModel($model) {
+        if($model->type == "inherit" && $this->inheritFrom) {
+            if($this->inheritFrom->id != $model->parentid) {
+                /** @var Permission $val */
+                $val = clone $this->inheritFrom;
+                $val->consolidate();
+                $val->parentid = $this->inheritFrom->id;
+                $val->id = $model->id;
+                $val->versionid = $model->versionid;
+                $val->name = $model->name;
+                return $val;
+            } else {
+                $model->type = $this->inheritFrom->type;
+            }
+        } else {
+            $model->parentid = 0;
+            $model->parent = null;
+        }
+
+        return $model;
+    }
+
+    /**
      * result
      */
     public function result()
     {
-        if ($this->fields["type"]->result() == "inherit" && $this->inheritFrom && is_a($this->inheritFrom, "Permission")) {
-            $val = clone $this->inheritFrom;
-            $val->consolidate();
-            $val->parentid = $this->inheritFrom->id;
-            $val->id = $this->value->id;
-            $val->versionid = $this->value->versionid;
-            $val->name = $this->value->name;
-            $this->value = $val;
-        } else {
-            $this->value->parentid = 0;
-            $this->value->parent = null;
-            // now remodify it by the given fields
-            foreach ($this->fields as $val) {
-                if ($result = $val->result()) {
-                    $this->value->{$val->dbname} = $result;
-                }
-            }
-        }
+        $model = parent::result();
 
-        return $this->value;
+        return $this->setInheritOnModel($model);
     }
 }

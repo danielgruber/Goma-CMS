@@ -39,26 +39,6 @@ class TabSet extends FieldSet
     }
 
     /**
-     * renders the field
-     * @param FormFieldRenderData $info
-     * @return HTMLNode
-     */
-    public function field($info)
-    {
-        if (PROFILE) Profiler::mark("FieldSet::field");
-
-        $this->callExtending("beforeField");
-
-        $this->container->addClass("hidden");
-
-        $this->callExtending("afterField");
-
-        if (PROFILE) Profiler::unmark("FieldSet::field");
-
-        return $this->container;
-    }
-
-    /**
      * @param FormFieldRenderData $info
      * @param bool $notifyField
      */
@@ -97,7 +77,7 @@ class TabSet extends FieldSet
             /** @var TabRenderData $child */
             $child = $children[$i];
             $child->setSubmitName("tabs_" . $child->getName());
-            if ((isset($this->form()->post["tabs_" . $child->getName()])) && !$activeTabFound) {
+            if ((isset($this->form()->getRequest()->post_params["tabs_" . $child->getName()])) && !$activeTabFound) {
                 $activeTabFound = true;
                 setcookie("tabs_" . $this->name, $child->getName(), 0, "/");
                 $child->setTabActive(true);

@@ -26,7 +26,7 @@ abstract class AbstractFormComponentWithChildren extends AbstractFormComponent {
     /**
      * @var bool[]
      */
-    protected $renderedFields;
+    protected $renderedFields = array();
 
     /**
      * @var FormState
@@ -42,6 +42,11 @@ abstract class AbstractFormComponentWithChildren extends AbstractFormComponent {
      * @var ViewAccessableData
      */
     protected $templateView;
+
+    /**
+     * @var string
+     */
+    public $url;
 
     /**
      * AbstractFormComponentWithChildren constructor.
@@ -82,13 +87,13 @@ abstract class AbstractFormComponentWithChildren extends AbstractFormComponent {
                 $this->fieldList->add($field);
 
             $field->setForm($this);
-        } else if($field = $this->getField($to)) {
-            /** @var AbstractFormComponentWithChildren $field */
-            if(!is_a($field, "AbstractFormComponentWithChildren")) {
+        } else if($fieldToAddTo = $this->getField($to)) {
+            /** @var AbstractFormComponentWithChildren $fieldToAddTo */
+            if(!is_a($fieldToAddTo, "AbstractFormComponentWithChildren")) {
                 throw new InvalidArgumentException("Can't add field to field " . $to);
             }
 
-            $field->add($field, $sort);
+            $fieldToAddTo->add($field, $sort);
         }
     }
 
@@ -118,7 +123,7 @@ abstract class AbstractFormComponentWithChildren extends AbstractFormComponent {
      */
     public function getModel()
     {
-        return isset($this->model) ? (isset($this->parent) ? $this->parent->getModel() : null) : null;
+        return isset($this->model) ? (isset($this->parent) ? $this->parent->getModel() : $this->model) : null;
     }
 
     /**
@@ -168,12 +173,11 @@ abstract class AbstractFormComponentWithChildren extends AbstractFormComponent {
 
     /**
      * @param AbstractFormComponentWithChildren $form
-     * @param bool $renderAfterSetForm
      * @return $this
      */
-    public function setForm(&$form, $renderAfterSetForm = true)
+    public function setForm(&$form)
     {
-        parent::setForm($form, $renderAfterSetForm);
+        parent::setForm($form);
 
         if($this->fields) {
             foreach ($this->fields as $name => $field) {
@@ -242,8 +246,7 @@ abstract class AbstractFormComponentWithChildren extends AbstractFormComponent {
     /**
      * returns if a field exists and wasn't rendered in this form
      *
-     * @name isField
-     * @access public
+     * @param string $name
      * @return bool
      */
     public function isFieldToRender($name) {
@@ -285,9 +288,6 @@ abstract class AbstractFormComponentWithChildren extends AbstractFormComponent {
      * @param string $name
      */
     public function registerRendered($name) {
-        if($this->parent) {
-            $this->parent->registerRendered($name);
-        }
         $this->renderedFields[strtolower($name)] = true;
     }
 
@@ -297,10 +297,6 @@ abstract class AbstractFormComponentWithChildren extends AbstractFormComponent {
      * @param string $name
      */
     public function unregisterRendered($name) {
-        if($this->parent) {
-            $this->parent->unregisterField($name);
-        }
-
         unset($this->renderedFields[strtolower($name)]);
     }
 
@@ -326,6 +322,8 @@ abstract class AbstractFormComponentWithChildren extends AbstractFormComponent {
      */
     public function exportBasicInfo($fieldErrors = null)
     {
+        $this->url = str_replace('"', '', ROOT_PATH . BASE_SCRIPT . $this->getRequest()->url . URLEND);
+
         $data = parent::exportBasicInfo($fieldErrors);
 
         /** @var AbstractFormComponent $field */
@@ -350,8 +348,15 @@ abstract class AbstractFormComponentWithChildren extends AbstractFormComponent {
         if($info->getChildren()) {
             $data = array();
             foreach ($info->getChildren() as $child) {
-                if ($this->form()->isFieldToRender($child->getName())) {
-                    $child->getField()->addRenderData($child);
+                if ($this->isFieldToRender($child->getName())) {
+                    try {
+                        $child->getField()->addRenderData($child);
+                    } catch(Exception $e) {
+                        if($child->getRenderedField() == null) {
+                            $child->setRenderedField(new HTMLNode("div", array("class" => "form_field")));
+                        }
+                        $child->getRenderedField()->append('<div class="error">' . $e->getMessage() . '</div>');
+                    }
 
                     $data[] = $child->ToRestArray(true, false);
                 }
@@ -424,6 +429,17 @@ abstract class AbstractFormComponentWithChildren extends AbstractFormComponent {
             return $this->namespace;
         } else {
             throw new InvalidArgumentException("AbstractFormComponentWithChildren requires either parent or controller namespace.");
+        }
+    }
+
+    /**
+     * @param array $result
+     */
+    public function argumentResult(&$result)
+    {
+        /** @var AbstractFormComponent $field */
+        foreach($this->fieldList as $field) {
+            $field->argumentResult($result);
         }
     }
 }

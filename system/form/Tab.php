@@ -16,7 +16,7 @@ class Tab extends FieldSet
     /**
      * defines whether to render tab without fields.
      *
-     * @access public
+     * @var boolean
      */
     public $renderTabWithoutContent = false;
 
@@ -77,6 +77,6 @@ class Tab extends FieldSet
      */
     public function hidden()
     {
-        return (count($this->items) == 0);
+        return (count($this->fieldList) == count($this->renderedFields)) || $this->renderTabWithoutContent;
     }
 }

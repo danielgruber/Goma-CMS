@@ -1,15 +1,15 @@
-<?php
+<?php defined('IN_GOMA') OR die();
+
 /**
- * @package goma form framework
- * @link http://goma-cms.org
- * @license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
- * @author Goma-Team
- * last modified: 24.03.2012
- * $Version 1.0.2
+ * HTML-Field.
+ *
+ * @package     Goma\Form
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     1.1.1
  */
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
 class HTMLField extends FormField
 {
     /**
@@ -47,7 +47,6 @@ class HTMLField extends FormField
     public function field($info)
     {
         $this->callExtending("beforeField");
-
 
         $this->container->append($this->html);
         $this->container->addClass("hidden");
