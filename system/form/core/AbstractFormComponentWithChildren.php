@@ -14,7 +14,7 @@ defined("IN_GOMA") OR die();
  */
 abstract class AbstractFormComponentWithChildren extends AbstractFormComponent {
     /**
-     * @var ArrayList<AbstractFormComponent>
+     * @var ArrayList
      */
     protected $fieldList;
 
@@ -77,8 +77,8 @@ abstract class AbstractFormComponentWithChildren extends AbstractFormComponent {
     public function add($field, $sort = null, $to = null) {
         if($to == "this" || !isset($to)) {
             // if it already exists, we should remove it.
-            if($this->fieldList->find("name", $field->name)) {
-                $this->fieldList->remove($this->fieldList->find("name", $field->name));
+            if($this->fieldList->find("__fieldname", $field->name)) {
+                $this->fieldList->remove($this->fieldList->find("__fieldname", $field->name));
             }
 
             if(isset($sort))
@@ -158,7 +158,7 @@ abstract class AbstractFormComponentWithChildren extends AbstractFormComponent {
             }
 
             if (is_string($field)) {
-                $this->fieldList->remove($this->fieldList->find("name", $field, true));
+                $this->fieldList->remove($this->fieldList->find("__fieldname", $field, true));
             }
         }
 

@@ -43,8 +43,6 @@ class Group extends DataObject implements HistoryData, PermProvider
     /**
      * database-fields
      *
-     * @name db
-     * @access public
      * @var array
      */
     static $db = array(
@@ -57,9 +55,6 @@ class Group extends DataObject implements HistoryData, PermProvider
 
     /**
      * fields, whch are searchable
-     *
-     * @name search_fields
-     * @access public
      */
     static $search_fields = array(
         "name"
@@ -67,9 +62,6 @@ class Group extends DataObject implements HistoryData, PermProvider
 
     /**
      * belongs many-many
-     *
-     * @name belongs_many_many
-     * @access public
      */
     static $belongs_many_many = array(
         "users"       => "user",
@@ -83,17 +75,11 @@ class Group extends DataObject implements HistoryData, PermProvider
 
     /**
      * the table_name
-     *
-     * @name table_name
-     * @access public
      */
     static $table = "groups";
 
     /**
      * generates the form to create a new group
-     *
-     * @name getForm
-     * @access public
      */
     public function getForm(&$form) {
         $form->add(new TabSet("tabs", array(
@@ -136,13 +122,13 @@ class Group extends DataObject implements HistoryData, PermProvider
 
         // permissions
         if (Permission::check("canManagePermissions")) {
-            $form->general->add(new ClusterFormField("permissions", lang("rights")));
+            $form->general->add(new ClusterFormField("mypermissions", lang("rights")));
 
             foreach (Permission::$providedPermissions as $name => $data) {
                 $active = ($this->permissions(array("name" => $name))->count() > 0) ? 1 : 0;
-                $form->permissions->add(new Checkbox($name, parse_lang($data["title"]), $active));
+                $form->mypermissions->add(new Checkbox($name, parse_lang($data["title"]), $active));
                 if (isset($data["description"])) {
-                    $form->permissions->{$name}->info = parse_lang($data["description"]);
+                    $form->mypermissions->{$name}->info = parse_lang($data["description"]);
                 }
             }
 
@@ -157,15 +143,14 @@ class Group extends DataObject implements HistoryData, PermProvider
 
     /**
      * rewrites permissions to object
-     *
-     * @name handlePerms
-     * @access public
+     * @param array $data
+     * @return array
      */
     public function handlePerms($data)
     {
         $dataset = new ManyMany_DataObjectSet("permission");
-        $dataset->setData();
-        foreach ($data["permissions"] as $key => $val) {
+        $dataset->setFetchMode(DataObjectSet::FETCH_MODE_CREATE_NEW);
+        foreach ($data["mypermissions"] as $key => $val) {
             if ($val) {
                 // check for created
                 Permission::forceExisting($key);
@@ -187,7 +172,6 @@ class Group extends DataObject implements HistoryData, PermProvider
     /**
      * unsets the default group if this is now default.
      *
-     * @access public
      * @param ModelWriter $modelWriter
      * @throws MySQLException
      */

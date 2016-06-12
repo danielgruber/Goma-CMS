@@ -56,6 +56,12 @@ abstract class AbstractFormComponent extends RequestHandler {
     protected $name;
 
     /**
+     * name of this field for access-purpose.
+     * @internal
+     */
+    public $__fieldname;
+
+    /**
      * name of the data-relation
      *
      * @var string
@@ -98,6 +104,7 @@ abstract class AbstractFormComponent extends RequestHandler {
         parent::__construct();
 
         $this->name = $name;
+        $this->__fieldname = strtolower(trim($name));
         $this->dbname = strtolower(trim($name));
         $this->setModel($model);
 
