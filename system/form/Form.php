@@ -203,7 +203,7 @@ class Form extends AbstractFormComponentWithChildren {
 			GlobalSessionManager::globalSession()->remove("form_restore." . $this->name());
 		} else {
 			// get form-state
-			if(GlobalSessionManager::globalSession()->hasKey("form_state_" . $this->name) && $this->getRequest()->post_params) {
+			if(GlobalSessionManager::globalSession()->hasKey("form_state_" . $this->name)) {
 				$this->state = new FormState(GlobalSessionManager::globalSession()->get("form_state_" . $this->name));
 				$this->activateSecret($this->state->secret);
 			} else {
