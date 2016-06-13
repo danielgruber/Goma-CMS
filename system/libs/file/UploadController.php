@@ -47,7 +47,6 @@ class UploadController extends Controller {
      * @return mixed
      */
 	public function handleFile() {
-
 		$upload = Uploads::getFile($this->getParam("collection") . "/" . $this->getParam("hash") . "/" . $this->getParam("filename"));
 
 		if(!$upload) {
@@ -65,7 +64,7 @@ class UploadController extends Controller {
 		}
 
 		GlobalSessionManager::globalSession()->stopSession();
-		
-		return $upload->controller()->handleRequest($this->request);
+
+		return ControllerResolver::instanceForModel($upload)->handleRequest($this->request);
 	}	
 }

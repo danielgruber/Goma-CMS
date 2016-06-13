@@ -11,6 +11,8 @@
  * @version     2.0
  */
 class DataSet extends ArrayList {
+    const ID = "DataSet";
+
     /**
      * how many items per page
      *

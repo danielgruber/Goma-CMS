@@ -13,6 +13,8 @@
  */
 class DataObjectSet extends ViewAccessableData implements Countable {
 
+	const ID = "DataObjectSet";
+
 	const FETCH_MODE_CREATE_NEW = "fetch_create_new";
 	const FETCH_MODE_EDIT = "fetch_mode_edit";
 

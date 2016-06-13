@@ -21,16 +21,18 @@
                 </td>
                 <td class="filename" title="$upload.filename">
                     <% IF $upload.path %>
-                    <a href="$upload.path" target="_blank">$upload.filename</a>
+                    <a href="$upload.path" target="_blank">$upload.name</a>
                     <% ELSE %>
-                    $upload.filename
+                    $upload.name
                     <% END %>
                 </td>
                 <td class="actions">
+                    <% IF $upload.canDelete %>
                     <div class="delete">
                         <input type="checkbox" id="{$id}__delete_{$upload.id}" name="{$name}__delete_3028" value="1" />
                         <label for="{$id}__delete_{$upload.id}" ><% lang("delete") %></label>
                     </div>
+                    <% END %>
                 </td>
             </tr>
             <% ENDCONTROL %>

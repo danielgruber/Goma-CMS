@@ -8,7 +8,7 @@
  * @package Goma\Form
  * @version 2.0
  *
- * @property DataObjectSet $value
+ * @property DataObjectSet $model
  */
 class FileUploadSet extends FormField
 {
@@ -158,67 +158,15 @@ class FileUploadSet extends FormField
     }
 
     /**
-     * handles the request and saves the data to the session
-     *
-     * @param Request $request
-     * @param bool $subController
-     * @return false|string
-     */
-    public function handleRequest($request, $subController = false)
-    {
-        $data = parent::handleRequest($request, $subController);
-        $this->storeData();
-        return $data;
-    }
-
-    /**
-     * stores the data
-     */
-    public function storeData()
-    {
-        Core::globalSession()->set("FileUploadSet_" . $this->key, $this->value);
-        $this->Form()->saveToSession();
-    }
-
-    /**
      * gets the current value
      */
     public function getValue()
     {
-        if(!isset($this->value)) {
-            if (is_a($this->form()->result, "DataObject")) {
-                /** @var DataObject $object */
-                $object = $this->form()->result;
-                $relationShip = $object->getManyManyInfo($this->name);
-                $this->uploadClass = $relationShip->getTargetClass();
-            }
+        $this->model = $this->getModel();
 
-            if (isset($this->form()->post[$this->PostName() . "__key"]) && Core::globalSession()->hasKey("FileUploadSet_" . $this->form()->post[$this->PostName() . "__key"])) {
-                $this->value = Core::globalSession()->get("FileUploadSet_" . $this->form()->post[$this->PostName() . "__key"]);
-                $this->key = $this->form()->post[$this->PostName() . "__key"];
-            } else {
-                if (!isset($this->uploadClass)) {
-                    throw new LogicException("FileUploadSet only works with DataObjects and corresponding Many-Many-Connections.");
-                }
-
-                if (isset($this->form()->result->{$this->name})) {
-                    $this->key = randomString(10);
-                    $this->value = $this->form()->result->{$this->name};
-                    if (!is_object($this->value)) {
-                        throw new LogicException("ManyMany-Connection did not return Object.");
-                    }
-                } else {
-                    $this->value = new ManyMany_DataObjectSet($this->uploadClass);
-                    $this->value->setFetchMode(DataObjectSet::FETCH_MODE_CREATE_NEW);
-                }
-            }
+        if(!is_a($this->model, DataObjectSet::ID)) {
+            throw new InvalidArgumentException("FileUploadSet requires DataObjectSet as model.");
         }
-
-        if(!is_a($this->value, "DataObjectSet")) {
-            throw new InvalidArgumentException("FileUploadSet requires DataObjectSet as source.");
-        }
-
-        $this->checkForEvents();
     }
 
     /**
@@ -237,14 +185,14 @@ class FileUploadSet extends FormField
         }
 
         /** @var DataObject $record */
-        foreach ($this->value as $record) {
+        foreach ($this->model as $record) {
             if (isset($this->request->post_params[$this->PostName() . "__delete_" . $record->id])) {
-                if(is_a($this->value, "RemoveStagingDataObjectSet")) {
+                if(is_a($this->model, "RemoveStagingDataObjectSet")) {
                     /** @var ManyMany_DataObjectSet $manyManySet */
-                    $manyManySet = $this->value;
+                    $manyManySet = $this->model;
                     $manyManySet->removeFromSet($record);
                 } else {
-                    $this->value->removeFromStage($record);
+                    $this->model->removeFromStage($record);
                 }
             }
         }
@@ -255,7 +203,7 @@ class FileUploadSet extends FormField
      */
     public function ajaxUpload()
     {
-        if ($this->allowed_file_types == "*" || preg_match('/\.(' . implode("|", $this->allowed_file_types) . ')$/i', $this->request->getHeader("x-file-name"))) {
+        try {
             if ($this->request->inputStreamFile()) {
                 $tmp_name = $this->request->inputStreamFile();
 
@@ -272,21 +220,10 @@ class FileUploadSet extends FormField
                 "error" => 0,
                 "tmp_name" => $tmp_name
             );
-            $response = $this->handleUpload($upload);
-            // clean up
-            if (isset($tmp_name))
-                @unlink($tmp_name);
 
-            /** @var Uploads $response */
-            if (is_object($response)) {
-                return new JSONResponseBody(array("status" => 1, "file" => $this->getFileArray($response)));
-            } else if (is_string($response)) {
-                return $this->sendJSONError($response);
-            } else {
-                return $this->sendJSONError(lang("files.upload_failure"));
-            }
-        } else {
-            return $this->sendJSONError(lang("files.filetype_failure", "The filetype isn't allowed."));
+            return new JSONResponseBody(array("status" => 1, "file" => $this->getFileArray($this->handleUpload($upload))));
+        } catch(Exception $e) {
+            return $this->sendJSONError($e->getMessage());
         }
     }
 
@@ -322,35 +259,41 @@ class FileUploadSet extends FormField
     /**
      * frame upload
      *
-     * @name frameUpload
-     * @access public
      * @return string
      */
     public function frameUpload()
     {
-        if (isset($this->request->post_params["file"])) {
-            if (is_array($this->request->post_params["file"]["name"])) {
-                $files = $this->handleUpload($this->request->post_params["file"]);
-                $filedata = array();
-                /** @var Uploads $data */
-                foreach ($files as $data) {
-                    $filedata[] = $this->getFileArray($data);
-                }
+        try {
+            if (isset($this->getRequest()->post_params["file"])) {
+                if (is_array($this->getRequest()->post_params["file"]["name"])) {
+                    $files = $this->handleUpload($this->request->post_params["file"]);
+                    $filedata = array();
+                    /** @var Uploads $data */
+                    foreach ($files as $data) {
+                        if (is_a($data, "Uploads")) {
+                            $filedata[] = array(
+                                "status" => 1,
+                                "file"   => $this->getFileArray($data)
+                            );
+                        } else {
+                            $filedata[] = array(
+                                "status"    => 0,
+                                "errstring" => $data
+                            );
+                        }
+                    }
 
-                return new JSONResponseBody(array("status" => 1, "multiple" => true, "files" => $filedata));
-            } else {
-                $response = $this->handleUpload($this->request->post_params["file"]);
-                /** @var Uploads $response */
-                if (is_object($response)) {
-                    return new JSONResponseBody(array("status" => 1, "file" => $this->getFileArray($response)));
-                } else if (is_string($response)) {
-                    return $this->sendJSONError($response, false);
+                    return new JSONResponseBody(array("status" => 1, "multiple" => true, "files" => $filedata));
                 } else {
-                    return $this->sendJSONError(lang("files.upload_failure"), false);
+                    $response = $this->handleUpload($this->request->post_params["file"]);
+                    /** @var Uploads $response */
+                    return new JSONResponseBody(array("status" => 1, "file" => $this->getFileArray($response)));
                 }
+            } else {
+                return $this->sendJSONError(lang("files.upload_failure"), false);
             }
-        } else {
-            return $this->sendJSONError(lang("files.upload_failure"), false);
+        } catch(Exception $e) {
+            return $this->sendJSONError($e->getMessage(), false);
         }
     }
 
@@ -363,14 +306,14 @@ class FileUploadSet extends FormField
     {
         $id = $this->getParam("id");
         /** @var DataObject $record */
-        foreach ($this->value as $record) {
+        foreach ($this->model as $record) {
             if ($record->id == $id) {
-                if(is_a($this->value, "RemoveStagingDataObjectSet")) {
+                if(is_a($this->model, RemoveStagingDataObjectSet::ID)) {
                     /** @var ManyMany_DataObjectSet $manyManySet */
-                    $manyManySet = $this->value;
+                    $manyManySet = $this->model;
                     $manyManySet->removeFromSet($record);
                 } else {
-                    $this->value->removeFromStage($record);
+                    $this->model->removeFromStage($record);
                 }
             }
         }
@@ -381,80 +324,64 @@ class FileUploadSet extends FormField
     /**
      * handles the upload(s)
      * @param array $upload
-     * @return array|bool|string
+     * @return Uploads|Uploads[]|string[]
+     * @throws Exception
      */
     public function handleUpload($upload)
     {
         if (!isset($upload["name"])) {
-            return "No Upload defined.";
+            throw new Exception(lang("files.upload_failure"));
         }
 
         // if are more than one file are given ;)
         if (is_array($upload["name"])) {
             // we make a error-stack
-            $errStack = array();
-            $fileStack = array();
+            $responseStack = array();
             foreach ($upload["name"] as $key => $name) {
-
-                if (GOMA_FREE_SPACE - $upload["size"][$key] < 10 * 1024 * 1024) {
-                    $errStack[] = lang("error_disk_space");
-                }
-
-                if ($this->max_filesize == -1 || $upload["size"][$key] <= $this->max_filesize) {
-                    $ext = strtolower(substr($name, strrpos($name, ".") + 1));
-                    if ($this->allowed_file_types == "*" || in_array($ext, $this->allowed_file_types)) {
-                        $name = preg_replace('/[^a-zA-Z0-9_\-\.]/i', '_', $name);
-                        if ($data = call_user_func_array(array($this->uploadClass, "addFile"), array($name, $upload["tmp_name"][$key], $this->collection, $this->uploadClass))) {
-                            $this->value->add($data);
-                            $fileStack[] = $data;
-                        } else {
-                            $errStack[] = lang("files.upload_failure") . "(" . convert::raw2text($name) . ")";
-                        }
-                    } else {
-                        // not right filetype
-                        $errStack[] = lang("files.filetype_failure", "The filetype isn't allowed.") . "(" . convert::raw2text($name) . ")";
-                    }
-                } else {
-                    // file is too big
-                    $errStack[] = lang('files.filesize_failure', "The file is too big.") . "(" . convert::raw2text($name) . ")";
+                try {
+                    $responseStack[] = $this->handleSingleUpload($upload["name"][$key], $upload["size"][$key], $upload["tmp_name"][$key]);
+                } catch(Exception $e) {
+                    $responseStack[] = $e->getMessage();
                 }
             }
-            if (count($errStack) == 0) {
-                $this->storeData();
-                return $fileStack;
-            } else {
-                $this->storeData();
-                return '<ul>
-					<li>' . implode('</li><li>', $errStack) . '</li>
-				</ul>';
-            }
 
-            // just one file
+            return $responseStack;
         } else {
-            if (GOMA_FREE_SPACE - $upload["size"] < 10 * 1024 * 1024) {
-                return lang("error_disk_space");
-            }
+            return $this->handleSingleUpload($upload["name"], $upload["size"], $upload["tmp_name"]);
+        }
+    }
 
-            if ($this->max_filesize == -1 || $upload["size"] <= $this->max_filesize) {
-                $name = $upload["name"];
-                $ext = strtolower(substr($name, strrpos($name, ".") + 1));
-                if ($this->allowed_file_types == "*" || in_array($ext, $this->allowed_file_types)) {
-                    $name = preg_replace('/[^a-zA-Z0-9_\-\.]/i', '_', $name);
-                    if ($data = call_user_func_array(array($this->uploadClass, "addFile"), array($name, $upload["tmp_name"], $this->collection, $this->uploadClass))) {
-                        $this->value->add($data);
-                        $this->storeData();
-                        return $data;
-                    } else {
-                        return false;
-                    }
-                } else {
-                    // not right filetype
-                    return lang("files.filetype_failure", "The filetype isn't allowed.");
-                }
-            } else {
-                // file is too big
-                return lang('files.filesize_failure', "The file is too big.");
-            }
+    /**
+     * @param string $name
+     * @param int $size
+     * @param string $tmp_name
+     * @return Uploads
+     * @throws Exception
+     */
+    protected function handleSingleUpload($name, $size, $tmp_name) {
+        if (GOMA_FREE_SPACE - $size < 10 * 1024 * 1024) {
+            throw new Exception(lang("error_disk_space"));
+        }
+
+        if($this->max_filesize != -1 && $size > $this->max_filesize) {
+            throw new Exception(lang('files.filesize_failure', "The file is too big."));
+        }
+
+        $ext = strtolower(substr($name, strrpos($name, ".") + 1));
+        if ($this->allowed_file_types != "*" &&
+            (
+                (is_array($this->allowed_file_types) && !in_array($ext, $this->allowed_file_types)) ||
+                (is_string($this->allowed_file_types) && !preg_match('/\.(' . implode("|", $this->allowed_file_types) . ')$/i', $name))
+            )
+        ) {
+            throw new Exception(lang("files.filetype_failure", "The filetype isn't allowed."));
+        }
+
+        if ($data = call_user_func_array(array($this->uploadClass, "addFile"), array($name, $tmp_name, $this->collection, $this->uploadClass))) {
+            $this->model->add($data);
+            return $data;
+        } else {
+            throw new Exception(lang("files.upload_failure"));
         }
     }
 
@@ -463,6 +390,7 @@ class FileUploadSet extends FormField
      */
     public function saveSort()
     {
+        // TODO: Implement it
         $this->sortInfo = array();
         if (isset($this->request->post_params["sorted"])) {
             foreach ($this->request->post_params["sorted"] as $k => $id) {
@@ -501,8 +429,6 @@ class FileUploadSet extends FormField
     {
         if (PROFILE) Profiler::mark("FormField::field");
 
-        $this->storeData();
-
         $this->form()->form->enctype = "multipart/form-data";
 
         $this->callExtending("beforeField");
@@ -512,7 +438,7 @@ class FileUploadSet extends FormField
                 ->customise(
                     $info->setIncludeLink($this->link)
                         ->setDefaultIcon($this->defaultIcon)
-                        ->setUploads($this->value->ToArray())
+                        ->setUploads($this->getModel())
                         ->ToRestArray(false, false)
                 )->customise(
                     array(
@@ -559,7 +485,7 @@ class FileUploadSet extends FormField
     {
         $list = array();
         /** @var Uploads $file */
-        foreach ($this->value as $file) {
+        foreach ($this->model as $file) {
             $list[$file->id] = $this->getFileArray($file);
         }
         return $list;
@@ -582,14 +508,9 @@ class FileUploadSet extends FormField
     {
         $this->getValue();
 
-        if (isset($this->form()->post[$this->PostName() . "__key"]) && Core::globalSession()->hasKey("FileUploadSet_" . $this->form()->post[$this->PostName() . "__key"])) {
-            $this->value = Core::globalSession()->get("FileUploadSet_" . $this->form()->post[$this->PostName() . "__key"]);
-            $this->key = $this->form()->post[$this->PostName() . "__key"];
-        }
-
         $this->checkForEvents();
 
-        return $this->value;
+        return $this->model;
     }
 
     /**

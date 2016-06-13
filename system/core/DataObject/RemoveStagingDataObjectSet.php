@@ -12,6 +12,8 @@ defined("IN_GOMA") OR die();
  * @version 1.0
  */
 abstract class RemoveStagingDataObjectSet extends DataObjectSet {
+    const ID = "RemoveStagingDataObjectSet";
+
     /**
      * remove staging ArrayList.
      *
@@ -110,4 +112,9 @@ abstract class RemoveStagingDataObjectSet extends DataObjectSet {
      * @return array
      */
     abstract protected function argumentFilterForHidingRemovedStageForQuery($filter);
+
+    /**
+     * @return bool
+     */
+    abstract public function canSortSet();
 }

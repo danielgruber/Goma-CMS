@@ -47,7 +47,7 @@ var FileUploadSet = function(name, table, url) {
         $this.table.sortable({
             opacity: 0.75,
             revert: true,
-            items: 'dbody tr:not(.uploading):not(.empty)',
+            items: 'tbody tr:not(.uploading):not(.empty)',
             tolerance: 'pointer',
             containment: "parent",
             start: function(event, ui) {
@@ -176,25 +176,32 @@ var FileUploadSet = function(name, table, url) {
 				var tablerow = $("#" + this.queue[fileIndex].tableid);
 				try {
 					var data = JSON.parse(html);
-					if(data.status == 0) {
+					if(data.status == 0 && !data.multiple) {
                         this.removeTableRowWithError(tablerow, data.errstring);
 					} else {
 						if(data.multiple) {
 							for(var i in data.files) {
-								var file = data.files[i];
-								
-								// the current we can just update
-								if(i === 0) {
-                                    this.updateTableRowWhenDoneUploading(tablerow, file);
-								} else {
-									
-									
-									// now add some records
-									this.currentIndex++;
-                                    var insertedTableRow = this.addTableRow(this.name + "_frameupload_" + this.currentIndex, "", file.name, tablerow);
+								if(data.files.hasOwnProperty(i)) {
+									var file = data.files[i];
+									// the current we can just update
+									if (i === 0) {
+										if(file.status == 0) {
+											this.removeTableRowWithError(tablerow, file.errstring);
+										} else {
+											this.updateTableRowWhenDoneUploading(tablerow, file.file);
+										}
+									} else {
+										// now add some records
+										this.currentIndex++;
+										var insertedTableRow = this.addTableRow(this.name + "_frameupload_" + this.currentIndex, "", file.name, tablerow);
 
-                                    this.updateTableRowWhenDoneUploading(insertedTableRow, file);
-                                    redrawEvenOddMarkers();
+										if(file.status == 0) {
+											this.removeTableRowWithError(insertedTableRow, file.errstring);
+										} else {
+											this.updateTableRowWhenDoneUploading(insertedTableRow, file.file);
+										}
+										redrawEvenOddMarkers();
+									}
 								}
 							}
 						} else {

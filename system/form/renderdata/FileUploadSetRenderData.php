@@ -14,7 +14,7 @@ class FileUploadSetRenderData extends FormFieldRenderData {
     /**
      * uploads object.
      *
-     * @var Uploads[]
+     * @var DataObjectSet
      */
     protected $uploads = array();
 
@@ -45,8 +45,8 @@ class FileUploadSetRenderData extends FormFieldRenderData {
      */
     public function setUploads($uploads)
     {
-        if(!is_array($uploads)) {
-            throw new InvalidArgumentException("Uploads must be an array of uploads.");
+        if(!is_a($uploads, DataObjectSet::ID)) {
+            throw new InvalidArgumentException("Uploads must be an DataObjectSet of uploads.");
         }
 
         $this->uploads = $uploads;
@@ -101,7 +101,7 @@ class FileUploadSetRenderData extends FormFieldRenderData {
         $data["uploads"] = array();
         if(isset($this->uploads)) {
             foreach($this->uploads as $upload) {
-                $data["uploads"] = array(
+                $data["uploads"][] = array(
                     "name"       => $upload->filename,
                     "realpath"   => $this->includeLink ? $upload->fieldGet("path") : null,
                     "icon16"     => $upload->getIcon(16),
@@ -110,7 +110,8 @@ class FileUploadSetRenderData extends FormFieldRenderData {
                     "id"         => $upload->id,
                     "icon128"    => $upload->getIcon(128),
                     "icon128_2x" => $upload->getIcon(128, true),
-                    "icon"       => $upload->getIcon()
+                    "icon"       => $upload->getIcon(),
+                    "canDelete"  => is_a($this->uploads, RemoveStagingDataObjectSet::ID) || $this->uploads->getStaging()->itemExists($upload)
                 );
             }
         }

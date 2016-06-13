@@ -625,4 +625,12 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
     {
         return $filter;
     }
+
+    /**
+     * @return bool
+     */
+    public function canSortSet()
+    {
+        return true;
+    }
 }

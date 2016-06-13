@@ -214,4 +214,12 @@ class HasMany_DataObjectSet extends RemoveStagingDataObjectSet {
 
         return $this->relationShipInfo;
     }
+
+    /**
+     * @return bool
+     */
+    public function canSortSet()
+    {
+        return false;
+    }
 }
