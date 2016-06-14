@@ -1671,14 +1671,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
      * builds a SearchQuery and adds Search-Filter
      * after that decorates the query with argumentQuery and argumentSelectQuery on Extensions and local
      *
-     * @name buildSearchQuery
-     * @access public
-     * @param array - search
-     * @param array - filter
-     * @param array - sort
-     * @param array - limit
-     * @param array - join
-     * @param string|int|false - version
+     * @param array $searchQuery
+     * @param array $filter
+     * @param array $sort
+     * @param array $limit
+     * @param array $join
+     * @param bool $version
+     * @param bool $forceClasses
      * @return SelectQuery
      */
     public function buildSearchQuery($searchQuery = array(), $filter = array(), $sort = array(), $limit = array(), $join = array(), $version = false, $forceClasses = true) {
@@ -1686,27 +1685,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
 
         $query = $this->buildQuery($version, $filter, $sort, $limit, $join);
 
-        $query = $this->decorateSearchQuery($query, $searchQuery);
+        $this->decorateSearchQuery($query, $searchQuery);
 
-        foreach($this->getextensions() as $ext)
-        {
-            if (ClassInfo::hasInterface($ext, "argumentsQuery")) {
-                $newquery = $this->getinstance($ext)->argumentQuery($query, $version, $filter, $sort, $limit, $join, $forceClasses);
-                if (is_object($newquery) && (strtolower(get_class($newquery)) == "dbquery" || is_subclass_of($newquery, "DBQuery"))) {
-                    $query = $newquery;
-                    unset($newquery);
-                }
-            }
+        $this->callExtending("argumentQuery", $query, $version, $filter, $sort, $limit, $join, $forceClasses);
+        $this->callExtending("argumentSearchSQL", $query, $searchQuery, $version, $filter, $sort, $limit, $join, $forceClasses);
 
-            if (ClassInfo::hasInterface($ext, "argumentsSearchQuery")) {
-                $newquery = $this->getinstance($ext)->argumentSearchSQL($query, $searchQuery, $version, $filter, $sort, $limit, $join, $forceClasses);
-                if (is_object($newquery) && (strtolower(get_class($newquery)) == "dbquery" || is_subclass_of($newquery, "DBQuery"))) {
-                    $query = $newquery;
-                    unset($newquery);
-                }
-            }
-            unset($ext);
-        }
         $this->argumentQuery($query);
 
         if (PROFILE) Profiler::unmark("DataObject::buildSearchQuery");
@@ -1717,8 +1700,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
     /**
      * returns whether user is permitted to use versions.
      *
-     * @name _canVersion
-     * @access public
+     * @param string $version
      * @return bool
      */
     public function memberCanViewVersions($version) {
@@ -1743,12 +1725,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
     /**
      * decorates a query with search
      *
-     *@name decorateSearchQuery
-     *@access public
-     *@param object - query
-     *@param words
+     * @param SelectQuery $query
+     * @param array $searchQuery
      */
-    public function decorateSearchQuery($query, $searchQuery) {
+    protected function decorateSearchQuery($query, $searchQuery) {
         if ($searchQuery) {
             $filter = array();
 
@@ -1809,7 +1789,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
                 throw new LogicException("Could not search for " . $searchQuery . ". No Search-Fields defined in {$this->baseClass}.");
             }
         }
-        return $query;
     }
 
     /**
@@ -1842,17 +1821,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
     {
         if (PROFILE) Profiler::mark("DataObject::buildExtendedQuery");
         $query = $this->buildQuery($version, $filter, $sort, $limit, $joins, $forceClasses);
-        foreach($this->getextensions() as $ext)
-        {
-            if (ClassInfo::hasInterface($ext, "argumentsQuery")) {
-                $newquery = $this->getinstance($ext)->argumentQuery($query, $version, $filter, $sort, $limit, $joins, $forceClasses);
-                if (is_object($newquery) && (strtolower(get_class($newquery)) == "dbquery" || is_subclass_of($newquery, "DBQuery"))) {
-                    $query = $newquery;
-                    unset($newquery);
-                }
-            }
-            unset($ext);
-        }
+
+        $this->callExtending("argumentQuery", $query, $version, $filter, $sort, $limit, $joins, $forceClasses);
+
         $this->argumentQuery($query);
         if (PROFILE) Profiler::unmark("DataObject::buildExtendedQuery");
         return $query;

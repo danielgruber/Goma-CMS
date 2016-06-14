@@ -677,6 +677,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 		return $this;
 	}
 
+
 	/**
 	 * filters the data
 	 * @param array $filter

@@ -740,6 +740,7 @@ class SelectQuery {
 			$this->result = $result;
 			return $this;
 		} else {
+			log_error(print_r($this, true));
 			throw new SQLException();
 		}
 	}

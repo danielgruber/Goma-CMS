@@ -117,4 +117,5 @@ abstract class RemoveStagingDataObjectSet extends DataObjectSet {
      * @return bool
      */
     abstract public function canSortSet();
+    //abstract public function sortSet();
 }

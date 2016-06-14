@@ -36,9 +36,16 @@ class HasOneGetter extends Extension implements ArgumentsQuery {
     );
 
     /**
-     * @var array
+     * create objects for all has-one-data.
      */
-    protected $viewCache = array();
+    public function initValues() {
+        foreach($this->hasOne() as $name => $data) {
+            if(is_array($this->getOwner()->fieldGet($name))) {
+                $target = $data->getTargetClass();
+                $this->getOwner()->setField($name, new $target($data));
+            }
+        }
+    }
 
     /**
      * define statics extension.
@@ -113,55 +120,30 @@ class HasOneGetter extends Extension implements ArgumentsQuery {
      * gets a has-one-dataobject
      *
      * @param string $name name of relationship
-     * @param array $filter
      * @return DataObject
      */
-    public function getHasOne($name, $filter = null) {
+    public function getHasOne($name) {
+        $name = trim(strtolower($name));
 
-        $name = strtolower(trim($name));
-        $owner = $this->getOwner();
+        // get info
+        if($relationShip = $this->hasOne($name)) {
+            if($this->getOwner()->fieldGet($name . "id")) {
+                // check field
+                $instance = $this->getOwner()->fieldGet($name);
+                if (!$instance || !is_a($instance, "DataObject")) {
+                    $response = DataObject::get($relationShip->getTargetClass(), array(
+                        "id" => $this->getOwner()->fieldGet($name . "id")
+                    ));
 
-        if (PROFILE) Profiler::mark("getHasOne");
+                    if ($this->getOwner()->queryVersion == DataObject::VERSION_STATE) {
+                        $response->setVersion(DataObject::VERSION_STATE);
+                    }
 
-        $cache = "has_one_{$name}_".var_export($filter, true) . $this->getOwner()->fieldGet($name . "id");
-        if (isset($this->viewCache[$cache])) {
-            if (PROFILE) Profiler::unmark("getHasOne", "getHasOne viewcache");
-            return $this->viewCache[$cache];
-        }
+                    $this->getOwner()->setField($name, $response->first());
+                }
 
-        $has_one = $this->hasOne();
-        if (isset($has_one[$name])) {
-            if ($owner->isField($name) && is_object($owner->fieldGet($name)) && is_a($owner->fieldGet($name), $has_one[$name]->getTargetClass()) && !$filter) {
-                if (PROFILE) Profiler::unmark("getHasOne");
-                return $owner->fieldGet($name);
-            }
-
-            if ($this->getOwner()->fieldGet($name . "id") == 0) {
-
-                if (PROFILE) Profiler::unmark("getHasOne");
-                return null;
-            }
-
-            $filter["id"] = $this->getOwner()->fieldGet($name . "id");
-
-            if (isset(DataObjectQuery::$datacache[$owner->baseClass][$cache])) {
-                if (PROFILE) Profiler::unmark("getHasOne", "getHasOne datacache");
-                $this->viewCache[$cache] = clone DataObjectQuery::$datacache[$owner->baseClass][$cache];
-                return $this->viewCache[$cache];
-            }
-
-            $response = DataObject::get($has_one[$name]->getTargetClass(), $filter);
-
-            if ($owner->queryVersion == DataObject::VERSION_STATE) {
-                $response->setVersion(DataObject::VERSION_STATE);
-            }
-
-            if (($this->viewCache[$cache] = $response->first(false))) {
-                DataObjectQuery::$datacache[$owner->baseClass][$cache] = clone $this->viewCache[$cache];
-                if (PROFILE) Profiler::unmark("getHasOne");
-                return $this->viewCache[$cache];
+                return $instance;
             } else {
-                if (PROFILE) Profiler::unmark("getHasOne");
                 return null;
             }
         } else {
@@ -180,22 +162,14 @@ class HasOneGetter extends Extension implements ArgumentsQuery {
 
         $has_one = $this->hasOne();
         if (isset($has_one[$name])) {
-            $idField = $name . "id";
             if(!isset($value)) {
-                $this->getOwner()->$idField = 0;
+                $this->getOwner()->setField($name, $value);
+                $this->getOwner()->setField($name  ."id", 0);
             } else if(is_a($value, "DataObject")) {
                 $this->getOwner()->setField($name, $value);
-                $this->getOwner()->$idField = $value->id != 0 ? $value->id : null;
+                $this->getOwner()->setField($name  ."id", $value->id != 0 ? $value->id : null);
             } else {
-                if(DEV_MODE) {
-                    $trace = debug_backtrace();
-                    $method = (isset($trace[1]["class"])) ? $trace[1]["class"] . "::" . $trace[1]["function"] : $trace[1]["function"];
-                    $file = isset($trace[1]["file"]) ? $trace[1]["file"] : (isset($trace[2]["file"]) ? $trace[2]["file"] : "Undefined");
-                    $line = isset($trace[1]["line"]) ? $trace[1]["line"] : (isset($trace[2]["line"]) ? $trace[2]["line"] : "Undefined");
-
-                    log_error("SetHasOne called without giving a DataObject in $file on line $line (Method $method).");
-                }
-                $this->getOwner()->setField($name, $value);
+                throw new InvalidArgumentException("setting HasOne-Relationship must be either DataObject or null.");
             }
         } else if(substr($name, 0, 3) == "set") {
             $this->setHasOne(substr($name, 3), $value);

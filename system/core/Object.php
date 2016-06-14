@@ -572,7 +572,7 @@ abstract class gObject
      * @access public
      * @return array - return values
      */
-    public function callExtending($method, &$p1 = null, &$p2 = null, &$p3 = null, &$p4 = null, &$p5 = null, &$p6 = null, &$p7 = null)
+    public function callExtending($method, &$p1 = null, &$p2 = null, &$p3 = null, &$p4 = null, &$p5 = null, &$p6 = null, &$p7 = null, &$p8 = null)
     {
         $returns = array();
         foreach ($this->getextensions(true) as $extension) {
@@ -580,7 +580,7 @@ abstract class gObject
                 if ($instance = $this->getinstance($extension)) {
 
                     // so let's call ;)
-                    $return = $instance->$method($p1, $p2, $p3, $p4, $p5, $p6, $p7);
+                    $return = $instance->$method($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8);
                     if ($return)
                         $returns[] = $return;
 
@@ -610,14 +610,14 @@ abstract class gObject
      * @access public
      * @return array - return values
      */
-    public function LocalCallExtending($method, &$p1 = null, &$p2 = null, &$p3 = null, &$p4 = null, &$p5 = null, &$p6 = null, &$p7 = null)
+    public function LocalCallExtending($method, &$p1 = null, &$p2 = null, &$p3 = null, &$p4 = null, &$p5 = null, &$p6 = null, &$p7 = null, &$p8 = null)
     {
         $returns = array();
         foreach ($this->getExtensions(false) as $extension) {
             if (gObject::method_exists($extension, $method)) {
                 if ($instance = $this->getinstance($extension)) {
                     $instance->setOwner($this);
-                    $returns[] = $instance->$method($p1, $p2, $p3, $p4, $p5, $p6, $p7);
+                    $returns[] = $instance->$method($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8);
                 }
             }
         }
