@@ -17,6 +17,7 @@ class GomaSeperatedEnvironment {
 	*/
 	protected $classes = array(
 		gObject::ID,
+		"ExceptionManager",
         "StaticsManager",
 		"ClassInfo",
 		"ClassManifest",

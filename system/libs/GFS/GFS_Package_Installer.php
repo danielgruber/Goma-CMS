@@ -254,8 +254,6 @@ class GFS_Package_installer extends GFS {
 	/**
 	 * if a specific file was unpacked
 	 *
-	 * @name wasUnpacked
-	 * @access public
 	 * @return bool
 	 */
 	public static function wasUnpacked($file = null) {
@@ -276,21 +274,18 @@ class GFS_Package_installer extends GFS {
 	/**
 	 * builds the Code for the external file
 	 *
-	 * @name buildFile
-	 * @access public
 	 * @return string
 	 */
 	public function buildFile($destination) {
-
 		$goma = new GomaSeperatedEnvironment();
 		$goma->addClasses(array("gfs", "GFS_Package_installer"));
 
 		$code = 'try { 
-					$gfs = new GFS_Package_Installer('.var_export($this->file, true).'); 
+					$gfs = new GFS_Package_Installer('.var_export($this->file, true).');
+					$gfs->unpack('.var_export($destination, true).');
 				} catch(Exception $e) { 
 					echo "<script type=\"text/javascript\">setTimeout(location.reload, 1000);</script> An Error occurred. Please <a href=\"\">Reload</a>"; exit; 
 				}';
-		$code .= '$gfs->unpack('.var_export($destination, true).');';
 
 		$file = $goma->build($code);
 
@@ -300,9 +295,6 @@ class GFS_Package_installer extends GFS {
 
 	/**
 	 * shows the ui
-	 *
-	 *@name showUI
-	 *@access public
 	 */
 	public function showUI($file = "",$reload = true) {
 		if(!defined("BASE_URI")) define("BASE_URI", "./"); // most of the users use this path ;)

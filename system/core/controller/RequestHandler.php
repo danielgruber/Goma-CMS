@@ -401,14 +401,11 @@ class RequestHandler extends gObject {
 			throw $e;
 		}
 
-		return $e->getMessage();
+		return $e->getCode() . ": " . get_class($e) . "\n" . $e->getMessage();
 	}
 
 	/**
 	 * gets parent controller of this
-	 *
-	 *@name parentController
-	 *@access public
 	 */
 	public function parentController() {
 		return Director::$controller[$this -> requestHandlerKey - 1];

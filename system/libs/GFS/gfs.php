@@ -20,7 +20,6 @@ define("GFS_READONLY", 2);
 define("GFS_READWRITE", 1);
 
 class GFS {
-	
 	/**
 	 * required version for this class
 	*/
@@ -226,18 +225,17 @@ class GFS {
 							} else {
 								try {
 									$data = unserialize($db);
-								} catch(Exception $e) {
-									var_dump($db);
-								}
-								if($data !== false) {
+									if($data === false) {
+										throw new Exception("Could not unserialize content.");
+									}
+
 									$this->db = $data;
-								} else {
+								} catch(Exception $e) {
 									$this->valid = false;
-									throw new GFSDBException("Could not open GFS ".$filename.". Failed to decode Serialized DB.");
+									throw new GFSDBException("Could not open GFS ".$filename.". Failed to decode Serialized DB. " . print_r($db, true), null, $e);
 								}
 							}
-							
-							
+
 							unset($data, $db);
 							$this->position = strlen("!GFS;V" . $version) + 2;
 							$this->endOfContentPos = $filesize - 1 - strlen((string)$dbsize) - $dbsize - 2;
@@ -306,7 +304,6 @@ class GFS {
 	 * @throws GFSRealFilePermissionException
 	 */
 	public function addFromFile($file, $path, $not_add_if_dir = array()) {
-		
 		$this->checkValidOrThrow();
 
 		// check if is dir.
@@ -333,7 +330,6 @@ class GFS {
 		// check if file exists and add it.
 		if(is_file($file)) {
 			$this->addFileToArchiveWithoutChecks($file, $path);
-			$this->updateDB();
 		} else {
 			throw new GFSRealFileNotFoundException();
 		}
@@ -352,7 +348,6 @@ class GFS {
 	 * @throws GFSRealFilePermissionException
 	 */
 	protected function addFromFileHelper($file, $path, $not_add_if_dir = array()) {
-		
 		$this->checkValidOrThrow();
 
 		// check if is dir.
@@ -396,21 +391,27 @@ class GFS {
 				$this->setPosition($this->endOfContentPos);
 				// read and save memory
 				if($filehandle = @fopen($file, "r")) {
-					while (!feof($filehandle)) {
-						$content = fgets($filehandle);
-						fwrite($this->pointer, $content);
-						unset($content);
+					try {
+						while (!feof($filehandle)) {
+							$content = fgets($filehandle);
+							if (fwrite($this->pointer, $content) !== strlen($content)) {
+								throw new GFSRealFilePermissionException();
+							}
+							unset($content);
+						}
+						$this->db[$path] = array(
+							"type"	 			=> $this->getFileType($file),
+							"size"	 			=> filesize($file),
+							"lastModified"		=> filemtime($file),
+							"checksum"			=> "GFS" . md5_file($file),
+							"startChunk"		=> $this->endOfContentPos
+						);
+						$this->endOfContentPos += filesize($file);
+					} finally {
+						fclose($filehandle);
+						unset($filehandle);
+						$this->updateDB();
 					}
-					fclose($filehandle);
-					unset($filehandle);
-					$this->db[$path] = array(
-						"type"	 			=> $this->getFileType($file),
-						"size"	 			=> filesize($file),
-						"lastModified"		=> filemtime($file),
-						"checksum"			=> "GFS" . md5_file($file),
-						"startChunk"		=> $this->endOfContentPos
-					);
-					$this->endOfContentPos += filesize($file);
 				} else {
 					throw new GFSRealFilePermissionException();
 				}
@@ -421,6 +422,7 @@ class GFS {
 					"lastModified"		=> filemtime($file),
 					"contents"			=> file_get_contents($file)
 				);
+				$this->updateDB();
 			}
 		} else {
 			throw new GFSRealFileNotFoundException();
@@ -433,36 +435,39 @@ class GFS {
 	 * @param string $content
 	 * @param string $path
 	 * @param null $lastModified
-	 * @throws GFSRealFileNotFoundException
+	 * @throws GFSRealFilePermissionException
 	 */
 	protected function addContentToArchiveWithoutChecks($content, $path, $lastModified = null) {
 		if(!isset($lastModified)) {
 			$lastModified = time();
 		}
 
-		if(strlen($content) > FILESIZE_SAVE_IN_DB) {
-			$this->setPosition($this->endOfContentPos);
-			// write and save memory
-			if(!fwrite($this->pointer, $content)) {
-				// TODO: Preserve stability here
-				throw new GFSRealFileNotFoundException();
-			}
+		try {
+			if (strlen($content) > FILESIZE_SAVE_IN_DB) {
+				$this->setPosition($this->endOfContentPos);
+				// write and save memory
+				if (fwrite($this->pointer, $content) !== strlen($content)) {
+					throw new GFSRealFilePermissionException();
+				}
 
-			$this->db[$path] = array(
-				"type"	 			=> $this->getFileType($path),
-				"size"	 			=> strlen($content),
-				"lastModified"		=> $lastModified,
-				"checksum"			=> "GFS" . md5($content),
-				"startChunk"		=> $this->endOfContentPos
-			);
-			$this->endOfContentPos += strlen($content);
-		} else {
-			$this->db[$path] = array(
-				"type"	 			=> $this->getFileType($path),
-				"size"	 			=> strlen($content),
-				"lastModified"		=> $lastModified,
-				"contents"			=> $content
-			);
+				$this->db[$path] = array(
+					"type"         => $this->getFileType($path),
+					"size"         => strlen($content),
+					"lastModified" => $lastModified,
+					"checksum"     => "GFS" . md5($content),
+					"startChunk"   => $this->endOfContentPos
+				);
+				$this->endOfContentPos += strlen($content);
+			} else {
+				$this->db[$path] = array(
+					"type"         => $this->getFileType($path),
+					"size"         => strlen($content),
+					"lastModified" => $lastModified,
+					"contents"     => $content
+				);
+			}
+		} finally {
+			$this->updateDB();
 		}
 	}
 
@@ -601,8 +606,6 @@ class GFS {
 		}
 
 		$this->addContentToArchiveWithoutChecks($content, $path, $lastModified);
-
-		$this->updateDB();
 	}
 
 	/**
@@ -806,12 +809,17 @@ class GFS {
 
 		// parse path
 		$path = $this->parsePath($path);
-		
-		
+
 		if(isset($this->db[$path])) {
 			if($this->db[$path]["type"] == GFS_DIR_TYPE) {
 				$this->rmdir($path);
 			} else {
+				if(isset($this->db[$path]["startChunk"])) {
+					if($this->db[$path]["startChunk"] + $this->db[$path]["size"] == $this->endOfContentPos) {
+						$this->endOfContentPos = $this->db[$path]["size"];
+					}
+				}
+				
 				unset($this->db[$path]);
 				$this->updateDB();
 			}
@@ -841,7 +849,6 @@ class GFS {
 		
 		// close before read
 		fclose($this->pointer);
-		$files_to_delete = array();
 		foreach($db as $file => $data) {
 			if(preg_match("/^".preg_quote($path, "/")."\//", $file)) {
 				unset($db[$file], $file, $data);
@@ -1010,7 +1017,7 @@ class GFS {
 			} else if(isset($this->db[$path]["contents"]) || $this->db[$path]["contents"] === null) {
 				if($pointer = @fopen($aim, "w")) {
 					try {
-						if (!fwrite($pointer, (string)$this->db[$path]["contents"])) {
+						if (fwrite($pointer, (string)$this->db[$path]["contents"]) !== strlen((string)$this->db[$path]["contents"])) {
 							throw new GFSRealFilePermissionException();
 						}
 					} finally {
@@ -1018,6 +1025,7 @@ class GFS {
 						@chmod($aim, $this->writeMode);
 						unset($pointer);
 					}
+					return;
 				} else {
 					throw new GFSRealFilePermissionException();
 				}
@@ -1160,17 +1168,18 @@ class GFS {
 	 */
 	public function updateDB() {
 		$this->checkValidOrThrow();
-		
-		$this->setPosition($this->endOfContentPos);
-		if(GFS_DB_TYPE == "serialize")
-  	 		$db = serialize($this->db);
-  	 	else
-  	 		$db = json_encode($this->db);
-  	 	
-		if($this->oldDBSize > strlen($db)) {
-			$db = str_repeat("\n", $this->oldDBSize - strlen($db)) . $db;
+
+		$this->setPosition(0);
+		if(GFS_DB_TYPE == "serialize") {
+			$db = serialize($this->db);
+		} else {
+			$db = json_encode($this->db);
 		}
-		if(!fwrite($this->pointer, "\n\n" . $db . "\n" . strlen($db))) {
+
+		ftruncate($this->pointer, $this->endOfContentPos);
+		$this->setPosition($this->endOfContentPos);
+
+		if(fwrite($this->pointer, "\n\n" . $db . "\n" . strlen($db)) === false) {
 			throw new GFSRealFilePermissionException();
 		}
 
@@ -1243,8 +1252,8 @@ class GFS {
 
 	/**
 	 * closes a GFS-Archive
-	 *
 	 * @return bool
+	 * @throws GFSRealFilePermissionException
 	 */
 	public function close() {
 		if($this->valid === false) {
@@ -1278,7 +1287,9 @@ class GFS {
 			
 			fseek($this->pointer, filesize($this->file) - 5);
 			if(@fread($this->pointer, 5) != "!SIGN") {
-				@fwrite($this->pointer, "\n\n" . $this->certificate . "\n" . strlen($this->certificate) . "!SIGN");
+				if(fwrite($this->pointer, "\n\n" . $this->certificate . "\n" . strlen($this->certificate) . "!SIGN") === false) {
+					throw new GFSRealFilePermissionException();
+				}
 			}
 		} else if(!function_exists("openssl_private_encrypt")) {
 			self::$openssl_problems = true;

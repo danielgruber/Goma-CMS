@@ -115,7 +115,7 @@ class GFS_Package_Creator extends GFS {
 
 		$realfiles = array_keys($this->fileIndex);
 		$paths = array_values($this->fileIndex);
-		
+
 		// iterate through the index
 		while($i < count($this->fileIndex)){
 			// maximum of 2.0 seconds
@@ -164,7 +164,6 @@ class GFS_Package_Creator extends GFS {
 		self::$packed[$this->file] = $this->file;
 		$this->unlink("/gfsprogress" . count($this->fileIndex));
 		//$this->fileIndex = array();
-	
 		
 		// if we are in the external file
 		if(isset($inFile)) {
@@ -208,21 +207,17 @@ class GFS_Package_Creator extends GFS {
 	
 	/**
 	 * builds the Code for the external file
-	 *
-	 *@name buildFile
-	 *@access public
 	*/
 	public function buildFile($index) {
-
 		$goma = new GomaSeperatedEnvironment();
 		$goma->addClasses(array("gfs", "GFS_Package_Creator"));
 
 		$code = 'try { 
-					$gfs = new GFS_Package_Creator('.var_export($this->file, true).'); 
+					$gfs = new GFS_Package_Creator('.var_export($this->file, true).');
+					$gfs->commit(__FILE__, '.var_export($index, true).');
 				} catch(Exception $e) { 
 					echo "<script type=\"text/javascript\">setTimeout(location.reload, 1000);</script> An Error occurred. Please <a href=\"\">Reload</a>"; exit; 
 				}';
-		$code .= '$gfs->commit(__FILE__, '.var_export($index, true).');';
 
 		$file = $goma->build($code);
 
@@ -233,9 +228,6 @@ class GFS_Package_Creator extends GFS {
 	
 	/**
 	 * creates the index
-	 *
-	 *@name indexHelper
-	 *@access public
 	*/ 
 	public function indexHelper($folder, &$index, $path, $excludeList = array(), $internalPath = "") {
 		foreach(scandir($folder) as $file) {
@@ -253,9 +245,6 @@ class GFS_Package_Creator extends GFS {
 	}
 	/**
 	 * shows the ui
-	 *
-	 *@name showUI
-	 *@access public
 	*/
 	public function showUI($file = null, $reload = true) {
 		if(!defined("BASE_URI")) define("BASE_URI", "./"); // most of the users use this path ;)

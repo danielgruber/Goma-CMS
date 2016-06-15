@@ -214,6 +214,7 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 
 		$gfs = new GFS_Package_Creator($file);
 
+
 		$plist = new CFPropertyList();
 		$plist->add($dict = new CFDictionary());
 		$dict->add("type", new CFString("framework"));
@@ -227,7 +228,6 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 		}
 
 		$gfs->write("info.plist", $plist->toXML());
-
 
 		if(!GFS_Package_Creator::wasPacked($file)) {
 			$gfs->setAutoCommit(false);
