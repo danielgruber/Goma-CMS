@@ -135,15 +135,45 @@ class SelectQuery {
 	/**
 	 * this var adds a table to the from-part
 	 * @param string $table
+	 * @param bool $includeFields
+	 * @param string $alias
+	 * @param string $statement
 	 * @return $this
 	 */
-	public function from($table) {
-		if(self::getAlias($table) != $table) {
-			$this->from[str_replace(array('`', '"'), '', self::getAlias($table))] = array("table" => $table, "statement" => DB_PREFIX . $table . ' AS _' . $table . '');
-		} else {
-			$this->from[str_replace(array('`', '"'), '', $table)] = DB_PREFIX . $table . ' AS ' . $table . '';
+	public function from($table, $includeFields = true, $alias = "", $statement = "") {
+		$alias = $alias ? $alias : self::getAlias($table);
+		$info = array(
+			"table" => $table,
+			"statement" => $statement ? $statement :  DB_PREFIX . $table . ' AS ' . $alias . " ",
+			"alias"	=> str_replace(array('`', '"'), '', $alias)
+		);
+
+		if($this->aliasExists($alias)) {
+			throw new InvalidArgumentException("Can't bind multiple tables to one alias.");
 		}
+
+		if($includeFields) {
+			$this->from[str_replace(array('`', '"'), '', $alias)] = $info;
+		} else {
+			$this->from[] = $info;
+		}
+
 		return $this;
+	}
+
+	/**
+	 * @param string $alias
+	 * @return bool
+	 */
+	public function aliasExists($alias) {
+		$alias = str_replace(array('`', '"'), '', $alias);
+		foreach($this->from as $data) {
+			if($data["alias"] == $alias) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -334,10 +364,27 @@ class SelectQuery {
 
 	/**
 	 * sets the fields
-	 *@param array $field new value
+	 * @param  array|string $fields
 	 */
 	public function setFields($fields) {
 		$this->fields = $fields;
+	}
+
+	/**
+	 * @param string $type
+	 * @param string $table
+	 * @param string $statement
+	 * @param string $alias
+	 * @param bool $includeFields
+	 * @return $this
+	 */
+	public function join($type, $table, $statement, $alias = "", $includeFields = true) {
+		$this->getAliasAndStatement($table, $statement, $alias);
+
+		$this->from($table, $includeFields, $alias,
+			$type . " JOIN " . DB_PREFIX . $table . " AS " . $alias . " ON " . $statement . " ");
+
+		return $this;
 	}
 
 	/**
@@ -346,13 +393,24 @@ class SelectQuery {
 	 * @param string $table
 	 * @param string $statement after the ON
 	 * @param string $alias : for joining the same table more than one time
+	 * @param bool $includeFields
 	 * @return $this
 	 */
-	public function outerJoin($table, $statement, $alias = "") {
-		$this->getAliasAndStatement($table, $statement, $alias);
+	public function outerJoin($table, $statement, $alias = "", $includeFields = true) {
+		return $this->join("OUTER", $table, $statement, $alias, $includeFields);
+	}
 
-		$this->from[$alias] = array("table" => $table, "statement" => " OUTER JOIN " . DB_PREFIX . $table . " AS " . $alias . " ON " . $statement . " ");
-		return $this;
+	/**
+	 * adds an right-outer-join
+	 *
+	 * @param string $table
+	 * @param string $statement after the ON
+	 * @param string $alias : for joining the same table more than one time
+	 * @param bool $includeFields
+	 * @return $this
+	 */
+	public function rightOuterJoin($table, $statement, $alias = "", $includeFields = true) {
+		return $this->join("RIGHT OUTER", $table, $statement, $alias, $includeFields);
 	}
 
 	/**
@@ -361,13 +419,11 @@ class SelectQuery {
 	 * @param string $table
 	 * @param string $statement after the ON
 	 * @param string $alias
+	 * @param bool $includeFields
 	 * @return $this
 	 */
-	public function innerJoin($table, $statement, $alias = "") {
-		$this->getAliasAndStatement($table, $statement, $alias);
-
-		$this->from[$alias] = array("table" => $table, "statement" => " INNER JOIN " . DB_PREFIX . $table . " AS " . $alias . " ON " . $statement . " ");
-		return $this;
+	public function innerJoin($table, $statement, $alias = "", $includeFields = true) {
+		return $this->join("INNER", $table, $statement, $alias, $includeFields);
 	}
 
 	/**
@@ -376,12 +432,11 @@ class SelectQuery {
 	 * @param string $table
 	 * @param string $statement after the ON
 	 * @param string $alias to use in join
+	 * @param bool $includeFields
 	 * @return $this
 	 */
-	public function leftJoin($table, $statement, $alias = "") {
-		$this->getAliasAndStatement($table, $statement, $alias);
-		$this->from[$alias] = array("table" => $table, "statement" => " LEFT JOIN " . DB_PREFIX . $table . " AS " . $alias . " ON " . $statement . " ");
-		return $this;
+	public function leftJoin($table, $statement, $alias = "", $includeFields = true) {
+		return $this->join("LEFT", $table, $statement, $alias, $includeFields);
 	}
 
 	/**
@@ -390,12 +445,11 @@ class SelectQuery {
 	 * @param string $table table
 	 * @param string $statement after the ON
 	 * @param string $alias use in join
+	 * @param bool $includeFields
 	 * @return $this
 	 */
-	public function rightJoin($table, $statement, $alias = "") {
-		$this->getAliasAndStatement($table, $statement, $alias);
-		$this->from[$alias] = array("table" => $table, "statement" => " RIGHT JOIN " . DB_PREFIX . $table . " AS " . $alias . " ON " . $statement . " ");
-		return $this;
+	public function rightJoin($table, $statement, $alias = "", $includeFields = true) {
+		return $this->join("RIGHT", $table, $statement, $alias, $includeFields);
 	}
 
 	/**
@@ -426,7 +480,7 @@ class SelectQuery {
 	public function replaceAliasInStatement($statement) {
 		foreach($this->from as $a => $data) {
 			if(is_array($data)) {
-				$statement = str_replace(" " . $data["table"] . ".", " " . $a . ".", $statement);
+				$statement = str_replace(" " . $data["table"] . ".", " " . $data["alias"] . ".", $statement);
 			}
 		}
 
@@ -522,11 +576,18 @@ class SelectQuery {
 						if (!isset($foundFields[$field])) {
 							$foundFields[$field] = $alias;
 						} else {
-							if (!isset($colidingFields[$field])) {
-								$colidingFields[$field] = array(self::getAlias($foundFields[$field]));
-							}
+							if(!RegexpUtil::isNumber($alias) || !RegexpUtil::isNumber($foundFields[$field])) {
+								if (!isset($colidingFields[$field])) {
+									$colidingFields[$field] = array();
+									if(!RegexpUtil::isNumber(self::getAlias($foundFields[$field]))) {
+										$colidingFields[$field][] = self::getAlias($foundFields[$field]);
+									}
+								}
 
-							$colidingFields[$field][] = $alias;
+								if(!RegexpUtil::isNumber($alias)) {
+									$colidingFields[$field][] = $alias;
+								}
+							}
 						}
 					}
 				}
@@ -693,7 +754,6 @@ class SelectQuery {
 
 			// fix coliding fields
 			foreach($data["coliding"] as $field => $tables) {
-
 				if(is_string($tables)) {
 					if(strpos($tables, ".")) {
 						$colidingSQL[] = $tables;
@@ -735,7 +795,6 @@ class SelectQuery {
 	 * @throws SQLException
 	 */
 	public function execute($fields = null) {
-
 		if($result = sql::query($this->build($fields))) {
 			$this->result = $result;
 			return $this;
@@ -820,5 +879,13 @@ class SelectQuery {
 		}
 
 		return implode(",", $fieldsData);
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getFrom()
+	{
+		return $this->from;
 	}
 }

@@ -124,8 +124,12 @@ class ManyManyGetter extends Extension implements ArgumentsQuery
         /** @var DataObject $targetObject */
         $targetObject = new $target();
         $query = $targetObject->buildExtendedQuery($version, $filter, array(), array(), array(
-            "INNER JOIN " . DB_PREFIX . $relationShip->getTableName() . " AS " . $relationShip->getTableName() .
-            " ON " . $relationShip->getTableName() . "." . $relationShip->getTargetField() . " = " . $relationShip->getTargetTableName() . ".id"
+            array(
+                DataObject::JOIN_TYPE => "INNER",
+                DataObject::JOIN_TABLE => $relationShip->getTableName(),
+                DataObject::JOIN_STATEMENT => $relationShip->getTableName() . "." . $relationShip->getTargetField() . " = " . $relationShip->getTargetTableName() . ".id",
+                DataObject::JOIN_INCLUDEDATA => false
+            )
         ), $forceClasses);
         $query->addFilter($relationShip->getTableName()  . "." . $relationShip->getOwnerField() . " = " . $this->getOwner()->baseTable . ".id");
 

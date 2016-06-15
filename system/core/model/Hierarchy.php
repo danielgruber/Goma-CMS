@@ -56,7 +56,12 @@ class Hierarchy extends DataObjectExtension implements TreeModel {
      */
 	public function AllChildren($filter = null, $sort = null, $limit = null) {
 		return DataObject::get($this->getOwner()->classname, array_merge((array) $filter, array($this->getOwner()->baseTable . "_tree.parentid" => $this->getOwner()->id)), $sort, $limit, array(
-			"INNER JOIN " . DB_PREFIX . $this->getOwner()->baseTable . "_tree AS " . $this->getOwner()->baseTable . "_tree ON " . $this->getOwner()->baseTable . "_tree.id = " . $this->getOwner()->baseTable . ".id"
+			array(
+				DataObject::JOIN_TYPE => "INNER",
+				DataObject::JOIN_TABLE => $this->getOwner()->baseTable . "_tree",
+				DataObject::JOIN_STATEMENT => $this->getOwner()->baseTable . "_tree.id = " . $this->getOwner()->baseTable . ".id",
+				DataObject::JOIN_INCLUDEDATA => false
+			)
 		));
 	}
 
@@ -82,7 +87,12 @@ class Hierarchy extends DataObjectExtension implements TreeModel {
      */
 	public function SearchAllChildren($search, $filter = null, $sort = null, $limit = null) {
 		return DataObject::search_object($this->getOwner()->classname, $search, array_merge((array) $filter, array($this->getOwner()->baseTable . "_tree.parentid" => $this->getOwner()->id)), $sort, $limit, array(
-			"INNER JOIN " . DB_PREFIX . $this->getOwner()->baseTable . "_tree AS " . $this->getOwner()->baseTable . "_tree ON " . $this->getOwner()->baseTable . "_tree.id = " . $this->getOwner()->baseTable . ".id"
+			array(
+				DataObject::JOIN_TYPE => "INNER",
+				DataObject::JOIN_TABLE => $this->getOwner()->baseTable . "_tree",
+				DataObject::JOIN_STATEMENT => $this->getOwner()->baseTable . "_tree.id = " . $this->getOwner()->baseTable . ".id",
+				DataObject::JOIN_INCLUDEDATA => false
+			)
 		));
 	}
 
@@ -116,7 +126,12 @@ class Hierarchy extends DataObjectExtension implements TreeModel {
 			$sort = array("field" => $this->getOwner()->baseTable . "_tree.height", "type" => "DESC");
 		}
 		return DataObject::get($this->getOwner()->classname, array_merge((array) $filter, array($this->getOwner()->baseTable . "_tree.id" => $this->getOwner()->versionid)), $sort, $limit, array(
-			"INNER JOIN " . DB_PREFIX . $this->getOwner()->baseTable . "_tree AS " . $this->getOwner()->baseTable . "_tree ON " . $this->getOwner()->baseTable . "_tree.parentid = " . $this->getOwner()->baseTable . ".id"
+			array(
+				DataObject::JOIN_TYPE => "INNER",
+				DataObject::JOIN_TABLE => $this->getOwner()->baseTable . "_tree",
+				DataObject::JOIN_STATEMENT => $this->getOwner()->baseTable . "_tree.parentid = " . $this->getOwner()->baseTable . ".id",
+				DataObject::JOIN_INCLUDEDATA => false
+			)
 		));
 	}
 

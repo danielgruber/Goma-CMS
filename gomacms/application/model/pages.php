@@ -393,7 +393,12 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
         } else if(!$this->isPublished()) {
             // search for active data, which is currently assigned in the published version of this object.
             $dataCurrent = DataObject::Get_one("Permission", array(), array(), array(
-                'INNER JOIN ' . DB_PREFIX . "pages AS pages ON pages.".$name."id = permission.id AND pages.id = '".$this->publishedid."'"
+                array(
+                    DataObject::JOIN_TYPE => "INNER",
+                    DataObject::JOIN_TABLE => "pages",
+                    DataObject::JOIN_STATEMENT => "pages.".$name."id = permission.id AND pages.id = '".$this->publishedid."'",
+                    DataObject::JOIN_INCLUDEDATA => false
+                )
             ));
             if($dataCurrent  && ($currentCanBeAll || $dataCurrent->type != "all")) {
                 return $dataCurrent;
@@ -687,8 +692,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
 
         // version-state-status
         if($this->id != 0 && isset($this->data["stateid"]) && $this->data["stateid"] !== null) {
-
-
             if($this->everPublished()) {
                 define("PREVIEW_URL", BASE_URI . BASE_SCRIPT.'?r='.$this->id);
                 Resources::addJS("$(function(){ if(typeof pages_pushPreviewURL != 'undefined') pages_pushPreviewURL('".BASE_URI . BASE_SCRIPT.'?r='.$this->id."', '".BASE_URI . BASE_SCRIPT."?r=".$this->id . "&".$this->baseClass."_state', ".($this->isPublished() ? "true" : "false").", ".var_export($this->title, true)."); });");
@@ -1016,16 +1019,22 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
      *
      * @param SelectQuery $query
      */
-
     public function argumentQuery(&$query) {
         parent::argumentQuery($query);
 
         if(!Permission::check("superadmin")) {
-            array_push($query->from, "LEFT JOIN ".DB_PREFIX."permission_state AS view_permission_state ON view_permission_state.id = pages.read_permissionid");
-            array_push($query->from, "LEFT JOIN ".DB_PREFIX."permission AS view_permission ON view_permission.id = view_permission_state.publishedid");
-
-            // TODO: Find out why
-            $query->db_fields["parentid"] = $this->baseTable;
+            $query->leftJoin(
+                "permission_state",
+                "view_permission_state.id = pages.read_permissionid",
+                "view_permission_state",
+                false
+            );
+            $query->leftJoin(
+                "permission",
+                "view_permission.id = view_permission_state.publishedid",
+                "view_permission",
+                false
+            );
 
             if(!member::login()) {
                 $this->addFilterToQueryForGuest($query);

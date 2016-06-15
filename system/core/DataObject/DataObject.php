@@ -54,6 +54,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
     const MANY_MANY_VERSION_MODE = "versionMode";
     const VERSION_MODE_CURRENT_VERSION = "current";
     const VERSION_MODE_LATEST_VERSION = "latest";
+    const JOIN_TYPE = "type";
+    const JOIN_STATEMENT = "statement";
+    const JOIN_TABLE = "table";
+    const JOIN_ALIAS = "alias";
+    const JOIN_INCLUDEDATA = "includeFields";
 
     /**
      * default sorting
@@ -1637,16 +1642,19 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
         $query->limit($limit);
 
         if ($join)
-            foreach($join as $table => $statement)
+            foreach($join as $currentJoin)
             {
-                if (preg_match('/^[0-9]+$/', $table) && is_numeric($table))
-                    $query->from[] = $statement;
-                else if ($statement == "")
-                    $query->from[$table] = "";
-                else if (strpos(strtolower($statement), "join"))
-                    $query->from[$table] = $statement;
-                else
-                    $query->from[$table] = " LEFT JOIN ".DB_PREFIX.$table." AS ".$table." ON " . $statement;
+                if(isset($currentJoin[self::JOIN_TYPE], $currentJoin[self::JOIN_TABLE], $currentJoin[self::JOIN_STATEMENT])) {
+                    $query->join(
+                        $currentJoin[self::JOIN_TYPE],
+                        $currentJoin[self::JOIN_TABLE],
+                        $currentJoin[self::JOIN_STATEMENT],
+                        isset($currentJoin[self::JOIN_ALIAS]) ? $currentJoin[self::JOIN_ALIAS] : "",
+                        isset($currentJoin[self::JOIN_INCLUDEDATA]) ? $currentJoin[self::JOIN_INCLUDEDATA] : true
+                    );
+                } else {
+                    throw new InvalidArgumentException("Joins must follow Join-Format. array(type=>,table=>,statement=>,[alias=>],[includeFields=>}), got " . print_r($currentJoin, true));
+                }
             }
 
         // don't forget filtering on class-name
@@ -1853,7 +1861,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
         if (empty($groupby)) {
             if (PROFILE) Profiler::mark("getRecords::hash");
             $limithash = (is_array($limit)) ? implode($limit) : $limit;
-            $joinhash = (empty($joins)) ? "" : implode($joins);
+            $joinhash = (empty($joins)) ? "" : md5(var_export($joins, true));
             $searchhash = (is_array($search)) ? implode($search) : $search;
             $basehash = "record_" . $limithash . serialize($sort) . $joinhash . $searchhash . md5(var_export($version, true));
             if (is_array($filter)) {
@@ -1905,12 +1913,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
      */
     public function tryToBuild(SelectQuery $query) {
         // validate from
-        foreach($query->from as $table => $data) {
-            if (is_string($table) && !preg_match('/^[0-9]+$/', $table)) {
-                if (!isset(ClassInfo::$database[$table])) {
-                    // try to create the tables
-                    $this->buildDev();
-                }
+        foreach($query->getFrom() as $table => $data) {
+            if (!isset(ClassInfo::$database[$data["table"]])) {
+                // try to create the tables
+                $this->buildDev();
             }
         }
     }

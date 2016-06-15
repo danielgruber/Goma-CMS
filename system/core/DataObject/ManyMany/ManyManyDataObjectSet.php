@@ -297,11 +297,17 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
         $query->db_fields["relationid"] = array($this->relationShip->getTableName(), "id");
 
         // filter for not existing records
-        $query->from[$this->relationShip->getTableName()] = ' LEFT JOIN ' . DB_PREFIX . $this->relationShip->getTableName() . ' AS '. $this->relationShip->getTableName() .
-            ' ON ' . $baseTable . '.id = '. $this->relationShip->getTableName() .'.' . $this->relationShip->getTargetField() .
-            ' AND ' . $this->relationShip->getTableName().'.' . $this->relationShip->getOwnerField() . ' = \'' . $this->getQueryVersionID($oldId) . '\'';
-
-        $query->from[] = " INNER JOIN " . DB_PREFIX . $baseTable . "_state AS {$baseTable}_state ON {$baseTable}_state.publishedid = {$baseTable}.id";
+        $query->leftJoin(
+            $this->relationShip->getTableName(),
+            $baseTable . '.id = '. $this->relationShip->getTableName() .'.' . $this->relationShip->getTargetField() .
+            ' AND ' . $this->relationShip->getTableName().'.' . $this->relationShip->getOwnerField() . ' = \'' . $this->getQueryVersionID($oldId) . '\''
+        );
+        $query->innerJoin(
+            $baseTable . "_state",
+            "{$baseTable}_state.publishedid = {$baseTable}.id",
+            "",
+            false
+        );
 
         $query->sort($this->getManyManySort());
 
@@ -576,9 +582,12 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
             }
         }
 
-        $join[$relationTable] = " INNER JOIN " . DB_PREFIX . $relationTable . " AS " .
-            $relationTable . " ON " . $relationTable . "." . $this->relationShip->getTargetField() . " = " . $this->dbDataSource()->table() . ".id AND " .
-            $relationTable . "." . $this->relationShip->getOwnerField() . " = '" . $this->getQueryVersionID() . "'";
+        $join[$relationTable] = array(
+            DataObject::JOIN_TYPE => "INNER",
+            DataObject::JOIN_TABLE => $relationTable,
+            DataObject::JOIN_STATEMENT => $relationTable . "." . $this->relationShip->getTargetField() . " = " . $this->dbDataSource()->table() . ".id AND " .
+                $relationTable . "." . $this->relationShip->getOwnerField() . " = '" . $this->getQueryVersionID() . "'"
+        );
 
         return $join;
     }

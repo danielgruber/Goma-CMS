@@ -139,7 +139,7 @@ class HasOneGetter extends Extension implements ArgumentsQuery {
                         $response->setVersion(DataObject::VERSION_STATE);
                     }
 
-                    $this->getOwner()->setField($name, $response->first());
+                    $this->getOwner()->setField($name, $instance = $response->first());
                 }
 
                 return $instance;
@@ -214,21 +214,20 @@ class HasOneGetter extends Extension implements ArgumentsQuery {
         $table = ClassInfo::$class_info[$relationShip->getTargetClass()]["table"];
         $hasOneBaseTable = (ClassInfo::$class_info[ClassInfo::$class_info[$relationShip->getTargetClass()]["baseclass"]]["table"]);
 
-        foreach($query->from as $k => $v) {
-            if(is_string($v) && strpos($v, " AS ".$hasOneKey." ") !== false) {
-                return;
-            }
+        if(!$query->aliasExists($hasOneKey)) {
+            $query->innerJoin(
+                $table,
+                $hasOneKey . '.recordid = ' . $this->getOwner()->Table() . '.' . $hasOneKey . 'id',
+                $hasOneKey,
+                false
+            );
+            $query->innerJoin(
+                $hasOneBaseTable . '_state',
+                $hasOneBaseTable . '_state.publishedid = ' . $hasOneKey . '.id',
+                $hasOneBaseTable . '_state',
+                false
+            );
         }
-
-        $query->from[] = ' INNER JOIN
-													'.DB_PREFIX . $table.' AS '.$hasOneKey.' ON
-												 '.$hasOneKey.'.recordid = '.$this->getOwner()->Table().'.'.$hasOneKey.'id';
-        $query->from[] = ' INNER JOIN
-													'.DB_PREFIX . $hasOneBaseTable.'_state
-												AS
-													'.$hasOneBaseTable.'_state
-												ON
-												 '.$hasOneBaseTable.'_state.publishedid = '.$hasOneKey.'.id';
     }
 
     /**
