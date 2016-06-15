@@ -13,8 +13,11 @@ defined("IN_GOMA") OR die();
  *
  * @method DataObject getOwner()
  */
-class ManyManyGetter extends Extension implements ArgumentsQuery
+class ManyManyGetter extends AbstractGetterExtension implements ArgumentsQuery
 {
+
+    const ID = "ManyManyGetter";
+
     /**
      * extra-methods.
      */
@@ -30,37 +33,9 @@ class ManyManyGetter extends Extension implements ArgumentsQuery
     public function extendDefineStatics() {
         if ($manyMany = $this->getOwner()->ManyManyRelationships()) {
             foreach ($manyMany as $key => $val) {
-                gObject::LinkMethod($this->getOwner()->classname, $key, array("ManyManyGetter", function($instance) use($key) {
-                    $args = func_get_args();
-                    $args[0] = $key;
-                    try {
-                        return call_user_func_array(array($instance, "getManyMany"), $args);
-                    } catch(InvalidArgumentException $e) {
-                        throw new LogicException("Something got wrong wiring the ManyMany-Relationship.", 0, $e);
-                    }
-                }), true);
-
-                gObject::LinkMethod($this->getOwner()->classname, $key . "ids", array("this", "getRelationIDs"), true);
-
-                gObject::LinkMethod($this->getOwner()->classname, "set" . $key, array("ManyManyGetter", function($instance) use($key) {
-                    $args = func_get_args();
-                    $args[0] = $key;
-                    try {
-                        return call_user_func_array(array($instance, "setManyMany"), $args);
-                    } catch(InvalidArgumentException $e) {
-                        throw new LogicException("Something got wrong wiring the ManyMany-Relationship.", 0, $e);
-                    }
-                }), true);
-
-                gObject::LinkMethod($this->getOwner()->classname, "set" . $key . "ids", array("ManyManyGetter", function($instance) use($key) {
-                    $args = func_get_args();
-                    $args[0] = $key;
-                    try {
-                        return call_user_func_array(array($instance, "setManyManyIDs"), $args);
-                    } catch(InvalidArgumentException $e) {
-                        throw new LogicException("Something got wrong wiring the ManyMany-Relationship.", 0, $e);
-                    }
-                }), true);
+                $this->linkMethodWithInstance(self::ID, $key, "getManyMany", "Something got wrong wiring the ManyMany-Relationship.");
+                $this->linkMethodWithInstance(self::ID, "set" . $key . "ids", "setManyManyIDs", "Something got wrong wiring the ManyMany-Relationship.");
+                $this->linkMethodWithInstance(self::ID, "set" . $key, "setManyMany", "Something got wrong wiring the ManyMany-Relationship.");
             }
         }
     }

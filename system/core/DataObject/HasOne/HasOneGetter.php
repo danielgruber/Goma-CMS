@@ -7,13 +7,14 @@ defined("IN_GOMA") OR die();
  * @package Goma
  *
  * @author Goma-Team
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @copyright 2016 Goma-Team
  *
  * @version 1.0
  *
  * @method DataObject getOwner()
  */
-class HasOneGetter extends Extension implements ArgumentsQuery {
+class HasOneGetter extends AbstractGetterExtension implements ArgumentsQuery {
 
     /**
      * id of class.
@@ -52,24 +53,8 @@ class HasOneGetter extends Extension implements ArgumentsQuery {
     public function extendDefineStatics() {
         if ($has_one = $this->HasOne()) {
             foreach($has_one as $key => $val) {
-                gObject::LinkMethod($this->getOwner()->classname, $key, array("HasOneGetter", function($instance) use ($key) {
-                    $args = func_get_args();
-                    $args[0] = $key;
-                    try {
-                        return call_user_func_array(array($instance, "getHasOne"), $args);
-                    } catch(InvalidArgumentException $e) {
-                        throw new LogicException("Something got wrong wiring the HasOne-Relationship.", 0, $e);
-                    }
-                }), true);
-                gObject::LinkMethod($this->getOwner()->classname, "set" . $key, array("HasOneGetter", function($instance) use ($key) {
-                    $args = func_get_args();
-                    $args[0] = $key;
-                    try {
-                        return call_user_func_array(array($instance, "setHasOne"), $args);
-                    } catch(InvalidArgumentException $e) {
-                        throw new LogicException("Something got wrong wiring the HasOne-Relationship.", 0, $e);
-                    }
-                }), true);
+                $this->linkMethodWithInstance(self::ID, $key, "getHasOne", "Something got wrong wiring the HasOne-Relationship.");
+                $this->linkMethodWithInstance(self::ID, "set" . $key, "setHasOne", "Something got wrong wiring the HasOne-Relationship.");
             }
         }
     }

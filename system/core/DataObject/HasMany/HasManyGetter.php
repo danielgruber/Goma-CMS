@@ -11,7 +11,7 @@
  * @version    1.0.2
  * @method DataObject getOwner()
  */
-class HasManyGetter extends Extension {
+class HasManyGetter extends AbstractGetterExtension {
 
     /**
      * id of class.
@@ -39,26 +39,10 @@ class HasManyGetter extends Extension {
     public function extendDefineStatics() {
         if ($has_many = $this->hasMany()) {
             foreach ($has_many as $key => $val) {
-                gObject::LinkMethod($this->getOwner()->classname, $key, array("HasManyGetter", function($instance) use($key) {
-                    $args = func_get_args();
-                    $args[0] = $key;
-                    try {
-                        return call_user_func_array(array($instance, "getHasMany"), $args);
-                    } catch(InvalidArgumentException $e) {
-                        throw new LogicException("Something got wrong wiring the HasMany-Relationship.", 0, $e);
-                    }
-                }), true);
+                $this->linkMethodWithInstance(self::ID, $key, "getHasMany", "Something got wrong wiring the HasMany-Relationship.");
+                $this->linkMethodWithInstance(self::ID, "set" . $key . "ids", "setHasManyIDs", "Something got wrong wiring the HasMany-Relationship.");
 
                 gObject::LinkMethod($this->getOwner()->classname, $key . "ids", array("this", "getRelationIDs"), true);
-                gObject::LinkMethod($this->getOwner()->classname, "set" . $key . "ids", array("HasManyGetter", function($instance) use($key) {
-                    $args = func_get_args();
-                    $args[0] = $key;
-                    try {
-                        return call_user_func_array(array($instance, "setHasManyIDs"), $args);
-                    } catch(InvalidArgumentException $e) {
-                        throw new LogicException("Something got wrong wiring the HasMany-Relationship.", 0, $e);
-                    }
-                }), true);
             }
         }
     }
