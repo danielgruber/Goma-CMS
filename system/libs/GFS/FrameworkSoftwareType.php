@@ -74,16 +74,6 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 				'<?php if(!GFS_Package_Installer::wasUnpacked('.var_export($this->file, true).') || !is_dir('.var_export($dir, true).')) { $gfs = new GFS_Package_installer('.var_export($this->file, true).');$gfs->unpack('.var_export($dir, true).'); }'
 			);
 
-			/*if($gfs->exists(".preflight")) {
-				$gfs->writeToFileSystem(".preflight", $dir . "/.preflight");
-				$data["preflight"][] = $dir . "/.preflight";
-			}
-			
-			if($gfs->exists(".postflight")) {
-				$gfs->writeToFileSystem(".postflight", $dir . "/.postflight");
-				$data["postflight"][] = $dir . "/.postflight";
-			}*/
-
 			$data["installFolders"] = array(
 				"source"		=> $dir . "/data/",
 				"destination"	=> ROOT
@@ -95,13 +85,6 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 			$data["postflightCode"] = array(
 				'<?php FileSystem::Delete('.var_export($dir, true).');'
 			);
-
-			/*if($gfs->exists(".getinstallinfo")) {
-				$file = FRAMEWORK_ROOT . "temp/" . md5($this->file . ".installInfo") . ".php";
-				$gfs->writeToFileSystem(".getinstallinfo", $file);
-				include($file);
-				@unlink($file);
-			}*/
 
 			return $data;
 		} else {
@@ -282,7 +265,6 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 	 * @return bool|mixed|string
 	 */
 	public static function buildDistro($file, $name, $controller) {
-
 		if(GlobalSessionManager::globalSession()->hasKey(g_SoftwareType::FINALIZE_SESSION_VAR))
 			return gObject::instance("g_frameworkSoftWareType")->finalizeDistro(GlobalSessionManager::globalSession()->get(g_SoftwareType::FINALIZE_SESSION_VAR));
 

@@ -155,4 +155,21 @@ class ExceptionManager {
 	 * model.
 	 */
 	const DATAOBJECTSET_COMMIT = -1105;
+
+	/**
+	 * gfs
+	 */
+	const GFSException = 4000;
+	const GFSVersionException = 4001;
+	const GFSFileException = 4002;
+	const GFSDBException = 4003;
+	const GFSReadOnlyException = 4004;
+	const GFSFileNotFoundException = 4005;
+	const GFSFileNotValidException = 4006;
+	const GFSFileExistsException = 4007;
+	const GFSRealFileNotExistsException = 4008;
+	const GFSRealFilePermissionException = 4009;
+
+
+
 }

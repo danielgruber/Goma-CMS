@@ -262,4 +262,9 @@ class FormTest extends GomaUnitTest implements TestAble {
 
 		GlobalSessionManager::__setSession($session);
 	}
+
+	public function testName() {
+		$form = new Form(new Controller(), "BLAH");
+		$this->assertEqual($form->name(), "blah");
+	}
 }

@@ -108,7 +108,7 @@ class Form extends AbstractFormComponentWithChildren {
 	 */
 	public function __construct($controller = null, $name = null, $fields = array(), $actions = array(), $validators = array(), $request = null, $model = null) {
 
-		parent::__construct($name, $fields, $model);
+		parent::__construct(strtolower($name), $fields, $model);
 
 		if(!isset($controller))
 			return;

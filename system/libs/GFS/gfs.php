@@ -23,124 +23,74 @@ class GFS {
 	
 	/**
 	 * required version for this class
-	 *
-	 *@name REQUIRED_VERSION
-	 *@access public
 	*/
 	const REQUIRED_VERSION = "2.0";
 	
 	/**
 	 * version for this class
-	 *
-	 *@name VERSION
-	 *@access public
 	*/
 	const VERSION = "2.6";
 
 	/**
-	 * list of errors.
-	 * all errors are int under 0.
-	*/
-	const FILE_NOT_FOUND = -4;
-	const ARCHIVE_READONLY = -5;
-	const FILE_CONTENT_NOT_VALID = -3;
-	const REALFILE_PERMISSION_ERROR = -6;
-	const FILE_ALREADY_EXISTS = -1;
-	const REALFILE_NOT_FOUND = -10;
-
-	/**
 	 * contains whether PHP supports Open-SSL or not.
-	 *
-	 *@name openssl_problems
 	*/
 	static $openssl_problems = false;
 	
 	/**
 	 * version of the GFS-Library the opeded file was created with
-	 *
-	 *@name version
-	 *@access public
 	*/
 	public $version;
 	
 	/**
 	 * filepointer
-	 *
-	 *@name pointer
-	 *@access protected
 	*/
 	protected $pointer;
 	
 	/**
 	 * file
-	 *
-	 *@name file
-	 *@access public
 	*/
 	public $file;
 	
 	/**
 	 * database
-	 *
-	 *@name database
-	 *@access protected 
 	*/
 	protected $db;
 	
 	/**
 	 * valid
-	 *
-	 *@name valid
-	 *@access public
 	*/
 	public $valid;
 	
 	/**
 	 * fileposition
-	 *
-	 *@name position
 	*/
 	public $position = 0;
 	
 	/**
 	 * endofcontentposition
-	 *
-	 *@name endOfContentPos
-	 *@access public
 	*/
 	protected $endOfContentPos = 0;
 	 
 	/**
 	 * files
-	 *
-	 *@name files
-	 *@access protected
 	*/
 	protected $files = array();
 	
 	/**
 	 * offsetcache
-	 *
-	 *@name offsetcache
-	 *@access protected
-	 *@var array
+	 * @var array
 	*/
 	protected $offsetcache = array();
 	
 	/**
 	 * old-db-size
-	 *
-	 *@name oldDBSize
-	 *@access protected
 	*/
 	protected $oldDBSize;
 	
 	/**
 	 * if this archive is opened as readonly
 	 *
-	 *@name readonly
-	 *@access public
-	 *@var bool
+	 * @var bool
 	*/
 	protected $readonly;
 	
@@ -154,17 +104,11 @@ class GFS {
 	
 	/**
 	 * private-key-cache for signing
-	 *
-	 *@name private
-	 *@access private
 	*/
 	private $private;
 	
 	/**
 	 * certificate-validate-cache
-	 *
-	 *@name certValidCache
-	 *@access private
 	*/
 	private $certValidCache;
 
@@ -351,105 +295,100 @@ class GFS {
 	/**
 	 * adds a file.
 	 *
-	 * @name    addFromFile
-	 * @access    public
-	 * @param    string - file
-	 * @param    string - path in container
+	 * @param string $file
+	 * @param string $path
+	 * @param array $not_add_if_dir
 	 * @return bool|int
+	 * @throws GFSException
+	 * @throws GFSFileExistsException
+	 * @throws GFSReadonlyException
+	 * @throws GFSRealFileNotFoundException
+	 * @throws GFSRealFilePermissionException
 	 */
 	public function addFromFile($file, $path, $not_add_if_dir = array()) {
 		
 		$this->checkValidOrThrow();
-		
-		if($this->readonly) {
-			return self::ARCHIVE_READONLY;
-		}
 
 		// check if is dir.
 		if(is_dir($file)) {
-			$r = $this->addDirectoryAndFiles($file, $path, $not_add_if_dir);
+			$this->addDirectoryAndFiles($file, $path, $not_add_if_dir);
 			$this->updateDB();
-			return $r;
+			return;
 		}
 
 		// parse path
 		$path = $this->parsePath($path);
 		
 		if(realpath($file) == $this->file || in_array($path, $not_add_if_dir)) {
-			return true;
-		}
-		
-		if(!file_exists($file)) {
-			return self::REALFILE_NOT_FOUND;
+			return;
 		}
 		
 		// check if you can create the path
 		if(!isset($this->db[$path])) {
 			$this->createPath($path);
 		} else {
-			return self::FILE_ALREADY_EXISTS;
+			throw new GFSFileExistsException();
 		}
 		
 		// check if file exists and add it.
 		if(is_file($file)) {
-			$s = $this->addFileToArchiveWithoutChecks($file, $path);
-			if($s === true) {
-				return $this->updateDB();
-			}
-			
-			return $s;
+			$this->addFileToArchiveWithoutChecks($file, $path);
+			$this->updateDB();
 		} else {
-			return self::REALFILE_NOT_FOUND;
+			throw new GFSRealFileNotFoundException();
 		}
 	}
-	
+
 	/**
 	 * adds a file without call updateDB. it updates the local copy of db in $this->db.
 	 *
-	 * @name 	addFromFileHelper
-	 * @access 	protected
-	 * @param 	string - file
-	 * @param 	string - path in container
-	*/
+	 * @param    string $file
+	 * @param    string $path in container
+	 * @param     array $not_add_if_dir
+	 * @throws GFSException
+	 * @throws GFSFileExistsException
+	 * @throws GFSReadonlyException
+	 * @throws GFSRealFileNotFoundException
+	 * @throws GFSRealFilePermissionException
+	 */
 	protected function addFromFileHelper($file, $path, $not_add_if_dir = array()) {
 		
 		$this->checkValidOrThrow();
-		
-		if($this->readonly) {
-			return self::ARCHIVE_READONLY;
-		}
 
 		// check if is dir.
 		if(is_dir($file)) {
-			return $this->addDirectoryAndFiles($file, $path, $not_add_if_dir);
+			$this->addDirectoryAndFiles($file, $path, $not_add_if_dir);
+			return;
 		}
 
 		// parse path
 		$path = $this->parsePath($path);
 				
 		if(basename($file) == basename($this->file) || in_array($path,$not_add_if_dir)) { 
-			return true;
+			return;
 		}
 		
 		// check if you can create the path
 		if(!isset($this->db[$path])) {
 			$this->createPath($path);
 		} else {
-			return self::FILE_ALREADY_EXISTS;
+			throw new GFSFileExistsException();
 		}
 		
 		if(file_exists($file)) {
-			return $this->addFileToArchiveWithoutChecks($file, $path);
+			$this->addFileToArchiveWithoutChecks($file, $path);
 		} else {
-			return self::REALFILE_NOT_FOUND;
+			throw new GFSRealFileNotFoundException();
 		}
 	}
 
 	/**
 	 * adds an file to archive.
 	 *
-	 * @name addFileToArchiveWithoutChecks
-	 * @return bool|int
+	 * @param string $file
+	 * @param string $path
+	 * @throws GFSRealFileNotFoundException
+	 * @throws GFSRealFilePermissionException
 	 */
 	protected function addFileToArchiveWithoutChecks($file, $path) {
 		if(file_exists($file)) {
@@ -473,7 +412,7 @@ class GFS {
 					);
 					$this->endOfContentPos += filesize($file);
 				} else {
-					return self::REALFILE_PERMISSION_ERROR;
+					throw new GFSRealFilePermissionException();
 				}
 			} else {
 				$this->db[$path] = array(
@@ -484,19 +423,19 @@ class GFS {
 				);
 			}
 		} else {
-			return self::REALFILE_NOT_FOUND;
+			throw new GFSRealFileNotFoundException();
 		}
-
-		return true;
 	}
 
 	/**
 	 * adds content to archive.
 	 *
-	 * @return bool
+	 * @param string $content
+	 * @param string $path
+	 * @param null $lastModified
+	 * @throws GFSRealFileNotFoundException
 	 */
 	protected function addContentToArchiveWithoutChecks($content, $path, $lastModified = null) {
-
 		if(!isset($lastModified)) {
 			$lastModified = time();
 		}
@@ -504,7 +443,10 @@ class GFS {
 		if(strlen($content) > FILESIZE_SAVE_IN_DB) {
 			$this->setPosition($this->endOfContentPos);
 			// write and save memory
-			fwrite($this->pointer, $content);
+			if(!fwrite($this->pointer, $content)) {
+				// TODO: Preserve stability here
+				throw new GFSRealFileNotFoundException();
+			}
 
 			$this->db[$path] = array(
 				"type"	 			=> $this->getFileType($path),
@@ -522,20 +464,19 @@ class GFS {
 				"contents"			=> $content
 			);
 		}
-
-		return true;
 	}
 
 	/**
 	 * adds all files of a directory.
-	*/
+	 * @param string $file
+	 * @param string $path
+	 * @param array $not_add_if_dir
+	 */
 	public function addDirectoryAndFiles($file, $path, $not_add_if_dir = array()) {
-
 		$path = $this->parsePath($path);
 
 		// create folder.
 		if(!isset($this->db[$path])) {
-
 			// create sub-path.
 			$this->createPath($path);
 
@@ -543,7 +484,6 @@ class GFS {
 				"type"	 			=> GFS_DIR_TYPE,
 				"lastModified"		=> filemtime($file)
 			);
-
 		}
 
 		foreach(scandir($file) as $_file) {
@@ -551,8 +491,6 @@ class GFS {
 				$this->addFromFileHelper($file . "/" . $_file, $path . "/" . $_file, $not_add_if_dir);
 			}
 		}
-		
-		return true;
 	}
 
 	/**
@@ -560,14 +498,11 @@ class GFS {
 	 *
 	 * @param string $path
 	 * @return bool|int
+	 * @throws GFSException
 	 */
 	public function addDir($path) {
-		
 		$this->checkValidOrThrow();
-		
-		if($this->readonly) {
-			return self::ARCHIVE_READONLY;
-		}
+
 		// parse path
 		$path = $this->parsePath($path);
 		
@@ -576,23 +511,27 @@ class GFS {
 		if(!isset($this->db[$path])) {
 			$this->createPath($path);
 		} else {
-			return self::FILE_NOT_FOUND;
+			throw new GFSFileNotFoundException();
 		}
 		
 		$this->db[$path] = array(
 			"type"  	 	=> GFS_DIR_TYPE,
 			"lastModified"	=> TIME
 		);
-		return $this->updateDB();
+		$this->updateDB();
 	}
-	
+
 	/**
 	 * returns filesize of given file.
 	 *
-	 * @param 	string path
-	*/
+	 * @param    string $path
+	 * @return int
+	 * @throws GFSException
+	 * @throws GFSFileNotFoundException
+	 * @throws GFSReadonlyException
+	 */
 	public function getFileSize($path) {
-		$this->checkValidOrThrow();
+		$this->checkValidOrThrow(false);
 
 		// parse path
 		$path = $this->parsePath($path);
@@ -601,23 +540,26 @@ class GFS {
 			if(isset($this->db[$path]["size"])) {
 				return $this->db[$path]["size"];
 			} else {
-
 				// folders have size 0.
 				return 0;
 			}
 
 		} else {
-			return false::FILE_NOT_FOUND;
+			throw new GFSFileNotFoundException();
 		}
 	}
 
 	/**
 	 * returns when a file was last modified.
 	 *
-	 * @param 	string path
-	*/
+	 * @param  string $path
+	 * @return int
+	 * @throws GFSException
+	 * @throws GFSFileNotFoundException
+	 * @throws GFSReadonlyException
+	 */
 	public function getLastModified($path) {
-		$this->checkValidOrThrow();
+		$this->checkValidOrThrow(false);
 
 		// parse path
 		$path = $this->parsePath($path);
@@ -632,25 +574,22 @@ class GFS {
 			}
 
 		} else {
-			return false::FILE_NOT_FOUND;
+			throw new GFSFileNotFoundException();
 		}
 	}
 
 	/**
 	 * adds a file
 	 *
-	 *@name addFile
-	 *@access public
-	 *@param string - path
-	 *@param string - content
-	*/
+	 * @param string $path
+	 * @param string $content
+	 * @param int $lastModified
+	 * @return bool|int
+	 * @throws GFSException
+	 */
 	public function addFile($path, $content, $lastModified = null) {
 		$this->checkValidOrThrow();
-		
-		if($this->readonly) {
-			return self::ARCHIVE_READONLY;
-		}
-		
+
 		// parse path
 		$path = $this->parsePath($path);
 		
@@ -658,16 +597,12 @@ class GFS {
 		if(!isset($this->db[$path])) {
 			$this->createPath($path);
 		} else {
-			return self::FILE_ALREADY_EXISTS;
+			throw new GFSFileExistsException();
 		}
 
-		$s = $this->addContentToArchiveWithoutChecks($content, $path, $lastModified);
+		$this->addContentToArchiveWithoutChecks($content, $path, $lastModified);
 
-		if($s === true) {
-			return $this->updateDB();
-		}
-		
-		return $s;
+		$this->updateDB();
 	}
 
 	/**
@@ -676,7 +611,6 @@ class GFS {
 	 * @name createPath
 	*/
 	protected function createPath($path) {
-
 		// parse path
 		$path = $this->parsePath($path);
 
@@ -695,30 +629,32 @@ class GFS {
 			}
 		}
 	}
-	
+
 	/**
 	 * gets the filetype = extension
 	 *
-	 *@name getFileType
-	 *@access public
-	 *@param string - file
-	*/
+	 * @param string $file
+	 * @return null|string
+	 */
 	public function getFileType($file) {
 		if(strpos($file, ".") !== false)
 			return substr($file, strrpos($file, ".") + 1);
 		
 		return null;
 	}
-	
+
 	/**
 	 * gets contents of a file
 	 *
-	 *@name getFileContents
-	 *@access public
-	 *@param string - path
-	*/
+	 * @param string $path
+	 * @return int|string
+	 * @throws GFSException
+	 * @throws GFSFileNotFoundException
+	 * @throws GFSFileNotValidException
+	 * @throws GFSReadonlyException
+	 */
 	public function getFileContents($path) {
-		$this->checkValidOrThrow();
+		$this->checkValidOrThrow(false);
 
 		// parse path
 		$path = $this->parsePath($path);
@@ -727,13 +663,14 @@ class GFS {
 			if($this->db[$path]["size"] == 0) {
 				return "";
 			}
+
 			// get position of file
 			if(isset($this->db[$path]["startChunk"])) {
 				$offset = $this->db[$path]["startChunk"];
 			} else if(isset($this->db[$path]["contents"])) {
 				return $this->db[$path]["contents"];
 			} else {
-				return false;
+				throw new GFSFileNotFoundException();
 			}
 
 			// go to position of file
@@ -742,33 +679,43 @@ class GFS {
 			if("GFS" . md5($content) == $this->db[$path]["checksum"]) {
 				return $content;
 			} else {
-				return self::FILE_CONTENT_NOT_VALID;
+				throw new GFSFileNotValidException();
 			}
 		} else {
-			return self::FILE_NOT_FOUND;
+			throw new GFSFileNotFoundException();
 		}
 	}
-	
+
 	/**
 	 * getDBInfo
 	 *
-	 *@name getDBInfo
-	 *@access public
-	 *@param string - path
-	*/
+	 * @param string $path
+	 * @return array
+	 * @throws FileNotFoundException
+	 * @throws GFSException
+	 * @throws GFSReadonlyException
+	 */
 	public function getDBInfo($path) {
-		$this->checkValidOrThrow();
+		$this->checkValidOrThrow(false);
 		
 		$path = $this->parsePath($path);
 		
-		return isset($this->db[$path]) ? $this->db[$path] : self::FILE_NOT_FOUND;
+		if(isset($this->db[$path])) {
+			return $this->db[$path];
+		}
+
+		throw new FileNotFoundException();
 	}
 
 	/**
 	 * returns if file exists.
-	*/
+	 * @param string $path
+	 * @return bool
+	 * @throws GFSException
+	 * @throws GFSReadonlyException
+	 */
 	public function exists($path) {
-		$this->checkValidOrThrow();
+		$this->checkValidOrThrow(false);
 		
 		$path = $this->parsePath($path);
 		
@@ -777,9 +724,13 @@ class GFS {
 
 	/**
 	 * returns if file is folder.
-	*/
+	 * @param string $path
+	 * @return bool
+	 * @throws GFSException
+	 * @throws GFSReadonlyException
+	 */
 	public function isDir($path) {
-		$this->checkValidOrThrow();
+		$this->checkValidOrThrow(false);
 		
 		$path = $this->parsePath($path);
 		
@@ -788,9 +739,13 @@ class GFS {
 
 	/**
 	 * returns md5-hash of file.
-	*/
+	 * @param $path
+	 * @return bool|string
+	 * @throws GFSException
+	 * @throws GFSReadonlyException
+	 */
 	public function getMd5($path) {
-		$this->checkValidOrThrow();
+		$this->checkValidOrThrow(false);
 		
 		$path = $this->parsePath($path);
 		
@@ -799,28 +754,27 @@ class GFS {
 		} else if(isset($this->db[$path]["contents"])) {
 			return md5($this->db[$path]["contents"]);
 		} else {
-			return false;
+			throw new GFSFileNotFoundException();
 		}
 	}
 	
 	/**
 	 * returns the complete database
-	 *
-	 *@name getDB
-	 *@access public
 	*/
 	public function getDB() {
 		return $this->db;
 	}
-	
+
 	/**
 	 * gets contents of a directory
-	 *
-	 *@name scanDir
-	 *@access public
-	*/
+	 * @param string $path
+	 * @return array
+	 * @throws GFSException
+	 * @throws GFSFileNotFoundException
+	 * @throws GFSReadonlyException
+	 */
 	public function scanDir($path) {
-		$this->checkValidOrThrow();
+		$this->checkValidOrThrow(false);
 		
 		// parse path
 		$path = $this->parsePath($path);
@@ -833,58 +787,54 @@ class GFS {
 			}
 			return array_map("basename", array_filter(array_keys($this->db), create_function("\$val", "return preg_match('/^".preg_quote($path, "/")."([^\/]+)$/', \$val);")));
 		} else {
-			return self::FILE_NOT_FOUND;
+			throw new GFSFileNotFoundException();
 		}
 	}
-	
+
 	/**
 	 * remove
 	 * we just unset the data in db
-	 *
-	 *@name unlink
-	 *@access public
-	 *@param string - path
-	*/
+	 * @param string $path
+	 * @return bool|int|void
+	 * @throws GFSException
+	 * @throws GFSFileNotFoundException
+	 * @throws GFSReadonlyException
+	 * @throws GFSRealFilePermissionException
+	 */
 	public function unlink($path) {
 		$this->checkValidOrThrow();
-		
-		if($this->readonly) {
-			return self::ARCHIVE_READONLY;
-		}
-		
+
 		// parse path
 		$path = $this->parsePath($path);
 		
 		
 		if(isset($this->db[$path])) {
 			if($this->db[$path]["type"] == GFS_DIR_TYPE) {
-				return $this->rmdir($path);
+				$this->rmdir($path);
 			} else {
 				unset($this->db[$path]);
-				return $this->updateDB();
+				$this->updateDB();
 			}
 		} else {
-			return self::FILE_NOT_FOUND;
+			throw new GFSFileNotFoundException();
 		}
 	}
-	
+
 	/**
 	 * deletes a directory recursivly
 	 *
-	 *@name rmdir
-	 *@access public
-	 *@param string - path
-	*/
+	 * @param string $path
+	 * @throws GFSException
+	 * @throws GFSFileNotFoundException
+	 * @throws GFSReadonlyException
+	 * @throws GFSRealFilePermissionException
+	 */
 	public function rmdir($path) {
 		$this->checkValidOrThrow();
-
-		if($this->readonly) {
-			return self::ARCHIVE_READONLY;
-		}
 		
 		$path = $this->parsePath($path);
 		if(!isset($this->db[$path]) || $this->db[$path]["type"] != GFS_DIR_TYPE) {
-			return false;
+			throw new GFSFileNotFoundException();
 		}
 		// first find files in path, but go from last to first to have better caches
 		$db = array_reverse($this->db);
@@ -898,42 +848,41 @@ class GFS {
 			}
 		}
 		
-		return $this->updateDB();
-
-		
+		$this->updateDB();
 	}
+
 	/**
 	 * gets last modfied of given file
-	 *
-	 *@name filemTime
-	 *@access public
-	 *@param string - path
-	*/
+	 * @param string $path
+	 * @return int
+	 * @throws GFSException
+	 * @throws GFSReadonlyException
+	 */
 	public function filemTime($path) {
-		$this->checkValidOrThrow();
+		$this->checkValidOrThrow(false);
 		
 		$path = $this->parsePath($path);
 		
 		if(isset($this->db[$path]["last_modfied"])) {
 			return $this->db[$path]["last_modfied"];
 		} else {
-			return self::FILE_NOT_FOUND;
+			throw new GFSFileNotFoundException();
 		}
 	}
-	
+
 	/**
 	 * rename
-	 *
-	 *@name rename
-	 *@access public
-	*/
+	 * @param string $path
+	 * @param string $new
+	 * @throws GFSException
+	 * @throws GFSFileExistsException
+	 * @throws GFSFileNotFoundException
+	 * @throws GFSReadonlyException
+	 * @throws GFSRealFilePermissionException
+	 */
 	public function rename($path, $new) {
 		$this->checkValidOrThrow();
-		
-		if($this->readonly) {
-			return self::ARCHIVE_READONLY;
-		}
-		
+
 		$path = $this->parsePath($path);
 		
 		$new = basename($new);
@@ -947,7 +896,7 @@ class GFS {
 						unset($this->db[$key]);
 					}
 				}
-				return $this->updateDB();
+				$this->updateDB();
 			} else {
 				$new = substr($path, 0, strrpos($path, "/")) . "/" . $new;
 				if(substr($new, 0, 1) == "/")
@@ -957,29 +906,24 @@ class GFS {
 					$this->db[$new] = $this->db[$path];
 					$this->db[$new]["type"] = $this->getFileType($new);
 					unset($this->db[$path]);
-					return $this->updateDB();
+					$this->updateDB();
 				} else {
-					return self::FILE_ALREADY_EXISTS;
+					throw new GFSFileExistsException();
 				}
 			}
 		} else {
-			return self::FILE_NOT_FOUND;
+			throw new GFSFileNotFoundException();
 		}
 	}
 	
 	/**
 	 * sets the last modfied-meta-tag to the current time
 	 *
-	 *@name touch
-	 *@access public
-	 *@param string - path
+	 * @param string $path
+	 * @param int $time
 	*/
 	public function touch($path, $time = NOW) {
 		$this->checkValidOrThrow();
-		
-		if($this->readonly) {
-			return self::ARCHIVE_READONLY;
-		}
 		
 		$path = $this->parsePath($path);
 		
@@ -988,81 +932,71 @@ class GFS {
 				$this->db[$path]["lastModified"] = $time;
 			}
 			unset($path);
-			return $this->updateDB();
+			$this->updateDB();
 		} else {
-			return $this->addFile($path, "", $time);
+			$this->addFile($path, "", $time);
 		}
 	}
-	
+
 	/**
 	 * Writes $text in $path
-	 *@name write
-	 *@param string - text
-	 *@param string - path
-	 *@access public
-	 *@return bool
-	**/
+	 *
+	 * @param string $path
+	 * @param string $text
+	 * @throws GFSReadonlyException
+	 */
 	public function write($path, $text)
 	{
 		$this->checkValidOrThrow();
 		
-		if($this->readonly) {
-			return self::ARCHIVE_READONLY;
-		}
-		
 		$path = $this->parsePath($path);
 			
 		if(isset($this->db[$path])) {
-			if($err = $this->addFile($path . ".tmp", $text) === true) {
-				$this->unlink($path);
-				return $this->rename($path . ".tmp", $path);
-			} else {
-				return $err;
-			}
+			$this->addFile($path . ".tmp", $text);
+			$this->unlink($path);
+			$this->rename($path . ".tmp", $path);
 		} else {
-			return $this->addFile($path, $text);
+			$this->addFile($path, $text);
 		} 	 
 	}
-	
+
 	/**
 	 * unpacks the archive
 	 *
-	 *@name unpack
-	 *@access public
-	 *@param string - aim directory
-	 *@param string - path to start
-	*/
+	 * @param string $aim directory
+	 * @param string $path to start
+	 * @throws FileNotPermittedException
+	 * @throws GFSFileNotFoundException
+	 * @throws GFSRealFilePermissionException
+	 */
 	public function unpack($aim, $path = "") {
 		FileSystem::requireDir($aim);
 		if($path == "" || $this->exists($path)) {
 			foreach($this->scandir($path) as $file) {
 				$fileinfo = $this->getDBInfo($path . "/" . $file);
 				if(is_array($fileinfo) && $fileinfo["type"] == GFS_DIR_TYPE) {
-					if($this->unpack($aim . "/" . $file,$path . "/" . $file) !== true) {
-						return false;
-					}
+					$this->unpack($aim . "/" . $file,$path . "/" . $file);
 				} else {
-					if(!$this->writeToFileSystem($path . "/" . $file, $aim . "/" . $file)) {
-						return false;
-					}
+					$this->writeToFileSystem($path . "/" . $file, $aim . "/" . $file);
 				}
 				unset($file, $fileinfo);
 			}
-			return true;
 		} else {
-			return self::FILE_NOT_FOUND;
+			throw new GFSFileNotFoundException();
 		}
 	}
-	
+
 	/**
 	 * writes a file from the archive to the real filesystem
 	 * you should use this function if you write files directly to the filesystem, because with this function you can also write files larger than your RAM-amount
 	 *
-	 *@name writeToFileSystem
-	 *@access public
-	 *@param string - file in archive
-	 *@param string - destination file
-	*/
+	 * @param string $path
+	 * @param string $aim
+	 * @throws GFSException
+	 * @throws GFSFileNotFoundException
+	 * @throws GFSReadonlyException
+	 * @throws GFSRealFilePermissionException
+	 */
 	public function writeToFileSystem($path, $aim) {
 		$this->checkValidOrThrow();
 		
@@ -1070,23 +1004,27 @@ class GFS {
 		$path = $this->parsePath($path);
 		
 		if(isset($this->db[$path])) {
-			
 			// get position of file
 			if(isset($this->db[$path]["startChunk"])) {
 				$offset = $this->db[$path]["startChunk"];
 			} else if(isset($this->db[$path]["contents"]) || $this->db[$path]["contents"] === null) {
 				if($pointer = @fopen($aim, "w")) {
-					fwrite($pointer, (string) $this->db[$path]["contents"]);
-					fclose($pointer);
-					@chmod($aim, $this->writeMode);
-					unset($pointer);
-					return true;
+					try {
+						if (!fwrite($pointer, (string)$this->db[$path]["contents"])) {
+							throw new GFSRealFilePermissionException();
+						}
+					} finally {
+						fclose($pointer);
+						@chmod($aim, $this->writeMode);
+						unset($pointer);
+					}
 				} else {
-					return self::REALFILE_PERMISSION_ERROR;
+					throw new GFSRealFilePermissionException();
 				}
 			} else {
-				return false;
+				throw new GFSFileNotFoundException();
 			}
+
 			$this->setPosition($offset);
 			if($pointer = @fopen($aim . ".tmp", "w")) {
 				$this->readChunked($pointer, $offset, $offset + $this->db[$path]["size"]);
@@ -1094,22 +1032,31 @@ class GFS {
 
 				@chmod($aim, $this->writeMode);
 				if("GFS" . md5_file($aim . ".tmp") == $this->db[$path]["checksum"]) {
-					if(file_exists($aim)) @unlink($aim);
-					return rename($aim . ".tmp", $aim);
+					if(file_exists($aim))
+						@unlink($aim);
+
+					if(!rename($aim . ".tmp", $aim)) {
+						throw new GFSRealFilePermissionException();
+					}
 				} else {
 					@unlink($aim . ".tmp");
-					return self::REALFILE_PERMISSION_ERROR;
+					throw new GFSRealFilePermissionException();
 				}
 			}
 			
 		} else {
-			return -4;
+			throw new GFSFileNotFoundException();
 		}
 	}
 
 	/**
 	 * reads data chunked from this archived and writes it to a pointer.
-	*/
+	 * @param $pointer
+	 * @param $start
+	 * @param $end
+	 * @param int $chunkSize
+	 * @return bool
+	 */
 	public function readChunked($pointer, $start, $end, $chunkSize = 50000) {
 		$currentchunk = $start;
 		while($currentchunk < $end) {
@@ -1123,13 +1070,15 @@ class GFS {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * parses a given plist-file and gives back the result as an array
-	 *
-	 *@name parsePlist
-	 *@access public
-	*/
+	 * @param string $file
+	 * @return array|mixed
+	 * @throws DOMException
+	 * @throws IOException
+	 * @throws PListException
+	 */
 	public function parsePlist($file) {
 		if($this->exists($file)) {
 			$plist = new CFPropertyList();
@@ -1146,15 +1095,10 @@ class GFS {
 	 *
 	 * @name writePlist
 	 * @access public
-	 * @return bool|int
 	 */
 	public function writePlist($file, $data) {
 		$this->checkValidOrThrow();
-		
-		if($this->readonly) {
-			return self::ARCHIVE_READONLY;
-		}
-		
+
 		$plist = new CFPropertyList();
 		
 		$td = new CFTypeDetector();  
@@ -1162,16 +1106,14 @@ class GFS {
 		
 		$plist->add($guessedStructure);
 		
-		return $this->write($file, $plist->toXML());
+		$this->write($file, $plist->toXML());
 	}
 	
 	/**
 	 * parses paths
 	 *
-	 *@name parsePath
-	 *@access public
-	 *@param string - path
-	 *@return string - parsed path
+	 * @param string $path
+	 * @return string - parsed path
 	*/
 	public function parsePath($path) {
 		if(substr($path, 0, 1) == "/") {
@@ -1213,15 +1155,11 @@ class GFS {
 
 	/**
 	 * writes the database
-	 *
-	 * @return bool
+	 * @throws GFSException
+	 * @throws GFSReadonlyException
 	 */
 	public function updateDB() {
-		if(PROFILE) Profiler::mark("updateDB");
 		$this->checkValidOrThrow();
-		if($this->readonly)
-			return false;
-			
 		
 		$this->setPosition($this->endOfContentPos);
 		if(GFS_DB_TYPE == "serialize")
@@ -1232,30 +1170,29 @@ class GFS {
 		if($this->oldDBSize > strlen($db)) {
 			$db = str_repeat("\n", $this->oldDBSize - strlen($db)) . $db;
 		}
-		fwrite($this->pointer, "\n\n" . $db . "\n" . strlen($db));
+		if(!fwrite($this->pointer, "\n\n" . $db . "\n" . strlen($db))) {
+			throw new GFSRealFilePermissionException();
+		}
+
 		$this->oldDBSize = strlen($db);
 		$this->certValidCache = null;
 		$this->certificate = null;
 		unset($db);
-		if(PROFILE) Profiler::unmark("updateDB");
-		return true;
 	}
 
 	/**
 	 * returns if this archive is signed
 	 *
-	 * @name isSigned
-	 * @access public
+	 * @param string $publicKey
 	 * @return bool
 	 */
 	public function isSigned($publicKey) {
-		$this->checkValidOrThrow();
+		$this->checkValidOrThrow(false);
 		
 		if(isset($this->certValidCache)) {
 			return $this->certValidCache;
 		}
-		
-		
+
 		if(isset($this->certificate)) {
 			if(function_exists("openssl_public_decrypt")) {
 				// generate data to encrypt
@@ -1285,20 +1222,17 @@ class GFS {
 		$this->certValidCache = false;
 		return false;
 	}
-	
+
 	/**
 	 * signs the archive
 	 *
-	 *@name sign
-	 *@access public
-	 *@param string - privateKey
-	*/
+	 * @param string $privateKey
+	 * @return bool|int
+	 * @throws GFSException
+	 * @throws GFSReadonlyException
+	 */
 	public function sign($privateKey) {
 		$this->checkValidOrThrow();
-		
-		if($this->readonly) {
-			return self::ARCHIVE_READONLY;
-		}
 		
 		$this->certificate = null;
 		$this->private = $privateKey;
@@ -1313,7 +1247,6 @@ class GFS {
 	 * @return bool
 	 */
 	public function close() {
-
 		if($this->valid === false) {
 			return false;
 		}
@@ -1361,10 +1294,16 @@ class GFS {
 	
 	/**
 	 * checks if valid and when not throws exception.
+	 *
+	 * @throws GFSException
 	*/
-	protected function checkValidOrThrow() {
+	protected function checkValidOrThrow($checkReadonly = true) {
 		if($this->valid === false) {
-			throw new LogicException("GFS-Archive ".$this->file." corrupted.");
+			throw new GFSException("GFS-Archive ".$this->file." corrupted.");
+		}
+
+		if($this->readonly && $checkReadonly) {
+			throw new GFSReadonlyException();
 		}
 
 		return true;
@@ -1372,9 +1311,6 @@ class GFS {
 
 	/**
 	 * destruct
-	 *
-	 *@name __destruct
-	 *@access public
 	*/
 	public function __destruct() {
 		$this->close();
@@ -1383,19 +1319,35 @@ class GFS {
 }
 
 class GFSException extends Exception {
-	protected $internalCode = 40;
+	protected $internalCode = ExceptionManager::GFSException;
 	public function __construct($m = "", $code = null, Exception $previous = null) {
 		parent::__construct($m, $code ? $code : $this->internalCode, $previous);
 	}
 }
 class GFSVersionException extends GFSException {
-	protected $internalCode = 41;
+	protected $internalCode = ExceptionManager::GFSVersionException;
 }
-
 class GFSFileException extends GFSException {
-	protected $internalCode = 42;
+	protected $internalCode = ExceptionManager::GFSFileException;
 }
-
 class GFSDBException extends GFSException {
-	protected $internalCode = 43;
+	protected $internalCode = ExceptionManager::GFSDBException;
+}
+class GFSReadonlyException extends GFSException {
+	protected $internalCode = ExceptionManager::GFSReadOnlyException;
+}
+class GFSFileNotFoundException extends GFSException {
+	protected $internalCode = ExceptionManager::GFSFileNotFoundException;
+}
+class GFSFileNotValidException extends GFSException {
+	protected $internalCode = ExceptionManager::GFSFileNotValidException;
+}
+class GFSFileExistsException extends GFSException {
+	protected $internalCode = ExceptionManager::GFSFileExistsException;
+}
+class GFSRealFileNotFoundException extends GFSException {
+	protected $internalCode = ExceptionManager::GFSRealFileNotExistsException;
+}
+class GFSRealFilePermissionException extends GFSException {
+	protected $internalCode = ExceptionManager::GFSRealFilePermissionException;
 }
