@@ -17,17 +17,11 @@ class PageComments extends DataObject {
 
     /**
      * has-one-relation to page
-     *
-     * @name has_one
-     * @access public
      */
     static $has_one = array('page' => 'pages'); // has one page
 
     /**
      * sort
-     *
-     * @name default_sort
-     * @access public
      */
     static $default_sort = "created DESC";
 

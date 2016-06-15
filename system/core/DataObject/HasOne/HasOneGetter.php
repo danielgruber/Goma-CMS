@@ -41,8 +41,7 @@ class HasOneGetter extends Extension implements ArgumentsQuery {
     public function initValues() {
         foreach($this->hasOne() as $name => $data) {
             if(is_array($this->getOwner()->fieldGet($name))) {
-                $target = $data->getTargetClass();
-                $this->getOwner()->setField($name, new $target($data));
+                $this->getOwner()->setField($name, $this->getOwner()->createNew($this->getOwner()->fieldGet($name)));
             }
         }
     }
@@ -270,6 +269,45 @@ class HasOneGetter extends Extension implements ArgumentsQuery {
             $hasOnePrefix = strtolower(substr($aggregateField, 0, strpos($aggregateField, ".")));
             if (isset($has_one[$hasOnePrefix])) {
                 $this->addJoinForRelationship($query, $hasOnePrefix, $has_one[$hasOnePrefix]);
+            }
+        }
+    }
+
+    /**
+     * @param array $result
+     * @param SelectQuery $query
+     * @param string $version
+     */
+    public function argumentQueryResult(&$result, $query, $version) {
+        if(count($result) > 0) {
+            foreach ($this->hasOne() as $name => $relationShip) {
+                if($relationShip->getFetchType() == DataObject::FETCH_TYPE_EAGER) {
+                    if(isset($result[0][$name . "id"])) {
+                        // build ids
+                        $ids = array();
+                        foreach($result as $key => $record) {
+                            if(isset($record[$name . "id"]) && $record[$name . "id"] != 0) {
+                                $id = $record[$name . "id"];
+                                if(!isset($ids[$id])) {
+                                    $ids[$id] = array();
+                                }
+                                $ids[$id][] = $key;
+                            }
+                        }
+
+                        if(count($ids) > 0) {
+                            $relationShipData = DataObject::get_versioned($relationShip->getTargetClass(), $version, array(
+                                "id" => array_keys($ids)
+                            ));
+                            /** @var DataObject $record */
+                            foreach($relationShipData as $record) {
+                                foreach($ids[$record->id] as $resultKey) {
+                                    $result[$resultKey][$name] = $record->ToArray();
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

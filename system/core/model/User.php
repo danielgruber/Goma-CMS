@@ -104,7 +104,12 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	/**
 	 * every user has one group and an avatar-picture, which is reflected in this relation
 	 */
-	static $has_one = array("avatar" => "Uploads");
+	static $has_one = array(
+		"avatar" => array(
+			DataObject::RELATION_TARGET => "Uploads",
+			DataObject::FETCH_TYPE => DataObject::FETCH_TYPE_EAGER
+		)
+	);
 
 	/**
 	 * every user has additional groups

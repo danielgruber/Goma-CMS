@@ -1896,6 +1896,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
             $arr[] = $row;
         }
 
+        $this->callExtending("argumentQueryResult", $arr, $query, $version, $filter, $sort, $limit, $joins, $search);
+
         /** @var String $hash */
         DataObjectQuery::$datacache[$this->baseClass][$hash] = $arr;
 
