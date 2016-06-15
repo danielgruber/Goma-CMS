@@ -264,27 +264,30 @@ class HasOneGetter extends AbstractGetterExtension implements ArgumentsQuery {
      * @param string $version
      */
     public function argumentQueryResult(&$result, $query, $version) {
-        foreach ($this->getHasOnesToFetch($result) as $name => $relationShip) {
-            // build ids
-            $ids = array();
-            foreach($result as $key => $record) {
-                if(isset($record[$name . "id"]) && $record[$name . "id"] != 0) {
-                    $id = $record[$name . "id"];
-                    if(!isset($ids[$id])) {
-                        $ids[$id] = array();
+        $relationShips = $this->getHasOnesToFetch($result);
+        if($relationShips) {
+            foreach ($relationShips as $name => $relationShip) {
+                // build ids
+                $ids = array();
+                foreach ($result as $key => $record) {
+                    if (isset($record[$name . "id"]) && $record[$name . "id"] != 0) {
+                        $id = $record[$name . "id"];
+                        if (!isset($ids[$id])) {
+                            $ids[$id] = array();
+                        }
+                        $ids[$id][] = $key;
                     }
-                    $ids[$id][] = $key;
                 }
-            }
 
-            if(count($ids) > 0) {
-                $relationShipData = DataObject::get_versioned($relationShip->getTargetClass(), $version, array(
-                    "id" => array_keys($ids)
-                ));
-                /** @var DataObject $record */
-                foreach($relationShipData as $record) {
-                    foreach($ids[$record->id] as $resultKey) {
-                        $result[$resultKey][$name] = $record->ToArray();
+                if (count($ids) > 0) {
+                    $relationShipData = DataObject::get_versioned($relationShip->getTargetClass(), $version, array(
+                        "id" => array_keys($ids)
+                    ));
+                    /** @var DataObject $record */
+                    foreach ($relationShipData as $record) {
+                        foreach ($ids[$record->id] as $resultKey) {
+                            $result[$resultKey][$name] = $record->ToArray();
+                        }
                     }
                 }
             }
@@ -293,7 +296,7 @@ class HasOneGetter extends AbstractGetterExtension implements ArgumentsQuery {
 
     /**
      * @param array $result
-     * @return array
+     * @return ModelHasOneRelationshipInfo[]
      */
     protected function getHasOnesToFetch($result) {
         $hasOnes = array();
