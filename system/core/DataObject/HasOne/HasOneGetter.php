@@ -264,6 +264,8 @@ class HasOneGetter extends AbstractGetterExtension implements ArgumentsQuery {
      * @param string $version
      */
     public function argumentQueryResult(&$result, $query, $version) {
+        if(PROFILE) Profiler::mark("HasOneGetter::argumentQueryResult");
+
         $relationShips = $this->getHasOnesToFetch($result);
         if($relationShips) {
             foreach ($relationShips as $name => $relationShip) {
@@ -292,6 +294,8 @@ class HasOneGetter extends AbstractGetterExtension implements ArgumentsQuery {
                 }
             }
         }
+
+        if(PROFILE) Profiler::unmark("HasOneGetter::argumentQueryResult");
     }
 
     /**
