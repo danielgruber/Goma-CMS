@@ -279,37 +279,49 @@ class HasOneGetter extends Extension implements ArgumentsQuery {
      * @param string $version
      */
     public function argumentQueryResult(&$result, $query, $version) {
-        if(count($result) > 0) {
-            foreach ($this->hasOne() as $name => $relationShip) {
-                if($relationShip->getFetchType() == DataObject::FETCH_TYPE_EAGER) {
-                    if(isset($result[0][$name . "id"])) {
-                        // build ids
-                        $ids = array();
-                        foreach($result as $key => $record) {
-                            if(isset($record[$name . "id"]) && $record[$name . "id"] != 0) {
-                                $id = $record[$name . "id"];
-                                if(!isset($ids[$id])) {
-                                    $ids[$id] = array();
-                                }
-                                $ids[$id][] = $key;
-                            }
-                        }
+        foreach ($this->getHasOnesToFetch($result) as $name => $relationShip) {
+            // build ids
+            $ids = array();
+            foreach($result as $key => $record) {
+                if(isset($record[$name . "id"]) && $record[$name . "id"] != 0) {
+                    $id = $record[$name . "id"];
+                    if(!isset($ids[$id])) {
+                        $ids[$id] = array();
+                    }
+                    $ids[$id][] = $key;
+                }
+            }
 
-                        if(count($ids) > 0) {
-                            $relationShipData = DataObject::get_versioned($relationShip->getTargetClass(), $version, array(
-                                "id" => array_keys($ids)
-                            ));
-                            /** @var DataObject $record */
-                            foreach($relationShipData as $record) {
-                                foreach($ids[$record->id] as $resultKey) {
-                                    $result[$resultKey][$name] = $record->ToArray();
-                                }
-                            }
-                        }
+            if(count($ids) > 0) {
+                $relationShipData = DataObject::get_versioned($relationShip->getTargetClass(), $version, array(
+                    "id" => array_keys($ids)
+                ));
+                /** @var DataObject $record */
+                foreach($relationShipData as $record) {
+                    foreach($ids[$record->id] as $resultKey) {
+                        $result[$resultKey][$name] = $record->ToArray();
                     }
                 }
             }
         }
+    }
+
+    /**
+     * @param array $result
+     * @return array
+     */
+    protected function getHasOnesToFetch($result) {
+        $hasOnes = array();
+        if(count($result) > 0) {
+            foreach ($this->hasOne() as $name => $relationShip) {
+                if ($relationShip->getFetchType() == DataObject::FETCH_TYPE_EAGER) {
+                    if(isset($result[0][$name . "id"])) {
+                        $hasOnes[$name] = $relationShip;
+                    }
+                }
+            }
+        }
+        return $hasOnes;
     }
 }
 gObject::extend("DataObject", "HasOneGetter");
