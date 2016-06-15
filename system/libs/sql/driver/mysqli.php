@@ -962,9 +962,9 @@ class mysqliDriver implements SQLDriver
     /**
      * creates insert operation out of manipulation.
      *
-     * @param $data
+     * @param array $data
+     * @param string $class
      * @return string
-     * @throws InvalidArgumentException
      */
     private function manipulateInsert($data, $class)
     {

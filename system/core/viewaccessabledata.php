@@ -1085,7 +1085,6 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 		}
 	}
 
-
 	public function raw() {
 		return $this->data;
 	}
@@ -1116,7 +1115,7 @@ abstract class Extension extends gObject implements ExtensionModel {
      * @return $this
      */
 	public function setOwner($object) {
-		if(!is_object($object)) {
+		if(!is_object($object) && !is_null($object)) {
             throw new InvalidArgumentException('Object is not an object');
 		}
 

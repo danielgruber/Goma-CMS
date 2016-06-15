@@ -964,6 +964,10 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 			throw new InvalidArgumentException("DataObjectSet::push requires DataObject as first argument.");
 		}
 
+		if(($record->id != 0 && $this->staging->find("id", $record->id)) || $this->staging->itemExists($record)) {
+			throw new LogicException("You can't add a record to staging twice.");
+		}
+
 		foreach((array) $this->defaults as $key => $value) {
 			if(empty($record->{$key}))
 				$record->{$key} = $value;
@@ -1143,7 +1147,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 
 		if(isset($this->items)) {
 			foreach ($this->items as $key => $item) {
-				if ($item == $record) {
+				if ($item === $record) {
 					unset($this->items[$key]);
 				}
 			}
@@ -1151,11 +1155,11 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 			$this->items = array_values($this->items);
 		}
 
-		if($this->firstCache == $record) {
+		if($this->firstCache === $record) {
 			$this->firstCache = null;
 		}
 
-		if($this->lastCache == $record) {
+		if($this->lastCache === $record) {
 			$this->lastCache = null;
 		}
 

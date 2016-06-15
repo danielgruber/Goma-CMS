@@ -120,7 +120,8 @@ class ModelWriterTests extends GomaUnitTest implements TestAble
         $newDataObject->data = $newData;
 
         $writer = new ModelWriter($newDataObject, ModelRepository::COMMAND_TYPE_UPDATE, $mockObject, new MockDBRepository(), new MockDBWriter());
-        $writer->getInstance("ModelWriterTestExtensionForEvents")->checkLogic = true;
+        ModelWriterTestExtensionForEvents::$checkLogic = true;
+        ModelWriterTestExtensionForEvents::clear();
         $writer->write();
 
         $this->assertEqual($mockObject->onBeforeWriteFired, 0);
@@ -131,10 +132,10 @@ class ModelWriterTests extends GomaUnitTest implements TestAble
 
         /** @var ModelWriterTestExtensionForEvents $extInstance */
         $extInstance = $writer->getInstance("ModelWriterTestExtensionForEvents");
-        $this->assertEqual($extInstance->onBeforeWriteFired, 1);
-        $this->assertEqual($extInstance->onAfterWriteFired, 1);
-        $this->assertEqual($extInstance->onBeforeDBWriterFired, 1);
-        $this->assertEqual($extInstance->gatherDataToWrite, 1);
+        $this->assertEqual(ModelWriterTestExtensionForEvents::$onBeforeWriteFired, 1);
+        $this->assertEqual(ModelWriterTestExtensionForEvents::$onAfterWriteFired, 1);
+        $this->assertEqual(ModelWriterTestExtensionForEvents::$onBeforeDBWriterFired, 1);
+        $this->assertEqual(ModelWriterTestExtensionForEvents::$gatherDataToWrite, 1);
     }
 
     /**
@@ -258,42 +259,53 @@ class MockUpdatableGObject extends gObject {
         $this->onAfterWriteFired++;
     }
 
+    public function workWithExtensionInstance() {
+
+    }
+
     public function __call($key, $val) {
         return array();
     }
 }
 
 class ModelWriterTestExtensionForEvents extends Extension {
-    public $onBeforeWriteFired = 0;
-    public $onAfterWriteFired = 0;
-    public $gatherDataToWrite = 0;
-    public $onBeforeDBWriterFired = 0;
-    public $checkLogic = false;
+    public static $onBeforeWriteFired = 0;
+    public static $onAfterWriteFired = 0;
+    public static $gatherDataToWrite = 0;
+    public static $onBeforeDBWriterFired = 0;
+    public static $checkLogic = false;
     protected $calledPermissions = array();
 
+    public static function clear() {
+        self::$onAfterWriteFired = 0;
+        self::$onAfterWriteFired = 0;
+        self::$gatherDataToWrite = 0;
+        self::$onBeforeDBWriterFired = 0;
+    }
+
     public function gatherDataToWrite() {
-        if($this->checkLogic && $this->gatherDataToWrite == $this->onBeforeWriteFired) {
+        if(self::$checkLogic && self::$gatherDataToWrite == self::$onBeforeWriteFired) {
             throw new LogicException("onBeforeWrite must be fired before onGatherDataToWrite");
         }
-        $this->gatherDataToWrite++;
+        self::$gatherDataToWrite++;
     }
 
     public function onBeforeWrite() {
-        $this->onBeforeWriteFired++;
+        self::$onBeforeWriteFired++;
     }
 
     public function onBeforeDBWriter() {
-        if($this->checkLogic && $this->onBeforeDBWriterFired == $this->gatherDataToWrite) {
+        if(self::$checkLogic && self::$onBeforeDBWriterFired == self::$gatherDataToWrite) {
             throw new LogicException("gatherDataToWrite must be fired before onBeforeDBWrite");
         }
-        $this->onBeforeDBWriterFired++;
+        self::$onBeforeDBWriterFired++;
     }
 
     public function onAfterWrite() {
-        if($this->checkLogic && $this->onBeforeDBWriterFired == $this->onAfterWriteFired) {
+        if(self::$checkLogic && self::$onBeforeDBWriterFired == self::$onAfterWriteFired) {
             throw new LogicException("onBeforeDBWriter must be fired before onAfterWrite");
         }
-        $this->onAfterWriteFired++;
+        self::$onAfterWriteFired++;
     }
 }
 gObject::extend("ModelWriter", "ModelWriterTestExtensionForEvents");

@@ -33,9 +33,10 @@ class ManyManyGetter extends AbstractGetterExtension implements ArgumentsQuery
     public function extendDefineStatics() {
         if ($manyMany = $this->getOwner()->ManyManyRelationships()) {
             foreach ($manyMany as $key => $val) {
-                $this->linkMethodWithInstance(self::ID, $key, "getManyMany", "Something got wrong wiring the ManyMany-Relationship.");
-                $this->linkMethodWithInstance(self::ID, "set" . $key . "ids", "setManyManyIDs", "Something got wrong wiring the ManyMany-Relationship.");
-                $this->linkMethodWithInstance(self::ID, "set" . $key, "setManyMany", "Something got wrong wiring the ManyMany-Relationship.");
+                $this->linkMethodWithInstance(self::ID, "set" . $key . "ids", $key, "setManyManyIDs", "Something got wrong wiring the ManyMany-Relationship.");
+                $this->linkMethodWithInstance(self::ID, "set" . $key, $key, "setManyMany", "Something got wrong wiring the ManyMany-Relationship.");
+                gObject::LinkMethod($this->getOwner()->classname, $key . "ids", array("this", "getRelationIDs"), true);
+                $this->linkMethodWithInstance(self::ID, $key, $key, "getManyMany", "Something got wrong wiring the ManyMany-Relationship.");
             }
         }
     }

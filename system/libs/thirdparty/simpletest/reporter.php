@@ -141,11 +141,32 @@ class HtmlReporter extends SimpleReporter {
         $breadcrumb = $this->getTestList();
         array_shift($breadcrumb);
         print implode(" -&gt; ", $breadcrumb);
+
         $message = 'Unexpected exception of type [' . get_class($exception) .
                 '] with message ['. $exception->getMessage() .
                 '] in ['. $exception->getFile() .
                 ' line ' . $exception->getLine() . ']';
-        print " -&gt; <strong>" . $this->htmlEntities($message) . "</strong><br />\n";
+        print " -&gt; <strong>" . $this->htmlEntities($message) . "</strong> <a target=\"_blank\" href=\"".ROOT_PATH . $this->writeExceptionToFile($exception) . "\">More</a><br />\n";
+    }
+
+    /**
+     * @param Exception $exception
+     * @return string
+     */
+    function writeExceptionToFile($exception) {
+        $random = randomString(10);
+        $file = "system/temp/exception_" . $random . ".txt";
+        $info = "";
+
+        $current = $exception;
+        while($current) {
+            $info .= $current->getCode() . ": " . $current->getMessage() . "\n" .
+                $current->getTraceAsString() . "\n\n";
+            $current = $current->getPrevious();
+        }
+
+        FileSystem::write(ROOT . $file, $info);
+        return $file;
     }
 
     /**

@@ -39,8 +39,8 @@ class HasManyGetter extends AbstractGetterExtension {
     public function extendDefineStatics() {
         if ($has_many = $this->hasMany()) {
             foreach ($has_many as $key => $val) {
-                $this->linkMethodWithInstance(self::ID, $key, "getHasMany", "Something got wrong wiring the HasMany-Relationship.");
-                $this->linkMethodWithInstance(self::ID, "set" . $key . "ids", "setHasManyIDs", "Something got wrong wiring the HasMany-Relationship.");
+                $this->linkMethodWithInstance(self::ID, $key, $key, "getHasMany", "Something got wrong wiring the HasMany-Relationship.");
+                $this->linkMethodWithInstance(self::ID, "set" . $key . "ids", $key, "setHasManyIDs", "Something got wrong wiring the HasMany-Relationship.");
 
                 gObject::LinkMethod($this->getOwner()->classname, $key . "ids", array("this", "getRelationIDs"), true);
             }

@@ -290,7 +290,7 @@ class ContentController extends FrontedController
                         }
                     }
 
-                    $uploadObjects[] = $data;
+                    $uploadObjects[$data->id] = $data;
                     $uploadHash .= $data->realfile;
                 }
             }
@@ -301,7 +301,7 @@ class ContentController extends FrontedController
         foreach ($links[2] as $key => $href) {
             if (strpos($href, "Uploads/") !== false && preg_match('/Uploads\/([^\/]+)\/([a-zA-Z0-9]+)\/([^\/]+)/', $href, $match)) {
                 if ($data = Uploads::getFile($match[1] . "/" . $match[2] . "/" . $match[3])) {
-                    $uploadObjects[] = $data;
+                    $uploadObjects[$data->id] = $data;
                     $uploadHash .= $data->realfile;
                 }
             }

@@ -22,7 +22,8 @@ class HasManyWriter extends Extension {
 
         // has-many
         /** @var HasManyGetter $hasManyExtension */
-        if($hasManyExtension = $owner->getModel()->getInstance(HasManyGetter::ID)) {
+        $owner->getModel()->workWithExtensionInstance(HasManyGetter::ID, function($hasManyExtension) use($owner) {
+            /** @var HasManyGetter $hasManyExtension */
             if ($has_many = $hasManyExtension->hasMany()) {
                 foreach ($has_many as $name => $class) {
                     if (isset($data[$name]) && is_object($data[$name]) && is_a($data[$name], "HasMany_DataObjectSet")) {
@@ -47,7 +48,7 @@ class HasManyWriter extends Extension {
                     }
                 }
             }
-        }
+        });
 
         $owner->setData($data);
     }
@@ -129,12 +130,13 @@ class HasManyWriter extends Extension {
 
     /**
      * extends hasChanged-Method.
+     * @param bool $changed
      */
     public function extendHasChanged(&$changed) {
         /** @var ModelWriter $owner */
         $owner = $this->getOwner();
         /** @var HasManyGetter $extensionInstance */
-        if($extensionInstance = $owner->getModel()->getInstance(HasManyGetter::ID)) {
+        $owner->getModel()->workWithExtensionInstance(HasManyGetter::ID, function($extensionInstance) use($changed, $owner) {
             // has-many
             if ($has_many = $extensionInstance->hasMany()) {
                 if ($owner->checkForChangeInRelationship(array_keys($has_many), true, "HasMany_DataObjectSet")) {
@@ -143,7 +145,7 @@ class HasManyWriter extends Extension {
                     return;
                 }
             }
-        }
+        });
     }
 }
 gObject::extend("ModelWriter", "HasManyWriter");

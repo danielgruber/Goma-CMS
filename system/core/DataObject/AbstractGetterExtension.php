@@ -17,13 +17,14 @@ abstract class AbstractGetterExtension extends Extension {
      * link method.
      * @param string $instanceName
      * @param string $method
+     * @param string $methodName
      * @param string $localMethod
      * @param string $error
      */
-    protected function linkMethodWithInstance($instanceName, $method, $localMethod, $error) {
-        gObject::LinkMethod($this->getOwner()->classname, $method, array($instanceName, function($instance) use ($method, $localMethod, $error) {
+    protected function linkMethodWithInstance($instanceName, $method, $methodName, $localMethod, $error) {
+        gObject::LinkMethod($this->getOwner()->classname, $method, array($instanceName, function($instance) use ($method, $methodName, $localMethod, $error) {
             $args = func_get_args();
-            $args[0] = $method;
+            $args[0] = $methodName;
             try {
                 return call_user_func_array(array($instance, $localMethod), $args);
             } catch(InvalidArgumentException $e) {

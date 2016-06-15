@@ -130,8 +130,22 @@ class DataObjectSetTests extends GomaUnitTest
     {
         $set = new DataObjectSet("user");
         $set->setFetchMode(DataObjectSet::FETCH_MODE_CREATE_NEW);
-        $set->add(new User());
-        $set->add(new User());
+        $set->add($user1 = new User());
+        $set->add($user2 = new User());
+
+        $this->assertEqual($set->count(), 2);
+    }
+
+    public function testcreateFromCodeDuplicate()
+    {
+        $set = new DataObjectSet("user");
+        $set->setFetchMode(DataObjectSet::FETCH_MODE_CREATE_NEW);
+        $set->add($user1 = new User());
+        $set->add($user2 = new User());
+
+        $this->assertThrows(function() use ($set, $user1) {
+            $set->add($user1);
+        }, "LogicException");
 
         $this->assertEqual($set->count(), 2);
     }

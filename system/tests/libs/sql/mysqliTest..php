@@ -248,13 +248,14 @@ class MysqliTest extends GomaUnitTest {
     }
 
     public function testExtractManipulationInsert() {
-        $this->assertThrows(function(){
-            $this->unitTestExtractManipulation(array(
-                array(
-                    "command" => "insert"
-                )
-            ));
-        }, "InvalidArgumentException");
+        $this->assertEqual($this->unitTestExtractManipulation(array(
+            array(
+                "command" => "insert"
+            )
+        )), array(array(
+            "command" => "insert",
+            "sql" => null
+        )));
 
         $this->assertThrows(function(){
             $this->unitTestExtractManipulation(array(

@@ -45,18 +45,24 @@ abstract class ControllerExtension extends Controller implements ExtensionModel 
     /**
      * sets the owner-class
      * @param Controller $object
+     * @return $this
      */
     public function setOwner($object)
     {
-        if (!is_a($object, "RequestHandler")) {
-            throw new InvalidArgumentException('$object isn\'t a object of type RequestHandler.');
-        }
+        if(isset($object)) {
+            if (!is_a($object, "RequestHandler")) {
+                throw new InvalidArgumentException('$object isn\'t a object of type RequestHandler.');
+            }
 
-        $this->request = $object->getRequest();
-        $this->namespace = $object->namespace;
-        $this->originalNamespace = $object->originalNamespace;
-        $this->subController = $object->isSubController();
-        $this->owner = $object;
+            $this->request = $object->getRequest();
+            $this->namespace = $object->namespace;
+            $this->originalNamespace = $object->originalNamespace;
+            $this->subController = $object->isSubController();
+            $this->owner = $object;
+        } else {
+            $this->owner = $this->subController = $this->originalNamespace = $this->namespace = $this->request = null;
+        }
+        return $this;
     }
 
     /**

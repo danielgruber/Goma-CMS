@@ -1,11 +1,16 @@
 <?php
 defined("IN_GOMA") OR die();
 
-interface ExtensionModel
-{
-
+interface ExtensionModel {
+    /**
+     * @param gObject $object
+     * @return $this
+     */
     public function setOwner($object);
 
+    /**
+     * @return gObject
+     */
     public function getOwner();
 }
 
@@ -420,7 +425,17 @@ abstract class gObject
                 ' via '.print_r($method_callback, true).', but it is not callable.');
         }
 
-        return call_user_func_array($method_callback, $args);
+        $returnValue = call_user_func_array($method_callback, $args);
+
+        if(is_array($method_callback) && isset($method_callback[0]) && is_a($method_callback[0], "Extension")) {
+            /** @var Extension $ext */
+            $ext = $method_callback[0];
+            if($ext->getOwner() === $this) {
+                $method_callback[0]->setOwner(null);
+            }
+        }
+
+        return $returnValue;
     }
 
     /**
@@ -437,7 +452,7 @@ abstract class gObject
         } else if(is_a($extra_method[count($extra_method) - 1], "closure")) {
             /** @var Closure $closure */
             for($i = count($extra_method) - 2; $i >= 0; $i--) {
-                $object = is_object($extra_method[$i]) ? $extra_method[$i] : $this->getInstance($extra_method[$i]);
+                $object = is_object($extra_method[$i]) ? $extra_method[$i] : $this->getInstanceOrThrow($extra_method[$i])->setOwner($this);
                 if(!isset($object)) {
                     $object = gObject::instance($extra_method[$i]);
                 }
@@ -449,7 +464,7 @@ abstract class gObject
         } else if(is_array($extra_method)) {
             $method_callback = $extra_method;
             if (is_string($extra_method[0]) && substr($extra_method[0], 0, 4) == "EXT:") {
-                $method_callback[0] = $this->getInstance(substr($method_callback[0], 4));
+                $method_callback[0] = $this->getInstanceOrThrow(substr($method_callback[0], 4))->setOwner($this);
             } else if (is_string($extra_method[0]) && $extra_method[0] == "this") {
                 array_unshift($args, $method_name);
                 $method_callback[0] = $this;
@@ -516,21 +531,32 @@ abstract class gObject
     }
 
     /**
+     * @param string $extensionClassName
+     * @param Callable $callback
+     */
+    public function workWithExtensionInstance($extensionClassName, $callback) {
+        if(!is_callable($callback) || is_string($callback)) {
+            throw new InvalidArgumentException("Invalid callable for workWithExtensionInstance.");
+        }
+
+        $instance = $this->getInstanceOrThrow($extensionClassName);
+        $instance->setOwner($this);
+
+        call_user_func_array($callback, array($instance));
+
+        $instance->setOwner(null);
+    }
+
+    /**
      * gets an extension-instance
      *
      * @name getInstance
      * @param string $extensionClassName of extension
      * @return Extension
      */
-    public function getInstance($extensionClassName)
+    private function getInstance($extensionClassName)
     {
         $extensionClassName = trim(strtolower($extensionClassName));
-
-        // cache for instances. No clone here, cause an instance can used and customised.
-        if (isset($this->ext_instances[$extensionClassName])) {
-            $this->ext_instances[$extensionClassName]->setOwner($this);
-            return $this->ext_instances[$extensionClassName];
-        }
 
         if (defined("GENERATE_CLASS_INFO") || !isset(self::$cache_extensions[$this->classname])) {
             self::buildExtCache($this->classname);
@@ -552,9 +578,19 @@ abstract class gObject
         }
 
         // own instance
-        $this->ext_instances[$extensionClassName] = clone self::$extension_instances[$this->classname][$extensionClassName];
-        $this->ext_instances[$extensionClassName]->setOwner($this);
-        return $this->ext_instances[$extensionClassName];
+        return clone self::$extension_instances[$this->classname][$extensionClassName];
+    }
+
+    /**
+     * @param string $extensionClassName
+     * @return Extension
+     */
+    private function getInstanceOrThrow($extensionClassName) {
+        if($instance = $this->getInstance($extensionClassName)) {
+            return $instance;
+        }
+
+        throw new InvalidArgumentException("Extension {$extensionClassName} not found.");
     }
 
     /**
@@ -578,13 +614,14 @@ abstract class gObject
         foreach ($this->getextensions(true) as $extension) {
             if (gObject::method_exists($extension, $method)) {
                 if ($instance = $this->getinstance($extension)) {
-
+                    $instance->setOwner($this);
                     // so let's call ;)
                     $return = $instance->$method($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8);
                     if ($return)
                         $returns[] = $return;
 
                     unset($return);
+                    $instance->setOwner(null);
                 } else {
                     log_error("Could not create instance of " . $extension . " for class " . $this->classname . "");
                 }
@@ -618,6 +655,7 @@ abstract class gObject
                 if ($instance = $this->getinstance($extension)) {
                     $instance->setOwner($this);
                     $returns[] = $instance->$method($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8);
+                    $instance->setOwner(null);
                 }
             }
         }

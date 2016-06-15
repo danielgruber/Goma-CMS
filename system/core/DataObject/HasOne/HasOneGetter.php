@@ -53,8 +53,8 @@ class HasOneGetter extends AbstractGetterExtension implements ArgumentsQuery {
     public function extendDefineStatics() {
         if ($has_one = $this->HasOne()) {
             foreach($has_one as $key => $val) {
-                $this->linkMethodWithInstance(self::ID, $key, "getHasOne", "Something got wrong wiring the HasOne-Relationship.");
-                $this->linkMethodWithInstance(self::ID, "set" . $key, "setHasOne", "Something got wrong wiring the HasOne-Relationship.");
+                $this->linkMethodWithInstance(self::ID, $key, $key, "getHasOne", "Something got wrong wiring the HasOne-Relationship.");
+                $this->linkMethodWithInstance(self::ID, "set" . $key, $key, "setHasOne", "Something got wrong wiring the HasOne-Relationship.");
             }
         }
     }

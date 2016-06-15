@@ -268,8 +268,9 @@ class ArrayList extends ViewAccessableData implements Countable {
 	 */
 	public function itemExists($item) {
 		foreach($this->items as $key => $record) {
-			if($record == $item)
+			if((!is_object($record) && $record == $item) || $record === $item) {
 				return true;
+			}
 		}
 
 		return false;
