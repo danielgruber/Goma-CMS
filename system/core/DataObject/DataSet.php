@@ -475,13 +475,8 @@ class DataSet extends ArrayList {
     public function getOffset($offset, $args = array()) {
         if(strtolower($offset) == "count") {
             return $this->Count();
-        } else if(gObject::method_exists($this->classname, $offset) || parent::__canCall($offset, $args)) {
-            return parent::getOffset($offset, $args);
         } else {
-            if(is_object($this->first()) && method_exists($this->first(), "getOffset")) {
-                Core::Deprecate(2.0, "first()->$offset");
-                return $this->first()->getOffset($offset, $args);
-            }
+            return parent::getOffset($offset, $args);
         }
     }
 
@@ -500,10 +495,6 @@ class DataSet extends ArrayList {
         }
 
         return parent::getOffset($offset);
-    }
-
-    public function this() {
-        return $this;
     }
 
     /**
@@ -540,24 +531,6 @@ class DataSet extends ArrayList {
             return $object;
         } else {
             return $object;
-        }
-    }
-
-    /**
-     * generates an object from the offset
-     *
-     * @param string $offset
-     * @param mixed $data
-     * @return gObject
-     */
-    public function makeObject($offset, $data) {
-        if(parent::__cancall($offset)) {
-            return parent::makeObject($offset, $data);
-        } else {
-            if(is_object($this->first()) && method_exists($this->first(), "makeObject")) {
-                Core::Deprecate(2.0, "first()->$offset()");
-                return $this->first()->makeObject($offset, $data);
-            }
         }
     }
 

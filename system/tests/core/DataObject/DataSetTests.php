@@ -426,5 +426,18 @@ class DataSetTests extends GomaUnitTest {
         }
     }
 
+    public function testViewable() {
+        $dataset = new DataSet(array(
+            "blub" => array(
+                "blah" => 123
+            )
+        ));
+        $this->assertEqual($dataset->doObject("this"), $dataset);
+
+        $dataset->customised["this"] = $dataset->first();
+        $this->assertEqual($dataset->getOffset("this"), $dataset->first());
+        $this->assertEqual($dataset->doObject("this"), $dataset->first());
+    }
+
     // TODO: Add Test for count vs. countInSet
 }

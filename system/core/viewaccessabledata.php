@@ -28,7 +28,6 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 	/**
 	 * default datatype for casting.
 	 *
-	 * @access public
 	 * @var string
 	 */
 	static $default_casting = "HTMLText";
@@ -48,73 +47,56 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 	/**
 	 * data is stored in this var.
 	 *
-	 * @acccess public
 	 * @var array
 	 */
 	protected $data = array();
 
 	/**
 	 * contains the original data at object-generation.
-	 *
-	 * @access public
 	 */
 	protected $original = array();
 
 	/**
 	 * customised data for template via ViewAccessableData::customise.
 	 *
-	 * @access public
 	 * @var array
 	 */
 	public $customised = array();
 
 	/**
 	 * indicates whether the data was changes or not.
-	 *
-	 * @access public
 	 */
 	protected $changed = false;
 
 	/**
-	 * default values for specfic fields.
-	 *
-	 * @access public
+	 * default values for specific fields.
 	 */
 	protected $defaults;
 
 	/**
 	 * server-vars. This is for internal usage.
-	 *
-	 * @access private
 	 */
 	private static $server;
 
 	/**
 	 * get-vars. This is for internal usage.
-	 *
-	 * @access public
 	 */
 	private static $_get;
 
 	/**
 	 * post-vars. This is for internal usage.
-	 *
-	 * @access public
 	 */
 	private static $_post;
 
 	/**
 	 * a list of not allowed methods. This is for internal usage.
 	 *
-	 * @access public
 	 * @var array
 	 */
 	public static $notViewableMethods = array("getdata", "get_versioned", "getform", "geteditform", "getwholedata", "set_many_many", "get_has_one", "get_many", "get", "setfield", "setwholedata", "write", "writerecord", "__construct", "method_exists", "callmethodbyrecord", "getmanymany", "gethasmany", "search", "where", "fields", "getoffset", "getversion", "_get", "getobject", "versioned");
 
 	/**
 	 * a list of methods can't be called as getters. this is for internal usage.
-	 *
-	 * @access public
 	 */
 	public static $notCallableGetters = array("valid", "current", "rewind", "next", "key", "duplicate", "reset", "__construct");
 
@@ -599,8 +581,8 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
     /**
      * gets the offset
      *
-     * @param    string - name
-     * @param    array - args
+     * @param    string $name
+     * @param    array $args
      * @return   string
      */
 	public function getOffset($name, $args = array()) {
@@ -676,9 +658,8 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
     /**
      * gets data for offset.
      *
-     * @name    getOffsetData
-     * @param    name
-     * @param    args
+     * @param string $name
+     * @param array $args
      * @return  mixed
      */
 	protected function getOffsetData($name, $args) {
@@ -690,7 +671,6 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 
 		if(isset($this->customised[$lowername])) {
 			return $this->customised[$lowername];
-			// methods
 		}
 
 		if(!in_array($lowername, self::$notCallableGetters) && gObject::method_exists($this->classname, $name)) {
@@ -848,8 +828,8 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 
     /**
      * gets offset as object
-     * @name doObject
-     * @param string - name of offset
+     * @param string $name of offset
+	 * @param array $args
      * @return gObject
      */
 	public function doObject($name, $args = array()) {
