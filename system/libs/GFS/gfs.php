@@ -319,19 +319,19 @@ class GFS {
 		if(realpath($file) == $this->file || in_array($path, $not_add_if_dir)) {
 			return;
 		}
-		
-		// check if you can create the path
-		if(!isset($this->db[$path])) {
-			$this->createPath($path);
-		} else {
-			throw new GFSFileExistsException();
-		}
-		
+
 		// check if file exists and add it.
 		if(is_file($file)) {
+			// check if you can create the path
+			if(!isset($this->db[$path])) {
+				$this->createPath($path);
+			} else {
+				throw new GFSFileExistsException($path);
+			}
+
 			$this->addFileToArchiveWithoutChecks($file, $path);
 		} else {
-			throw new GFSRealFileNotFoundException();
+			throw new GFSRealFileNotFoundException($file);
 		}
 	}
 
@@ -367,13 +367,13 @@ class GFS {
 		if(!isset($this->db[$path])) {
 			$this->createPath($path);
 		} else {
-			throw new GFSFileExistsException();
+			throw new GFSFileExistsException($path);
 		}
 		
 		if(file_exists($file)) {
 			$this->addFileToArchiveWithoutChecks($file, $path);
 		} else {
-			throw new GFSRealFileNotFoundException();
+			throw new GFSRealFileNotFoundException($file);
 		}
 	}
 
@@ -425,7 +425,7 @@ class GFS {
 				$this->updateDB();
 			}
 		} else {
-			throw new GFSRealFileNotFoundException();
+			throw new GFSRealFileNotFoundException($file);
 		}
 	}
 

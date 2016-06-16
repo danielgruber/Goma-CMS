@@ -20,6 +20,13 @@ class GFSTest extends GomaUnitTest {
 	*/
 	public $name = "GFS";
 
+	public function tearDown()
+	{
+		FileSystem::delete(FRAMEWORK_ROOT . "temp/testmd5.gfs");
+		FileSystem::delete(FRAMEWORK_ROOT . "temp/testdir.gfs");
+		FileSystem::delete(FRAMEWORK_ROOT . "temp/testcontents.gfs");
+	}
+
 	/**
 	 * tests md5.
 	*/
@@ -81,8 +88,10 @@ class GFSTest extends GomaUnitTest {
 		$this->assertEqual($gfs->getFileContents("blah/t2.txt"), file_get_contents(FRAMEWORK_ROOT . "temp/testmd5big.txt"));
 		$this->assertEqual($gfs->getFileContents("blub/t2.txt"), file_get_contents(FRAMEWORK_ROOT . "temp/testmd5.txt"));
 
-		$this->assertEqual($gfs->getFileContents("test/myfile.txt"), GFS::FILE_NOT_FOUND);
-		$this->assertEqual($gfs->touch("test/myfile.txt"), true);
+		$this->assertThrows(function() use($gfs) {
+			$gfs->getFileContents("test/myfile.txt");
+		}, "GFSFileNotFoundException");
+		$this->assertNull($gfs->touch("test/myfile.txt"));
 		$this->assertEqual($gfs->getFileContents("test/myfile.txt"), "");
 		$this->assertEqual($gfs->getFileContents("test/test.txt"), "Hello World");
 		$this->assertEqual($gfs->getFileContents("test/testbig.txt"), $random);
@@ -96,8 +105,12 @@ class GFSTest extends GomaUnitTest {
 		$this->assertTrue(file_exists(FRAMEWORK_ROOT . "temp/testcbig.txt"));
 		$this->assertEqual(file_get_contents(FRAMEWORK_ROOT . "temp/testcbig.txt"), $random);		
 
-		$this->assertEqual($gfs->addFromFile(FRAMEWORK_ROOT . "temp/testmd5doesnotexist.txt", "test/myfile.txt"), GFS::REALFILE_NOT_FOUND);
-		$this->assertEqual($gfs->addFromFile(FRAMEWORK_ROOT . "temp/testmd5.txt", "test/myfile.txt"), GFS::FILE_ALREADY_EXISTS);
+		$this->assertThrows(function() use($gfs) {
+			$gfs->addFromFile(FRAMEWORK_ROOT . "temp/testmd5.txt", "test/myfile.txt");
+		}, "GFSFileExistsException");
+		$this->assertThrows(function() use($gfs) {
+			$gfs->addFromFile(FRAMEWORK_ROOT . "temp/testmd5doesnotexist.txt", "test/myfile.txt");
+		}, "GFSRealFileNotFoundException");
 
 		$gfs->close();
 
