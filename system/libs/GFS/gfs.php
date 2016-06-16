@@ -1005,7 +1005,7 @@ class GFS {
 	 * @throws GFSRealFilePermissionException
 	 */
 	public function writeToFileSystem($path, $aim) {
-		$this->checkValidOrThrow();
+		$this->checkValidOrThrow(false);
 		
 		// parse path
 		$path = $this->parsePath($path);
@@ -1100,9 +1100,11 @@ class GFS {
 
 	/**
 	 * writes given data to given plist-file
-	 *
-	 * @name writePlist
-	 * @access public
+	 * @param string $file
+	 * @param array $data
+	 * @throws GFSException
+	 * @throws GFSReadonlyException
+	 * @throws PListException
 	 */
 	public function writePlist($file, $data) {
 		$this->checkValidOrThrow();
