@@ -1660,3 +1660,33 @@ if (window.loader === undefined) {
 		});
 	}, 1000);
 }
+
+var measurePerformance = function(timeout) {
+	var data = [];
+	var myTimeout = timeout === undefined ? 2000 : timeout;
+	var measurePerformanceCycle = function(i) {
+		var current = i;
+		$.ajax({
+			url: location.href
+		}).done(function(response, status, jqXHR){
+			data.push(parseFloat(jqXHR.getResponseHeader("x-time")));
+			if(current != 19) {
+				console.log(current + " done in " + jqXHR.getResponseHeader("x-time") + "s");
+				setTimeout(function(){
+					measurePerformanceCycle(current + 1);
+				}, myTimeout);
+			} else {
+				console.log(data);
+				var sum = 0;
+				for(var i in data) {
+					if(data.hasOwnProperty(i)) {
+						sum += data[i];
+					}
+				}
+				var mean = sum / data.length;
+				console.log("mean: " + mean)
+			}
+		});
+	};
+	measurePerformanceCycle(0);
+};

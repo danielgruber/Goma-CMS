@@ -196,7 +196,6 @@ abstract class gObject
      */
     protected static function method_exists_on_object($class, $method, $object = null)
     {
-
         if (isset(self::$method_cache[$class . "::" . $method]) && (self::$method_cache[$class . "::" . $method] || !isset($object))) {
             return self::$method_cache[$class . "::" . $method];
         }

@@ -360,7 +360,7 @@ class GomaResponse extends gObject {
      */
     public function sendHeader()
     {
-        if(DEV_MODE) {
+        if(DEV_MODE || PROFILE) {
             $time =  microtime(true) - EXEC_START_TIME;
             $this->setHeader("X-Time", $time);
         }
