@@ -63,6 +63,19 @@ class DateField extends FormField
 	}
 
 	/**
+	 * @return string
+	 */
+	public function getModel()
+	{
+		$model = parent::getModel();
+		if(RegexpUtil::isNumber($model)) {
+			return date(DATE_FORMAT_DATE, $model);
+		}
+
+		return $model;
+	}
+
+	/**
 	 * @param int $timestamp
 	 * @throws FormInvalidDataException
 	 */

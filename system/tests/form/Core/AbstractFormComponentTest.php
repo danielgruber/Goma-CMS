@@ -139,6 +139,14 @@ class AbstractFormComponentTest extends GomaUnitTest {
         $request->post_params["test"] = 123;
         $field->argumentResult($data);
         $this->assertEqual($data["test"], 123);
+
+        $request->post_params["test"] = 0;
+        $field->argumentResult($data);
+        $this->assertEqual($data["test"], 0);
+
+        $request->post_params["test"] = null;
+        $field->argumentResult($data);
+        $this->assertEqual($data["test"], null);
     }
 
     /**
