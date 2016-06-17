@@ -642,4 +642,15 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
     {
         return true;
     }
+
+    /**
+     * checks if we can sort by a specefied field
+     *
+     * @param string $field
+     * @return bool
+     */
+    public function canSortBy($field) {
+        $extra = $this->relationShip ? $this->relationShip->getExtraFields() : array();
+        return isset($extra[strtolower(trim($field))]) || parent::canSortBy($field);
+    }
 }

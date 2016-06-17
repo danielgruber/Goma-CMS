@@ -839,7 +839,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	}
 
 	/**
-	 * checks if we can sort by a specefied field
+	 * checks if we can sort by a specified field
 	 *
 	 * @name canSortBy
 	 * @return bool
@@ -849,7 +849,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	}
 
 	/**
-	 * checks if we can sort by a specefied field
+	 * checks if we can sort by a specified field
 	 *
 	 * @name canSortBy
 	 * @return bool

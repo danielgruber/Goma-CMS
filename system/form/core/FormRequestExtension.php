@@ -26,6 +26,9 @@ class FormRequestExtension extends Extension {
                 if (!isset($params[1]) && $parts[0] == "forms") {
                     $request->shift(1);
                 }
+                if($parts[0] == "forms" && $parts[1] == "form") {
+                    $request->shift(2);
+                }
 
                 $formRequest = $request;
                 if (count($params) > 2) {
