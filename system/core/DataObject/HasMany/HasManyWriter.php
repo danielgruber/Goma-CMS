@@ -18,11 +18,11 @@ class HasManyWriter extends Extension {
      */
     protected function onBeforeWriteData() {
         $owner = $this->getOwner();
-        $data = $owner->getData();
 
         // has-many
         /** @var HasManyGetter $hasManyExtension */
         $owner->getModel()->workWithExtensionInstance(HasManyGetter::ID, function($hasManyExtension) use($owner) {
+            $data = $owner->getData();
             /** @var HasManyGetter $hasManyExtension */
             if ($has_many = $hasManyExtension->hasMany()) {
                 foreach ($has_many as $name => $class) {
@@ -48,9 +48,8 @@ class HasManyWriter extends Extension {
                     }
                 }
             }
+            $owner->setData($data);
         });
-
-        $owner->setData($data);
     }
 
     /**

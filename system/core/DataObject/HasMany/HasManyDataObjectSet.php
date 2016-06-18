@@ -92,7 +92,7 @@ class HasMany_DataObjectSet extends RemoveStagingDataObjectSet {
         if($this->fetchMode == DataObjectSet::FETCH_MODE_CREATE_NEW) {
             $records = $this->dbDataSource()->getRecords($this->version, array(
                 $this->relationShipField => $this->relationShipValue,
-                "recordid NOT in (".array_merge($this->staging->fieldToArray("id"), $this->removeStaging->fieldToArray("id")).")"
+                "recordid NOT in ('".implode("','", array_merge($this->staging->fieldToArray("id"), $this->removeStaging->fieldToArray("id")))."')"
             ));
 
             foreach($records as $record) {
