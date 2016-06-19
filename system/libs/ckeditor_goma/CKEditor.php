@@ -93,10 +93,6 @@ class GomaCKEditor extends GomaEditor {
 	 */
 	public function addEditorInfo($info)
 	{
-		$info->addJSFile("system/libs/thirdparty/ckeditor4_5/ckeditor.js");
-		if(ClassInfo::exists("pages")) {
-			$info->addJSFile("system/libs/ckeditor_goma/pagelinks.js");
-		}
 		$info->addCSSFile("ckeditor_goma.css");
 	}
 
@@ -126,34 +122,41 @@ class GomaCKEditor extends GomaEditor {
 				}
 			}
 		}
-		return '$(function(){
+		$pageLinksJS = ClassInfo::exists("pages") ? "$.getScript(\"system/libs/ckeditor_goma/pagelinks.js\");" : "";
+
+		return '
+window.CKEDITOR_BASEPATH = "'.BASE_URI.'system/libs/thirdparty/ckeditor4_5/";
+$.getScript("system/libs/thirdparty/ckeditor4_5/ckeditor.js").done(function(){
+	'.$pageLinksJS.'
+	$(function(){
 		CKEDITOR.basePath = "'.BASE_URI.'system/libs/thirdparty/ckeditor4_5/";
-	// apple bug with contenteditable of iOS 4 and lower
-	// firefox 3 and above are supported, otherwise dont load up
-	if((!isIDevice() || isiOS5()) && (getFirefoxVersion() > 2 || getFirefoxVersion() == -1)) {
-		setTimeout(function(){
-			if(CKEDITOR.instances.'.$id.' != null) CKEDITOR.remove(CKEDITOR.instances.'.$id.');
-			'.self::$htmlJS.'
-			CKEDITOR.replace("'.$id.'", {
-        		'.$config.'
-    		});
+		// apple bug with contenteditable of iOS 4 and lower
+		// firefox 3 and above are supported, otherwise dont load up
+		if((!isIDevice() || isiOS5()) && (getFirefoxVersion() > 2 || getFirefoxVersion() == -1)) {
+			setTimeout(function(){
+				if(CKEDITOR.instances.'.$id.' != null) CKEDITOR.remove(CKEDITOR.instances.'.$id.');
+				'.self::$htmlJS.'
+				CKEDITOR.replace("'.$id.'", {
+					'.$config.'
+				});
 
-		}, 100);
+			}, 100);
 
 
-		$("#'.$id.'").parents("form").on("beforesubmit",function(){
-			try {
-				$("#'.$id.'").val(CKEDITOR.instances.'.$id.'.getData());
-			} catch(e) {
-				alert(e);
-			}
-		});
-		$("#'.$id.'").change(function(){
+			$("#'.$id.'").parents("form").on("beforesubmit",function(){
+				try {
+					$("#'.$id.'").val(CKEDITOR.instances.'.$id.'.getData());
+				} catch(e) {
+					alert(e);
+				}
+			});
+			$("#'.$id.'").change(function(){
 
-			CKEDITOR.instances.'.$id.'.setData($("#'.$id.'").val());
-		});
-		$(".editor_toggle").css("display", "block");
-	}
+				CKEDITOR.instances.'.$id.'.setData($("#'.$id.'").val());
+			});
+			$(".editor_toggle").css("display", "block");
+		}
+	});
 });
 window.toggleEditor_'.$name.' = function() {
 	if(CKEDITOR.instances["'.$id.'"] != null) {

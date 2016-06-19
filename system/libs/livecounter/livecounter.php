@@ -645,8 +645,8 @@ class livecounter extends DataObject
 		$sqlDeleteData = "DELETE FROM ".DB_PREFIX ."statistics_live WHERE last_modified < ".$deleteTimeout;
 		$sqlDeleteStateData = "DELETE t FROM ".DB_PREFIX ."statistics_live_state t WHERE NOT EXISTS ( SELECT * FROM ".DB_PREFIX ."statistics_live l WHERE l.recordid = t.id)";
 			
-		SQL::Query($sqlDeleteData);
-		SQL::Query($sqlDeleteStateData);
+		SQL::Query($sqlDeleteData, true);
+		SQL::Query($sqlDeleteStateData, true);
 
 		$e = microtime(true);
 		$timeAfterDelete = $e - $start;

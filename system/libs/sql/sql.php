@@ -119,10 +119,15 @@ class SQL
     }
 
     /**
-     * @access public
      * @use: run a query
-     **/
-    static function query($sql, $unbuffered = false, $track = true, $debug = true)
+     * @param string $sql
+     * @param bool $async
+     * @param bool $track
+     * @param bool $debug
+     * @param bool $longQuery
+     * @return
+     */
+    static function query($sql, $async = false, $track = true, $debug = true, $longQuery = false)
     {
         $start = microtime(true);
 
@@ -136,7 +141,7 @@ class SQL
 
         if (PROFILE) Profiler::mark("sql::query");
         self::$queries++; // count queries and make it 1 more
-        $result = self::$driver->query($sql, $unbuffered, $debug);
+        $result = self::$driver->query($sql, $async, $debug);
         if (PROFILE) Profiler::unmark("sql::query");
 
 
@@ -145,8 +150,10 @@ class SQL
 
         if (defined("SLOW_QUERY") && SLOW_QUERY != -1 && $time > SLOW_QUERY) {
             slow_query_log("Slow SQL-Query: " . $sql . " (" . $time . "ms)");
+            if($time > 10000 && !$longQuery) {
+                throw new LogicException("SQL-Queries takes way too long, cancelling.");
+            }
         }
-
 
         if (!$result && $track && self::$track) {
             self::$error = self::$driver->error();
@@ -158,24 +165,18 @@ class SQL
     /**
      * in CGI ends send to client and runs query.
      *
-     * @access public
-     * @use: run a query
-     **/
+     * @param string $sql
+     * @param bool $unbuffered
+     * @param bool $track
+     * @param bool $debug
+     * @return
+     */
     static function queryAfterDie($sql, $unbuffered = false, $track = true, $debug = true)
     {
         if (function_exists("fastcgi_finish_request")) {
             fastcgi_finish_request();
         }
-        return self::query($sql, $unbuffered, $track, $debug);
-    }
-
-    /*
-     *@access public
-     *@use: show counter
-    */
-    static function viewcount()
-    {
-        return self::$qcounter;
+        return self::query($sql, $unbuffered, $track, $debug, true);
     }
 
     /**

@@ -498,7 +498,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 	 */
 	public function move($item, $to, $insertIfNotExisting = false) {
 		$inserted = false;
-		if(isset($this->items[$to]) || $insertIfNotExisting) {
+		if($this->itemExists($item) || $insertIfNotExisting) {
 			$new = array();
 			foreach ($this->items as $key => $val) {
 				if ($key == $to) {

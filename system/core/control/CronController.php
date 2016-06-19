@@ -11,7 +11,6 @@
  * @version    1.0
  */
 class CronController extends RequestHandler {
-
     /**
      * cron.
      */

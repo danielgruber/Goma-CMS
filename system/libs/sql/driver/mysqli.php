@@ -86,16 +86,18 @@ class mysqliDriver implements SQLDriver
     }
 
     /**
-     * @access public
-     * @use: run a query
-     **/
+     * @param string $sql
+     * @param bool $unbuffered
+     * @param bool $debug
+     * @return bool|mysqli_result
+     */
     public function query($sql, $unbuffered = false, $debug = true)
     {
         if (!$this->_db->ping()) {
             $this->__construct();
         }
 
-        if ($result = $this->_db->query($sql))
+        if ($result = $this->_db->query($sql, $unbuffered ? MYSQLI_ASYNC : MYSQLI_STORE_RESULT))
             return $result;
         else {
             if ($debug) {
