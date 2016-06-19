@@ -70,12 +70,9 @@ class HTMLText extends Varchar {
         preg_match_all('/\<img[^\>]+src\="([^"]+)"[^\>]*>/Usi', $value, $matches);
 
         foreach($matches[1] as $k => $machingSrcAttribute) {
-
             // match if may be upload
             if(preg_match('/^\.?\/?Uploads\/([a-zA-Z0-9_\-\.]+)\/([a-zA-Z0-9_\-\.]+)\/([a-zA-Z0-9_\-\.]+)\/?(index\.[a-zA-Z0-9_]+)?$/Ui', $machingSrcAttribute, $params)) {
-
                 if($sizes = self::matchSizes($matches[0][$k])) {
-
                     // generate information for resizing and caching of it
                     $width = isset($sizes["width"]) ? $sizes["width"] : null;
                     $height = isset($sizes["height"]) ? $sizes["height"] : null;
@@ -85,20 +82,18 @@ class HTMLText extends Varchar {
 
                     $cache = new Cacher(md5("upload_" . $machingSrcAttribute . $wString . "_" . $hString));
 
-                    if($cache->checkValid()) {
+                    if(false) {//$cache->checkValid()) {
                         $value = str_replace($machingSrcAttribute, $cache->getData(), $value);
                     } else {
-
-                        $upload = DataObject::Get("Uploads", array("path" => $params[1] . "/" . $params[2] . "/" . $params[3]));
-
-                        if($upload->count() == 0) {
-                            continue;
-                        }
-
+                        /** @var ImageUploads $upload */
+                        $upload = DataObject::get_one("ImageUploads", array("path" => $params[1] . "/" . $params[2] . "/" . $params[3]));
                         // generate new URLs for Resizing
-                        if($replace = $this->generateResizeUrls($upload, "noCropSetSize", $height, $width)) {
-
-                            $cache->write($replace, 86400);
+                        if($upload && $replace = $this->generateResizeUrls($upload, $height, $width)) {
+                            if(substr($replace, -1) == "/") {
+                                $cache->write($replace, 60);
+                            } else {
+                                $cache->write($replace, 86400);
+                            }
                             $value = str_replace($machingSrcAttribute, $replace, $value);
                         } else {
                             $cache->write($machingSrcAttribute, 86400);
@@ -115,16 +110,13 @@ class HTMLText extends Varchar {
      * creates the two urls with resized images and returns new HTML for replacement.
      *
      * @param ImageUploads $uploadsObject
-     * @param string $action URL-Method
      * @param int $desiredHeight
      * @param int $desiredWidth
      * @return string
      */
-    protected function generateResizeUrls($uploadsObject, $action, $desiredHeight = null, $desiredWidth = null) {
-        if($url = $this->generateResizeUrl($uploadsObject, $action, $desiredHeight, $desiredWidth)) {
-
-
-            $retinaUrlResized = $this->generateResizeUrl($uploadsObject, $action, $desiredHeight * 2, $desiredWidth * 2);
+    protected function generateResizeUrls($uploadsObject, $desiredHeight = null, $desiredWidth = null) {
+        if($url = $this->generateResizeUrl($uploadsObject, $desiredHeight, $desiredWidth)) {
+            $retinaUrlResized = $this->generateResizeUrl($uploadsObject, $desiredHeight * 2, $desiredWidth * 2);
 
             $filename = $uploadsObject->filename;
             $retinaUrl = $retinaUrlResized ?:
@@ -137,54 +129,33 @@ class HTMLText extends Varchar {
             return $url;
         }
 
-        return null;
+        return $uploadsObject->getUrl();
     }
 
     /**
      * checks if it is good to create a resized image for given image and given dimensions.
      *
      * @param ImageUploads $uploadsObject
-     * @param string $action URL-Method
      * @param int $desiredHeight
      * @param int $desiredWidth
      * @return string
      */
-    protected function generateResizeUrl($uploadsObject, $action, $desiredHeight = null, $desiredWidth = null)
+    protected function generateResizeUrl($uploadsObject, $desiredHeight = null, $desiredWidth = null)
     {
-
-
-        if($uploadsObject->width > self::MAX_RESIZE_WIDTH || $uploadsObject->height > self::MAX_RESIZE_HEIGHT) {
+        if($uploadsObject->width() > self::MAX_RESIZE_WIDTH || $uploadsObject->height() > self::MAX_RESIZE_HEIGHT ||
+            $uploadsObject->width() <= $desiredWidth || $uploadsObject->height() <= $desiredHeight) {
             return null;
         }
 
-        $url = "./" . $uploadsObject->path . '/'.$action.'/';
-        if(isset($desiredWidth)) {
-            if($desiredWidth < $uploadsObject->width) {
-                $url .= $desiredWidth . "/";
-            } else {
-                return null;
-            }
-        }
-
-        if(isset($desiredHeight)) {
-            if($desiredHeight < $uploadsObject->height) {
-                $url .= $desiredHeight . "/";
-            } else {
-                return null;
-            }
-        }
-
-        $url = $this->manageUrl($url, $uploadsObject);
-
-        return $url;
+        return $uploadsObject->getResizeUrl($desiredWidth, $desiredHeight, true);
     }
 
     /**
      * manages url.
      *
-     * @param string url
+     * @param string $url
      * @param ImageUploads $uploadsObject
-     * @return url
+     * @return string
      */
     protected function manageUrl($url, $uploadsObject) {
         if($url) {

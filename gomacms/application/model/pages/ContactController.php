@@ -45,7 +45,7 @@ class ContactController extends PageController
 
         $response = $form->render();
         if(is_string($response)) {
-            $this->tplVars["content"] = $this->modelInst()->data . $response;
+            $this->tplVars["content"] = $this->modelInst()->data()->forTemplate() . $response;
             return parent::index();
         }
 

@@ -751,6 +751,7 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 		$currentvar = trim(strtolower($currentvar));
 		$data = $this->getOffset($currentvar, array());
 
+
 		$casting = $this->casting();
 
 		if(is_object($data) && $remaining != "" && method_exists($data, "getTemplateVar")) {

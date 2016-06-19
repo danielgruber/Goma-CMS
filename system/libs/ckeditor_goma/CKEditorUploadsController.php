@@ -151,7 +151,7 @@ class CKEditorUploadsController extends RequestHandler {
      * @return string
      */
     protected function getFileUrl($response) {
-        return './'.$response->path . "/index" . substr($response->filename, strrpos($response->filename, "."));
+        return './'.$response->path . "/" . $response->filename;
     }
 
     /**

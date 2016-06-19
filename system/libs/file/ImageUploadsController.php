@@ -22,9 +22,6 @@ class ImageUploadsController extends UploadsController {
 		"setWidth/\$width" 					=> "setWidth",
 		"setHeight/\$height"				=> "setHeight",
 		"setSize/\$width/\$height"			=> "setSize",
-		"orgSetWidth/\$width" 				=> "orgSetWidth",
-		"orgSetHeight/\$height"				=> "orgSetHeight",
-		"orgSetSize/\$width/\$height"		=> "orgSetSize",
 		"noCropSetWidth/\$width" 			=> "noCropSetWidth",
 		"noCropSetHeight/\$height"			=> "noCropSetHeight",
 		"noCropSetSize/\$width/\$height"	=> "noCropSetSize"
@@ -38,9 +35,6 @@ class ImageUploadsController extends UploadsController {
 		"setWidth" 			=> "->checkImagePerms",
 		"setHeight"			=> "->checkImagePerms",
 		"setSize"			=> "->checkImagePerms",
-		"orgSetSize"		=> "->checkImagePerms",
-		"orgSetWidth"		=> "->checkImagePerms",
-		"orgSetHeight"		=> "->checkImagePerms",
 		"noCropSetSize"		=> "->checkImagePerms",
 		"noCropSetWidth"	=> "->checkImagePerms",
 		"nocropSetHeight"	=> "->checkImagePerms",
@@ -96,7 +90,8 @@ class ImageUploadsController extends UploadsController {
 			$image->filename = $this->modelInst()->filename;
 
 			// write to cache
-			if(preg_match('/index\.(jpg|jpeg|png|bmp|gif)$/', URL)) {
+			$filenameTwice = strtolower($image->filename . "/" . $image->filename);
+			if(strtolower(substr(URL, 0 - strlen($filenameTwice))) == $filenameTwice) {
 				FileSystem::requireDir($cacheDir);
 				$image->toFile(ROOT . URL);
 			}
@@ -189,9 +184,6 @@ class ImageUploadsController extends UploadsController {
 
 	/**
 	 * sets the width
-	 *
-	 *@name setWidth
-	 *@access public
 	 */
 	public function setWidth() {
 		$width = (int) $this->getParam("width");
@@ -203,9 +195,6 @@ class ImageUploadsController extends UploadsController {
 
 	/**
 	 * sets the height
-	 *
-	 *@name setHeight
-	 *@access public
 	 */
 	public function setHeight() {
 		$height = (int) $this->getParam("height");
@@ -217,9 +206,6 @@ class ImageUploadsController extends UploadsController {
 
 	/**
 	 * sets the size
-	 *
-	 *@name setSize
-	 *@access public
 	 */
 	public function setSize() {
 		$height = (int) $this->getParam("height");
@@ -232,54 +218,6 @@ class ImageUploadsController extends UploadsController {
 
 	/**
 	 * sets the size on the original
-	 *
-	 *@name orgSetSize
-	 *@åccess public
-	 */
-	public function orgSetSize() {
-
-		$height = (int) $this->getParam("height");
-		$width = (int) $this->getParam("width");
-
-		$this->resizeImage($width, $height);
-
-		exit;
-	}
-
-	/**
-	 * sets the width on the original
-	 *
-	 *@name orgSetWidth
-	 *@åccess public
-	 */
-	public function orgSetWidth() {
-
-		$width = (int) $this->getParam("width");
-
-		$this->resizeImage($width, null);
-
-		exit;
-	}
-
-	/**
-	 * sets the height on the original
-	 *
-	 *@name orgSetHeight
-	 *@access public
-	 */
-	public function orgSetHeight() {
-		$height = (int) $this->getParam("height");
-
-		$this->resizeImage(null, $height);
-
-		exit;
-	}
-
-	/**
-	 * sets the size on the original
-	 *
-	 *@name noCropSetSize
-	 *@åccess public
 	 */
 	public function noCropSetSize() {
 
@@ -288,7 +226,7 @@ class ImageUploadsController extends UploadsController {
 
 		// create image
 		$image = new RootImage($this->modelInst()->realfile);
-		$img = $image->resize($width, $height, true);
+		$img = $image->resize($width, $height, false);
 
 		// write to cache
 		try {
@@ -306,9 +244,6 @@ class ImageUploadsController extends UploadsController {
 
 	/**
 	 * sets the width on the original
-	 *
-	 *@name orgSetWidth
-	 *@åccess public
 	 */
 	public function noCropSetWidth() {
 
@@ -321,9 +256,6 @@ class ImageUploadsController extends UploadsController {
 
 	/**
 	 * sets the height on the original
-	 *
-	 *@name noCropSetHeight
-	 *@access public
 	 */
 	public function noCropSetHeight() {
 

@@ -688,7 +688,7 @@ class Uploads extends DataObject {
      * returns url.
      */
     public function getUrl() {
-        return BASE_URI . $this->checkForBase($this->getPath());
+        return BASE_URI . $this->checkForBase($this->getPath() . "/" . $this->filename);
     }
 
     /**

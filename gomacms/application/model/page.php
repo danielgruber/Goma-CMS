@@ -116,8 +116,6 @@ class ChildPage extends Page {
 	
 	/**
 	 * hide this type of page
-	 *
-	 *@name hidden
 	*/
 	public static function hidden($class = null) {
 		if($class == "childpage")
@@ -131,9 +129,6 @@ class pageController extends contentController
 {
 	/**
 	 * generates a button edit this page
-	 *
-	 *@name frontedBar
-	 *@access public
 	*/
 	public function frontedBar() {
 		if(!$this->modelInst()->id)

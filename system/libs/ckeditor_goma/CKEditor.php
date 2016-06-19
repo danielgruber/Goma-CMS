@@ -145,13 +145,14 @@ $.getScript("system/libs/thirdparty/ckeditor4_5/ckeditor.js").done(function(){
 
 			$("#'.$id.'").parents("form").on("beforesubmit",function(){
 				try {
-					$("#'.$id.'").val(CKEDITOR.instances.'.$id.'.getData());
+					if(CKEDITOR.instances.'.$id.' !== undefined) {
+						$("#'.$id.'").val(CKEDITOR.instances.'.$id.'.getData());
+					}
 				} catch(e) {
 					alert(e);
 				}
 			});
 			$("#'.$id.'").change(function(){
-
 				CKEDITOR.instances.'.$id.'.setData($("#'.$id.'").val());
 			});
 			$(".editor_toggle").css("display", "block");
@@ -168,6 +169,9 @@ window.toggleEditor_'.$name.' = function() {
 	}
 };
 field.getValue = function() {
+	if(CKEDITOR.instances.'.$id.' === undefined) {
+		return $("#'.$id.'").val();
+	}
 	return CKEDITOR.instances.'.$id.'.getData();
 };
 field.setValue = function(val) {

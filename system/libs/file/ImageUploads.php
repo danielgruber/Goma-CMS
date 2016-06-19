@@ -209,21 +209,16 @@ class ImageUploads extends Uploads {
      *
      * @param int $desiredWidth -1 for no desired with
      * @param int $desiredHeight -1 for no desired height
-     * @param bool $useThumb
      * @param bool $noCrop
      * @return string
      */
-    public function getResizeUrl($desiredWidth, $desiredHeight, $useThumb = true, $noCrop = false) {
-        if($useThumb === true && $noCrop === true) {
-            throw new InvalidArgumentException("You can't use the thumbnail when not cropping.");
-        }
-
+    public function getResizeUrl($desiredWidth, $desiredHeight, $noCrop = false) {
         if(!$this->path) {
             return "";
         }
 
         // get action
-        $action = ($noCrop === true) ? "NoCrop" : (($useThumb === false) ? "Org" : "");
+        $action = ($noCrop === true) ? "NoCrop" : "";
         if($desiredWidth == -1 && $desiredHeight == -1) {
             throw new InvalidArgumentException("At least one of the size-parameters should be set.");
         } else if($desiredHeight == -1) {
@@ -272,8 +267,8 @@ class ImageUploads extends Uploads {
         if(!$this->path)
             return "";
 
-        $file = $this->getResizeUrl(-1, $height, true, false);
-        $fileRetina = $this->getResizeUrl(-1, $height * 2, true, false);
+        $file = $this->getResizeUrl(-1, $height, false);
+        $fileRetina = $this->getResizeUrl(-1, $height * 2, false);
 
         if($absolute === true) {
             $file = BASE_URI . $file;
@@ -298,8 +293,8 @@ class ImageUploads extends Uploads {
         if(!$this->path)
             return "";
 
-        $file = $this->getResizeUrl($width, -1, true, false);
-        $fileRetina = $this->getResizeUrl($width * 2, -1, true, false);
+        $file = $this->getResizeUrl($width, -1, false);
+        $fileRetina = $this->getResizeUrl($width * 2, -1, false);
 
         if($absolute === true) {
             $file = BASE_URI . $file;
@@ -325,8 +320,8 @@ class ImageUploads extends Uploads {
         if(!$this->path)
             return "";
 
-        $file = $this->getResizeUrl($width, $height, true, false);
-        $fileRetina = $this->getResizeUrl($width * 2, $height * 2, true, false);
+        $file = $this->getResizeUrl($width, $height, false);
+        $fileRetina = $this->getResizeUrl($width * 2, $height * 2, false);
 
         if($absolute === true) {
             $file = BASE_URI . $file;
@@ -334,81 +329,6 @@ class ImageUploads extends Uploads {
         }
 
         return '<img src="' . $file .'" height="'.$height.'" width="'.$width.'" data-retina="' . $fileRetina .'" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
-    }
-
-    /**
-     * sets the size on the original,  so not the thumbnail we saved
-     *
-     * @param $width
-     * @param $height
-     * @param bool $absolute
-     * @param string $html
-     * @param string $style
-     * @return string
-     * @internal param $orgSetSize
-     * @access public
-     */
-    public function orgSetSize($width, $height, $absolute = false, $html = "", $style = "") {
-        if(!$this->path)
-            return "";
-
-        $file = $this->getResizeUrl($width, $height, false, false);
-        $fileRetina = $this->getResizeUrl($width * 2, $height * 2, false, false);
-
-        if($absolute === true) {
-            $file = BASE_URI . $file;
-            $fileRetina = BASE_URI . $fileRetina;
-        }
-
-        return '<img src="' . $file .'" height="'.$height.'" width="'.$width.'" data-retina="' . $fileRetina .'" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
-    }
-
-    /**
-     * sets the width on the original, so not the thumbnail we saved
-     *
-     * @param $width
-     * @param bool $absolute
-     * @param string $html
-     * @param string $style
-     * @return string
-     * @internal param $orgSetWidth
-     * @access public
-     */
-    public function orgSetWidth($width, $absolute = false, $html = "", $style = "") {
-        if(!$this->path)
-            return "";
-
-        $file = $this->getResizeUrl($width, -1, false, false);
-        $fileRetina = $this->getResizeUrl($width * 2, -1, false, false);
-
-        if($absolute === true) {
-            $file = BASE_URI . $file;
-            $fileRetina = BASE_URI . $fileRetina;
-        }
-
-        return '<img src="' . $file . '" width="'.$width.'" data-retina="' . $fileRetina . '" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
-    }
-
-    /**
-     * sets the height on the original, so not the thumbnail we saved
-     *
-     * @name orgSetHeight
-     * @access public
-     * @return string
-     */
-    public function orgSetHeight($height, $absolute = false, $html = "", $style = "") {
-        if(!$this->path)
-            return "";
-
-        $file = $this->getResizeUrl(-1, $height, false, false);
-        $fileRetina = $this->getResizeUrl(-1, $height * 2, false, false);
-
-        if($absolute === true) {
-            $file = BASE_URI . $file;
-            $fileRetina = BASE_URI . $fileRetina;
-        }
-
-        return '<img src="' . $file . '" height="'.$height.'" data-retina="' . $fileRetina . '" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
     }
 
     /**
@@ -427,8 +347,8 @@ class ImageUploads extends Uploads {
         if(!$this->path)
             return "";
 
-        $file = $this->getResizeUrl($width, $height, false, true);
-        $fileRetina = $this->getResizeUrl($width * 2, $height * 2, false, true);
+        $file = $this->getResizeUrl($width, $height, true);
+        $fileRetina = $this->getResizeUrl($width * 2, $height * 2, true);
 
         if($absolute === true) {
             $file = BASE_URI . $file;
@@ -453,8 +373,8 @@ class ImageUploads extends Uploads {
         if(!$this->path)
             return "";
 
-        $file = $this->getResizeUrl($width, -1, false, true);
-        $fileRetina = $this->getResizeUrl($width * 2, -1, false, true);
+        $file = $this->getResizeUrl($width, -1, true);
+        $fileRetina = $this->getResizeUrl($width * 2, -1, true);
 
         if($absolute === true) {
             $file = BASE_URI . $file;
@@ -477,8 +397,8 @@ class ImageUploads extends Uploads {
         if(!$this->path)
             return "";
 
-        $file = $this->getResizeUrl(-1, $height, false, true);
-        $fileRetina = $this->getResizeUrl(-1, $height * 2, false, true);
+        $file = $this->getResizeUrl(-1, $height, true);
+        $fileRetina = $this->getResizeUrl(-1, $height * 2, true);
 
         if($absolute === true) {
             $file = BASE_URI . $file;

@@ -223,7 +223,6 @@ class ContentController extends FrontedController
      */
     public static function outputHook($content)
     {
-
         if (PROFILE) Profiler::mark("contentController checkupload");
 
         if (self::$enableBacktracking && is_a(Director::$requestController, "contentController")) {
