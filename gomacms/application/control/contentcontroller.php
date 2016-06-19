@@ -331,18 +331,18 @@ class UploadsPageBacktraceController extends ControllerExtension
     public function onBeforeHandleAction($action, &$content, &$handleWithMethod)
     {
         if (contentController::$enableBacktracking) {
+            /** @var ManyMany_DataObjectSet $data */
             $data = $this->getOwner()->modelInst()->linkingPages();
-            $data->setVersion(false);
             if ($data->Count() > 0) {
-                foreach ($data as $page) {
-                    if ($page->isPublished() || $page->can("Write", $page) || $page->can("Publish", $page)) {
-                        return true;
-                    }
-                }
-
-                $handleWithMethod = false;
-                $content = false;
+                return true;
             }
+
+            if(Permission::check("admin")) {
+                return true;
+            }
+
+            $content = null;
+            $handleWithMethod = false;
         }
     }
 }
