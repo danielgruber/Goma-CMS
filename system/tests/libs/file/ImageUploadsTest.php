@@ -29,10 +29,6 @@ class ImageUploadsTest extends GomaUnitTest
 
         $this->unitTestResizeCase("SetSize", 500, 375);
 
-        /* org set size */
-
-        $this->unitTestResizeCase("OrgSetSize", 500, 375);
-
         /* no crop set size */
         $this->unitTestResizeCase("NoCropSetSize", 500, 375);
 
@@ -41,12 +37,6 @@ class ImageUploadsTest extends GomaUnitTest
 
         /* set height */
         $this->unitTestResizeCase("SetHeight", null, 375);
-
-        /* org set width */
-        $this->unitTestResizeCase("OrgSetWidth", 500, null);
-
-        /* org set height */
-        $this->unitTestResizeCase("OrgSetHeight", null, 375);
 
         /* no crop set width */
         $this->unitTestResizeCase("NoCropSetWidth", 500, null);

@@ -122,6 +122,7 @@ class ModelWriterTests extends GomaUnitTest implements TestAble
         $writer = new ModelWriter($newDataObject, ModelRepository::COMMAND_TYPE_UPDATE, $mockObject, new MockDBRepository(), new MockDBWriter());
         ModelWriterTestExtensionForEvents::$checkLogic = true;
         ModelWriterTestExtensionForEvents::clear();
+        $this->assertEqual(ModelWriterTestExtensionForEvents::$onBeforeWriteFired, 0);
         $writer->write();
 
         $this->assertEqual($mockObject->onBeforeWriteFired, 0);
@@ -131,7 +132,6 @@ class ModelWriterTests extends GomaUnitTest implements TestAble
         $this->assertEqual($newDataObject->onAfterWriteFired, 1);
 
         /** @var ModelWriterTestExtensionForEvents $extInstance */
-        $extInstance = $writer->getInstance("ModelWriterTestExtensionForEvents");
         $this->assertEqual(ModelWriterTestExtensionForEvents::$onBeforeWriteFired, 1);
         $this->assertEqual(ModelWriterTestExtensionForEvents::$onAfterWriteFired, 1);
         $this->assertEqual(ModelWriterTestExtensionForEvents::$onBeforeDBWriterFired, 1);
@@ -277,7 +277,7 @@ class ModelWriterTestExtensionForEvents extends Extension {
     protected $calledPermissions = array();
 
     public static function clear() {
-        self::$onAfterWriteFired = 0;
+        self::$onBeforeWriteFired = 0;
         self::$onAfterWriteFired = 0;
         self::$gatherDataToWrite = 0;
         self::$onBeforeDBWriterFired = 0;

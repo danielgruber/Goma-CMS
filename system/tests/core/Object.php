@@ -51,9 +51,11 @@ class ObjectTest extends GomaUnitTest implements TestAble {
         $this->assertEqual($this->o->ExTrA_mEtHoD(), "it works");
         $this->assertEqual($this->o->__call(" ExTrA_mEtHoD ", array()), "it works");
 
-		$instance = $this->o->getInstance("TestObjectExtension");
-		$instance2 = $this->o->getInstance("TestObjectExtension");
-		$this->assertTrue($instance === $instance2);
+		$this->o->workWithExtensionInstance("TestObjectExtension", function($instance1) {
+			$this->o->workWithExtensionInstance("TestObjectExtension", function($instance2) use($instance1) {
+				$this->assertFalse($instance1 === $instance2);
+			});
+		});
 	}
 
 	/**
@@ -169,8 +171,10 @@ class ObjectTest extends GomaUnitTest implements TestAble {
 
 	public function testexpansionInstanceSerialize() {
 		$o = new TestObject();
-		$this->assertIsA($o->getInstance("TestObjectExtension"), "TestObjectExtension");
-		$this->assertEqual($o->getInstance("TestObjectExtension")->getOwner(), $o);
+		$o->workWithExtensionInstance("TestObjectExtension", function($instance) use($o) {
+			$this->assertIsA($instance, "TestObjectExtension");
+			$this->assertNotEqual($instance, $o);
+		});
 
 		$d = clone $o;
 		$d->test = 1;
@@ -181,8 +185,10 @@ class ObjectTest extends GomaUnitTest implements TestAble {
 		/** @var gObject $data */
 		$data = unserialize(serialize($d));
 
-		$this->assertIsA($data->getInstance("TestObjectExtension"), "TestObjectExtension");
-		$this->assertEqual($data->getInstance("TestObjectExtension")->getOwner(), $data);
+		$data->workWithExtensionInstance("TestObjectExtension", function($instance) use($data) {
+			$this->assertIsA($instance, "TestObjectExtension");
+			$this->assertEqual($instance->getOwner(), $data);
+		});
 	}
 
 	public function testCheckWakeup() {

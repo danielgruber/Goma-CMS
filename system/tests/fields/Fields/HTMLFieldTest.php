@@ -139,6 +139,22 @@ class DummyUploadsObject {
     public $filename;
     public $path;
 
+    public function width() {
+        return $this->width;
+    }
+
+    public function height() {
+        return $this->height;
+    }
+
+    public function getUrl() {
+
+    }
+
+    public function getResizeUrl() {
+
+    }
+
     public function manageURL($url) {
 
     }
