@@ -660,10 +660,6 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 					}
 				}
 
-				if(($limit[1] > 100 && $this->count > 100) || ($limit[1] > 100 && $limit[1] != PHP_INT_MAX && $this->count === null)) {
-					throw new LogicException("Fetching more than 100 records is not supported by forceData. Use getRange instead.");
-				}
-
 				if(isset($this->firstCache)) {
 					$limit[0]++;
 					$limit[1]--;

@@ -190,6 +190,8 @@ class RequestHandler extends gObject {
 				$action = substr($action, 1);
 				if ($this -> getParam($action, false)) {
 					$action = $this -> getParam($action, false);
+				} else {
+					return null;
 				}
 			}
 
