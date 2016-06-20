@@ -1,7 +1,7 @@
 <?php defined("IN_GOMA") OR die();
 
 /**
- * Basic class for all Sets of ViewAccessableData-Objects. Maybe in Future this will be replaced by @ArrayList.
+ * Basically a mutable ArrayList.
  *
  * @package     Goma\Model
  *

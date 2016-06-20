@@ -3,7 +3,7 @@
 /**
  * a basic class for managing data in an array and manipualte the group of records.
  *
- * Note that the following methods create new instances of this Object:
+ * Note that the following methods are immutable:
  *
  * - reverse
  * - filter
@@ -12,7 +12,7 @@
  * - limit
  * - getRange
  *
- * all other functions work in-place.
+ * all other functions work as mutable implementations.
  *
  * @package		Goma\Model
  *
