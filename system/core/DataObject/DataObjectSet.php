@@ -443,7 +443,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 * @return int
 	 */
 	public function getPageCount() {
-		return ceil($this->countWholeSet() / $this->perPage);
+		return $this->page === null ? 1 : ceil($this->countWholeSet() / $this->perPage);
 	}
 
 	/**
@@ -633,7 +633,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 			if($this->fetchMode == self::FETCH_MODE_CREATE_NEW) {
 				$this->items = $this->staging->ToArray();
 			} else {
-				if($this->getPageCount() < $this->page) {
+				if($this->page !== null && $this->getPageCount() < $this->page) {
 					$this->page = $this->getPageCount();
 				}
 
