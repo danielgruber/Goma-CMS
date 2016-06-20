@@ -19,8 +19,6 @@ class Controller extends RequestHandler
     /**
      * showform if no edit right
      *
-     * @name showWithoutRight
-     * @access public
      * @var bool
      * @default false
      */
@@ -29,24 +27,18 @@ class Controller extends RequestHandler
     /**
      * activates the live-counter on this controller
      *
-     * @name live_counter
-     * @access public
+     * @var bool
      */
-    public static $live_counter = false;
+    protected static $live_counter = false;
 
     /**
      * how much data is on one page?
-     *
-     * @name perPage
-     * @access public
      */
     public $perPage = null;
 
     /**
      * defines whether to use pages or not
      *
-     * @name pages
-     * @access public
      * @var bool
      */
     public $pages = false;
@@ -54,8 +46,6 @@ class Controller extends RequestHandler
     /**
      * defines which model is used for this controller
      *
-     * @name model
-     * @access public
      * @var bool|string
      */
     public $model = null;
@@ -74,8 +64,6 @@ class Controller extends RequestHandler
 
     /**
      * allowed actions
-     * @name allowed_actions
-     * @access public
      */
     public $allowed_actions = array(
         "edit",
@@ -86,22 +74,16 @@ class Controller extends RequestHandler
 
     /**
      * template for this controller
-     *
-     * @name template
-     * @acceess public
      */
     public $template = "";
 
     /**
      * some vars for the template
-     * @name tplVars
-     * @access public
      */
     public $tplVars = array();
 
     /**
      * url-handlers
-     * @name url_handlers
      */
     public $url_handlers = array(
         '$Action/$id' => '$Action',
@@ -122,10 +104,7 @@ class Controller extends RequestHandler
      * inits the controller:
      * - determining and loading model
      * - checking template
-     *
-     *
-     * @name init
-     * @access public
+     * @param Request $request
      */
     public function Init($request = null)
     {
@@ -136,9 +115,8 @@ class Controller extends RequestHandler
         }
 
         if(!$this->subController) {
-            if (StaticsManager::getStatic($this->classname, "live_counter")) {
+            if (static::$live_counter) {
                 // run the livecounter (statistics), just if it is activated or the visitor wasn't tracked already
-
                 if (PROFILE) Profiler::mark("livecounter");
                 livecounter::run();
                 if (PROFILE) Profiler::unmark("livecounter");

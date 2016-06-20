@@ -125,7 +125,6 @@ class livecounter extends DataObject
 	}
 	
 	public static function run() {
-		
 		if(self::$alreadyRun) {
 			return true;
 		}

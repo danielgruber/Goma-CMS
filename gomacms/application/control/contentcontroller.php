@@ -94,18 +94,6 @@ class ContentController extends FrontedController
             $hasAction = true;
             return true;
         }
-
-        // register a PAGE_PATH
-        define("PAGE_PATH", $this->modelInst()->url);
-        define("PAGE_ORG_PATH", $this->modelInst()->orgurl);
-
-        if ($this->modelInst()->parentid == 0 && $this->modelInst()->sort == 0) {
-            defined("HOMEPAGE") OR define("HOMEPAGE", true);
-            Core::setTitle($this->modelInst()->windowtitle);
-        } else {
-            defined("HOMEPAGE") OR define("HOMEPAGE", false);
-            Core::setTitle($this->modelInst()->windowtitle);
-        }
     }
 
     /**
@@ -134,7 +122,6 @@ class ContentController extends FrontedController
      * @return boolean
      */
     public function checkForReadPermission() {
-
         /** @var Pages $model */
         $model = $this->modelInst();
         if ($model->read_permission && $model->read_permission->type == "password") {
@@ -212,6 +199,18 @@ class ContentController extends FrontedController
         if ($action == "index") {
             ContentTPLExtension::AppendContent($this->modelInst()->appendedContent);
             ContentTPLExtension::PrependContent($this->modelInst()->prependedContent);
+        }
+
+        // register a PAGE_PATH
+        define("PAGE_PATH", $this->modelInst()->url);
+        define("PAGE_ORG_PATH", $this->modelInst()->orgurl);
+
+        if ($this->modelInst()->parentid == 0 && $this->modelInst()->sort == 0) {
+            defined("HOMEPAGE") OR define("HOMEPAGE", true);
+            Core::setTitle($this->modelInst()->windowtitle);
+        } else {
+            defined("HOMEPAGE") OR define("HOMEPAGE", false);
+            Core::setTitle($this->modelInst()->windowtitle);
         }
     }
 

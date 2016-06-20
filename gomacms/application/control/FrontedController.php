@@ -1,4 +1,5 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
  * @package goma cms
  * @link http://goma-cms.org
@@ -7,24 +8,16 @@
  * last modified:  28.12.2012
  * $Version 2.1
  */
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
 class FrontedController extends Controller
 {
     /**
      * activates the live-counter on this controller
-     *
-     * @name live_counter
-     * @access public
      */
-    public static $live_counter = true;
+    protected static $live_counter = true;
 
     /**
      * gets $view
      *
-     * @name getView
-     * @access public
      * @return string
      */
     public function View()
@@ -144,14 +137,13 @@ class siteController extends Controller
     /**
      * gets the content
      *
-     * @name index
-     * @access public
      * @return bool|false|mixed|null|string
      */
     public function index()
     {
         $path = $this->getParam("path");
         if ($path) {
+            /** @var Page $data */
             $data = DataObject::get_one("pages", array("path" => array("LIKE", $path), "parentid" => 0));
 
             if ($data) {
@@ -166,65 +158,6 @@ class siteController extends Controller
                 unset($error);
             }
 
-        }
-    }
-
-
-    /**
-     * @access public
-     * @param string - title of the link
-     * @param string - href attribute of the link
-     * @use: for adding breadcrumbs
-     */
-    public static function addbreadcrumb($title, $link)
-    {
-        if (DEV_MODE) {
-            $trace = debug_backtrace();
-            logging("SiteController::addBreadCrumb is deprecated. Call From " . $trace[0]["file"] . " on line " . $trace[0]["line"] . "");
-        }
-        Core::addbreadcrumb($title, $link);
-    }
-
-    /**
-     * @access public
-     * @param string - title of addtitle
-     * @use: for adding title
-     */
-    public static function addtitle($title)
-    {
-        if (DEV_MODE) {
-            $trace = debug_backtrace();
-            logging("SiteController::addTitle is deprecated. Call From " . $trace[0]["file"] . " on line " . $trace[0]["line"] . "");
-        }
-        Core::setTitle($title);
-    }
-
-}
-
-class HomePageController extends SiteController
-{
-    /**
-     * shows the homepage of this page
-     *
-     * @name index
-     * @access public
-     * @return false|string
-     */
-    public function index() {
-        defined("HOMEPAGE") OR define("HOMEPAGE", true);
-
-        if (isset($_GET["r"])) {
-            $redirect = DataObject::get_one("pages", array("id" => $_GET["r"]));
-            if ($redirect) {
-                $query = preg_replace('/\&?r\=' . preg_quote($_GET["r"], "/") . '/', '', $_SERVER["QUERY_STRING"]);
-                HTTPResponse::redirect($redirect->url . "?" . $query);
-            }
-        }
-
-        if ($data = DataObject::get_one("pages", array("parentid" => 0))) {
-            return ControllerResolver::instanceForModel($data)->handleRequest($this->request);
-        } else {
-            return false;
         }
     }
 }
