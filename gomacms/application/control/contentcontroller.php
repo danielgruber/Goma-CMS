@@ -141,34 +141,21 @@ class ContentController extends FrontedController
      * @return bool
      */
     protected function showPasswordForm($passwords) {
-        $validator = new FormValidator(array($this, "validatePassword"), array($passwords));
-
         // set password + breadcrumb
-        if ($pwd = $this->prompt(lang("password", "password"), array($validator), null, null, true)) {
-            $this->keychain()->add($pwd);
-            return true;
-        } else {
-            return GomaResponse::redirect(ROOT_PATH . BASE_SCRIPT . $this->namespace . "/../");
-        }
-    }
+        $object = $this;
 
-    /**
-     * for validating the password
-     *
-     * @param FormValidator $obj
-     * @param array $passwords
-     * @return bool|string
-     * @throws FormInvalidDataException
-     */
-    public function validatePassword($obj, $passwords)
-    {
-        foreach ($passwords as $password) {
-            if ($obj->getForm()->result["prompt_text"] == $password) {
-                return true;
+        return $this->promptByForm(lang("password"), function($pwd) use($passwords, $object) {
+            foreach ($passwords as $password) {
+                if ($pwd == $password) {
+                    $object->keychain()->add($pwd);
+                    return true;
+                }
             }
-        }
 
-        throw new FormInvalidDataException("prompt_text", lang("captcha_wrong", "The Code was wrong."));
+            throw new FormInvalidDataException("prompt_text", lang("captcha_wrong", "The Code was wrong."));
+        }, function() {
+            return GomaResponse::redirect(ROOT_PATH . BASE_SCRIPT . $this->namespace . "/../");
+        }, null, array(), true);
     }
 
     /**
@@ -200,10 +187,6 @@ class ContentController extends FrontedController
             ContentTPLExtension::AppendContent($this->modelInst()->appendedContent);
             ContentTPLExtension::PrependContent($this->modelInst()->prependedContent);
         }
-
-        // register a PAGE_PATH
-        define("PAGE_PATH", $this->modelInst()->url);
-        define("PAGE_ORG_PATH", $this->modelInst()->orgurl);
 
         if ($this->modelInst()->parentid == 0 && $this->modelInst()->sort == 0) {
             defined("HOMEPAGE") OR define("HOMEPAGE", true);

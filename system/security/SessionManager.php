@@ -11,7 +11,6 @@
  * last modified: 26.07.2015
  */
 class SessionManager implements ISessionManager {
-
     /**
      * store-indicator.
      */
@@ -123,10 +122,6 @@ class SessionManager implements ISessionManager {
             } else {
                 $data = $_SESSION[ROOT][$key];
             }
-
-            /*if(is_object($data) && method_exists($data, "__wakeup")) {
-                $data->__wakeup();
-            }*/
         }
 
         return $data;

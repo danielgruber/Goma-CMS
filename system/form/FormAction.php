@@ -33,6 +33,11 @@ class FormAction extends FormField implements FormActionHandler
     public $useHtml = false;
 
     /**
+     * submit without data.
+     */
+    protected $submitWithoutData = false;
+
+    /**
      * @name __construct
      * @access public
      * @param string - name
@@ -119,7 +124,7 @@ class FormAction extends FormField implements FormActionHandler
      */
     public function canSubmit($data)
     {
-        return !!$data;
+        return !!$data || $this->submitWithoutData;
     }
 
     /**
@@ -165,5 +170,21 @@ class FormAction extends FormField implements FormActionHandler
     public function removeClass($class)
     {
         $this->input->removeClass($class);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSubmitWithoutData()
+    {
+        return $this->submitWithoutData;
+    }
+
+    /**
+     * @param mixed $submitWithoutData
+     */
+    public function setSubmitWithoutData($submitWithoutData)
+    {
+        $this->submitWithoutData = $submitWithoutData;
     }
 }

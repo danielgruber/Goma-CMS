@@ -430,8 +430,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
             $perm->write(true, true, 2, false, false);
         }
 
-        $field = $name . "id";
-        $this->$field = $perm->id;
+        $this->$name = $perm;
 
         if($write) {
             $this->writeToDB(false, true, $this->isOrgPublished() ? 2 : 1, false, $history);

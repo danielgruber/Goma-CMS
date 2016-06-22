@@ -781,12 +781,44 @@ class Controller extends RequestHandler
      * @param string - title of the okay-button, if you want to set it, default: "yes"
      * @param string|object|null - redirect on cancel button
      * @return bool
+     * @deprecated
      */
     public function confirm($title, $btnokay = null, $redirectOnCancel = null, $description = null)
     {
-        $form = new RequestForm($this, array(
+        $data = $this->confirmByForm($title, function() {
+            return true;
+        }, function() use($redirectOnCancel) {
+            if($redirectOnCancel) {
+                return GomaResponse::redirect($redirectOnCancel);
+            }
+
+            return false;
+        }, $btnokay, $description);
+        if(!is_bool($data)) {
+            Director::serve($data);
+            exit;
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param string $title
+     * @param Callable $successCallback
+     * @param Callable $errorCallback
+     * @param null $btnokay
+     * @param null $description
+     * @return null|string
+     */
+    public function confirmByForm($title, $successCallback, $errorCallback = null, $btnokay = null, $description = null) {
+        $form = new ConfirmationForm($this, "confirm_" . $this->classname, array(
             new HTMLField("confirm", '<div class="text">' . $title . '</div>')
-        ), lang("confirm", "Confirm..."), md5("confirm_" . $title . $this->classname), array(), ($btnokay === null) ? lang("yes") : $btnokay, $redirectOnCancel);
+        ), array(
+            $cancel = new FormAction("cancel", lang("cancel"), array($this, "_confirmCancel")),
+            new FormAction("save", $btnokay ? $btnokay : lang("yes"))
+        ));
+        $form->setSubmission(array($this, "_confirmSuccess"));
+        $cancel->setSubmitWithoutData(true);
 
         if (isset($description)) {
             if(is_object($description)) {
@@ -800,11 +832,31 @@ class Controller extends RequestHandler
 
             $form->add(new HTMLField("description", '<div class="confirmDescription">' . $description . '</div>'));
         }
-        if(is_array($form->get())) {
-            return true;
-        }
 
-        return false;
+        self::$successCallback = $successCallback;
+        self::$errorCallback = $errorCallback;
+
+        return $form->render();
+    }
+
+    private static $errorCallback;
+    private static $successCallback;
+
+
+    /**
+     * @internal
+     * @return bool
+     */
+    public function _confirmSuccess() {
+        return call_user_func_array(self::$successCallback, array());
+    }
+
+    /**
+     * @internal
+     * @return bool
+     */
+    public function _confirmCancel() {
+        return self::$errorCallback ? call_user_func_array(self::$errorCallback, array()) : false;
     }
 
     /**
@@ -816,19 +868,66 @@ class Controller extends RequestHandler
      * @param null|bool $redirectOnCancel
      * @param null|bool $usePwdField
      * @return RequestForm
+     * @deprecated
      */
     public function prompt($messsage, $validators = array(), $defaultValue = null, $redirectOnCancel = null, $usePwdField = null)
     {
-        $field = ($usePwdField) ? new PasswordField("prompt_text", $messsage, $defaultValue) : new TextField("prompt_text", $messsage, $defaultValue);
-        $form = new RequestForm($this, array(
-            $field
-        ), lang("prompt", "Insert Text..."), md5("prompt_" . $messsage . $this->classname), $validators, null, $redirectOnCancel);
-        $data = $form->get();
+        $data = $this->promptByForm($messsage, function($text) {
+            return array($text);
+        }, function() use($redirectOnCancel) {
+            if($redirectOnCancel) {
+                return GomaResponse::redirect($redirectOnCancel);
+            }
+
+            return false;
+        }, $defaultValue, $validators, $usePwdField);
         if(is_array($data)) {
-            return $data["prompt_text"];
+            return $data[0];
         }
 
-        return null;
+        if(!is_bool($data)) {
+            Director::serve($data);
+            exit;
+        }
+        return $data;
+    }
+
+    private static $successPromptCallback;
+
+    /**
+     * @param $message
+     * @param $successCallback
+     * @param $errorCallback
+     * @param null $defaultValue
+     * @param array $validators
+     * @param bool $usePwdField
+     * @return mixed|null|string
+     */
+    public function promptByForm($message, $successCallback, $errorCallback = null, $defaultValue = null, $validators = array(), $usePwdField = false) {
+        $field = ($usePwdField) ? new PasswordField("prompt_text", $message, $defaultValue) :
+            new TextField("prompt_text", $message, $defaultValue);
+        $form = new ConfirmationForm($this, "prompt_" . $this->classname, array(
+            $field
+        ), array(
+            $cancel = new FormAction("cancel", lang("cancel"), array($this, "_confirmCancel")),
+            new FormAction("save", lang("ok"))
+        ), $validators);
+        $cancel->setSubmitWithoutData(true);
+        $form->setSubmission(array($this, "_promptSuccess"));
+
+        self::$successPromptCallback = $successCallback;
+        self::$errorCallback = $errorCallback;
+
+        return $form->render();
+    }
+
+    /**
+     * @internal
+     * @param array $data
+     * @return mixed
+     */
+    public function _promptSuccess($data) {
+        return call_user_func_array(self::$successPromptCallback, array($data["prompt_text"]));
     }
 
     /**

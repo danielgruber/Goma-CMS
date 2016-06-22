@@ -277,6 +277,7 @@ class Form extends AbstractFormComponentWithChildren {
 		// check for submit or append info for user to resubmit.
 		if(isset($this->getRequest()->post_params["form_submit_" . $this->name()]) &&
 			GlobalSessionManager::globalSession()->hasKey(self::SESSION_PREFIX . "." . strtolower($this->name))) {
+
 			// check secret
 			if($this->secretKey && isset($this->getRequest()->post_params["secret_" . $this->ID()]) &&
 				$this->getRequest()->post_params["secret_" . $this->ID()] == $this->state->secret) {

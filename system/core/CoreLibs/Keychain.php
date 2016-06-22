@@ -149,4 +149,12 @@ class Keychain {
 
         return array();
     }
+
+    /**
+     * clears keychain.
+     */
+    public function clear()
+    {
+        $this->session->set($this->sessionName, array());
+    }
 }

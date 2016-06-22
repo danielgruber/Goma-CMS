@@ -597,14 +597,14 @@ self.dropdownDialogs = [];
 				type: "get",
 				// data should always be html as basic, we can interpret layteron
 				dataType: "html"
-			}).done(function(h, s, j){
+			}).done(function(response, status, jqXHR){
 				// run code
 				try {
-					goma.ui.loadResources(j).done(function(){
-						var content_type = j.getResponseHeader("content-type");
+					goma.ui.loadResources(jqXHR).done(function(){
+						var content_type = jqXHR.getResponseHeader("content-type");
 
 						// we have to set it new, because of scoping issues
-						var content = j.responseText;
+						var content = jqXHR.responseText;
 
 						// if it is json-data
 						if(content_type.indexOf("text/x-json") != -1) {
@@ -659,7 +659,7 @@ self.dropdownDialogs = [];
 							that.setContent(content);
 						}
 
-						RunAjaxResources(j);
+						RunAjaxResources(jqXHR);
 					}).fail(function(){
 						that.setContent('Error while fetching data from the server: <br /> Failed to fetch data from the server.');
 					});

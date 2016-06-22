@@ -111,25 +111,25 @@ class HasOneGetter extends AbstractGetterExtension implements ArgumentsQuery {
 
         // get info
         if($relationShip = $this->hasOne($name)) {
-            if($this->getOwner()->fieldGet($name . "id")) {
-                // check field
-                $instance = $this->getOwner()->fieldGet($name);
-                if (!$instance || !is_a($instance, "DataObject")) {
-                    $response = DataObject::get($relationShip->getTargetClass(), array(
-                        "id" => $this->getOwner()->fieldGet($name . "id")
-                    ));
-
-                    if ($this->getOwner()->queryVersion == DataObject::VERSION_STATE) {
-                        $response->setVersion(DataObject::VERSION_STATE);
-                    }
-
-                    $this->getOwner()->setField($name, $instance = $response->first());
+            // check field
+            $instance = $this->getOwner()->fieldGet($name);
+            if (!$instance || !is_a($instance, "DataObject")) {
+                if(!$this->getOwner()->fieldGet($name . "id")) {
+                    return null;
                 }
 
-                return $instance;
-            } else {
-                return null;
+                $response = DataObject::get($relationShip->getTargetClass(), array(
+                    "id" => $this->getOwner()->fieldGet($name . "id")
+                ));
+
+                if ($this->getOwner()->queryVersion == DataObject::VERSION_STATE) {
+                    $response->setVersion(DataObject::VERSION_STATE);
+                }
+
+                $this->getOwner()->setField($name, $instance = $response->first());
             }
+
+            return $instance;
         } else {
             throw new InvalidArgumentException("No Has-one-relation '".$name."' on ".$this->classname);
         }
