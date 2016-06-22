@@ -168,8 +168,6 @@ class contentAdmin extends LeftAndMain {
     /**
      * restores the last published version
      *
-     * @name revert_changes
-     * @access public
      * @return AjaxResponse
      */
     public function revert_changes()

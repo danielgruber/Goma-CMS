@@ -241,7 +241,7 @@ class Controller extends RequestHandler
 
         return $this->model;
     }
-    
+
     /**
      * handles requests
      *
@@ -807,7 +807,7 @@ class Controller extends RequestHandler
         self::$successCallback = $successCallback;
         self::$errorCallback = $errorCallback;
 
-        return $form->render();
+        return $this->showWithDialog($form->render(), lang("confirm", "Confirm..."));
     }
 
     private static $errorCallback;
@@ -889,7 +889,25 @@ class Controller extends RequestHandler
         self::$successPromptCallback = $successCallback;
         self::$errorCallback = $errorCallback;
 
-        return $form->render();
+        return $this->showWithDialog($form->render(), lang("prompt", "Insert Text..."));
+    }
+
+    /**
+     * catches problem when $data is not a string.
+     *
+     * @param string|object $data
+     * @param string $title
+     * @return string
+     */
+    protected function showWithDialog($data, $title) {
+        if(!is_string($data)) {
+            return $data;
+        }
+
+        $view = new ViewAccessableData();
+        return $view->customise(
+            array("content" => $data, "title" => $title)
+        )->renderWith("framework/dialog.html");
     }
 
     /**
