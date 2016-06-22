@@ -411,7 +411,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
         $perm = $this->createPermissionObject($name, $default, $type, $currentCanBeAll);
 
         // add permission and write if ID is not 0
-        $this->addPermission($perm, $name, $this->ID != 0, false);
+        $this->addPermission($perm, $name, $this->id != 0, false);
 
         return $perm;
     }
@@ -592,8 +592,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
             $this->data["sort"] = DataObject::get("pages", array("parentid" => $this->data["parentid"]))->last()->sort;
         }
 
-        $this->validatePageFileName();
-        $this->validatePageType();
+        $this->_validatePageFileName();
+        $this->_validatePageType();
     }
 
     //!Validators
@@ -603,7 +603,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
      *
      * @throws FormInvalidDataException
      */
-    protected function validatePageType()
+    protected function _validatePageType()
     {
         // find classes that should be allowed parents.
         if($this->parentid == 0)
@@ -657,7 +657,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
      * validates page-filename
      * @throws FormInvalidDataException
      */
-    protected function validatePageFileName() {
+    protected function _validatePageFileName() {
         if($this->filename) {
             if($this->filenameTaken()) {
                 throw new FormInvalidDataException("filename", lang("site_exists", "The page with this filename already exists."));

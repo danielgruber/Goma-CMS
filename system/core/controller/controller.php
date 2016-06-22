@@ -12,11 +12,6 @@ defined("IN_GOMA") OR die();
 class Controller extends RequestHandler
 {
     /**
-     * keychain constant for session.
-     */
-    const SESSION_KEYCHAIN = "c_keychain";
-
-    /**
      * showform if no edit right
      *
      * @var bool
@@ -88,6 +83,22 @@ class Controller extends RequestHandler
     public $url_handlers = array(
         '$Action/$id' => '$Action',
     );
+
+    /**
+     * @var Keychain
+     */
+    protected $keychain;
+
+    /**
+     * Controller constructor.
+     * @param KeyChain|null $keychain
+     */
+    public function __construct($keychain = null)
+    {
+        parent::__construct();
+
+        $this->keychain = $keychain;
+    }
 
     /**
      * @param ViewAccessableData $model
@@ -173,7 +184,7 @@ class Controller extends RequestHandler
      * returns the model-object
      *
      * @param ViewAccessableData|null $model
-     * @return ViewAccessableData
+     * @return ViewAccessableData|IDataSet
      */
     public function modelInst($model = null)
     {
@@ -344,15 +355,13 @@ class Controller extends RequestHandler
     /**
      * handles a request with a given record in it's controller
      *
-     * @name record
-     * @access public
      * @return string|false
      */
     public function record()
     {
-        $id = $this->getParam("id");
-        if ($model = $this->model()) {
-            $data = DataObject::get_one($model, array("id" => $id));
+        if (is_a($this->modelInst(), "IDataSet")) {
+            $data = clone $this->modelInst();
+            $data->addFilter(array("id" => $this->getParam("id")));
             $this->callExtending("decorateRecord", $model);
             $this->decorateRecord($data);
             if ($data) {
@@ -368,15 +377,13 @@ class Controller extends RequestHandler
     /**
      * handles a request with a given versionid in it's controller
      *
-     * @name version
-     * @access public
      * @return mixed|string
      */
     public function version()
     {
-        $id = $this->getParam("id");
-        if ($model = $this->model()) {
-            $data = DataObject::get_one($model, array("versionid" => $id));
+        if (is_a($this->modelInst(), "IDataSet")) {
+            $data = clone $this->modelInst();
+            $data->addFilter(array("versionid" => $this->getParam("id")));
             $this->callExtending("decorateRecord", $model);
             $this->decorateRecord($data);
             if ($data) {
@@ -484,14 +491,19 @@ class Controller extends RequestHandler
     /**
      * edit-function
      *
-     * @name edit
-     * @access public
      * @return string
      */
     public function edit()
     {
-        if ($this->countModelRecords() == 1 && (!$this->getParam("id") || !is_a($this->modelInst(), "DataObjectSet")) && (!$this->getParam("id") || $this->ModelInst()->id == $this->getParam("id"))) {
-            if (!$this->modelInst()->can("Write")) {
+        if(is_a($this->modelInst(), "IDataSet")) {
+            $model = $this->modelInst()->find("id", $this->getParam("id"));
+        } else {
+            $model = $this->modelInst();
+        }
+
+        /** @var DataObject $model */
+        if($model) {
+            if (!$model->can("Write")) {
                 if (StaticsManager::getStatic($this->classname, "showWithoutRight") || $this->modelInst()->showWithoutRight) {
                     $disabled = true;
                 } else {
@@ -501,21 +513,7 @@ class Controller extends RequestHandler
                 $disabled = false;
             }
 
-            return $this->form("edit_" . $this->classname . $this->modelInst()->id, $this->modelInst(), array(), true, "safe", $disabled);
-        } else if ($this->getParam("id")) {
-            if (preg_match('/^[0-9]+$/', $this->getParam("id"))) {
-                $model = DataObject::get_one($this->model(), array_merge($this->filter, array("id" => $this->getParam("id"))));
-                if ($model) {
-                    return $model->controller(clone $this)->edit();
-                } else {
-                    throw new InvalidArgumentException("No data found for ID " . $this->getParam("id"));
-                }
-            } else {
-                log_error("Warning: Param ID for Action edit is not an integer: " . print_r($this->request, true));
-                return $this->redirectBack();
-            }
-        } else {
-            throw new InvalidArgumentException("Controller::Edit should be called if you just have one Record or a given ID in URL.");
+            return $this->form("edit_" . $this->classname . $model->id, $model, array(), true, "safe", $disabled);
         }
     }
 
@@ -523,69 +521,71 @@ class Controller extends RequestHandler
      * delete-function
      * this delete-function also implements ajax-functions
      *
-     * @name delete
-     * @access public
-     * @param object - object for hideDeletedObject Function
      * @return bool|string
      */
-    public function delete($object = null)
+    public function delete()
     {
-        if ($this->countModelRecords() == 1) {
-            if (!$this->modelInst()->can("Delete")) {
+        if(is_a($this->modelInst(), "IDataSet")) {
+            $model = $this->modelInst()->find("id", $this->getParam("id"));
+        } else {
+            $model = $this->modelInst();
+        }
+
+        if($model) {
+            if(!$model->can("Delete")) {
                 return $this->actionComplete("less_rights");
             }
 
-            if (is_a($this->modelInst(), "DataObjectSet")) {
-                $toDelete = $this->modelInst()->first();
-            } else {
-                $toDelete = $this->modelInst();
-            }
-
-            // generate description for data to delete
-            $description = $toDelete->generateRepresentation(false);
-            if (isset($description))
-                $description = '<a href="' . $this->namespace . '/edit/' . $toDelete->id . URLEND . '" target="_blank">' . $description . '</a>';
+            $description = $this->generateRepresentation($model);
 
             if ($this->confirm(lang("delete_confirm", "Do you really want to delete this record?"), null, null, $description)) {
-                $data = clone $toDelete;
-                $toDelete->remove();
+                $preservedModel = clone $model;
+                $model->remove();
                 if ($this->getRequest()->isJSResponse() || isset($this->getRequest()->get_params["dropdownDialog"])) {
                     $response = new AjaxResponse();
-                    if ($object !== null)
-                        $data = $object->hideDeletedObject($response, $data);
-                    else
-                        $data = $this->hideDeletedObject($response, $data);
+                    $data = $this->hideDeletedObject($response, $preservedModel);
 
-                    if (is_object($data))
-                        $data = $data->render();
-
-                    HTTPResponse::setBody($data);
-                    HTTPResponse::output();
-                    exit;
+                    return $data;
                 } else {
-                    return $this->actionComplete("delete_success", $data);
+                    return $this->actionComplete("delete_success", $preservedModel);
                 }
-            }
-        } else {
-            if (preg_match('/^[0-9]+$/', $this->getParam("id"))) {
-                $model = DataObject::get_one($this->model(), array_merge($this->filter, array("id" => $this->getParam("id"))));
-                if ($model) {
-                    return $model->controller(clone $this)->delete();
-                } else {
-                    return false;
-                }
-            } else {
-                log_error("Warning: Param ID for Action delete is not an integer: " . print_r($this->request, true));
-                return $this->redirectBack();
             }
         }
     }
 
     /**
+     * @param DataObject $model
+     * @param bool $link
+     * @return string
+     */
+    protected function generateRepresentation($model, $link = false) {
+        $description = $model->generateRepresentation($link);
+
+        // find link.
+        if(!preg_match('/<a\s+/i', $description)) {
+            $link = false;
+        }
+
+        if(!$link) {
+            if ($this->modelInst() == $model) {
+                return '<a href="' . $this->namespace . '/edit' . URLEND . '">' . $description . '</a>';
+            }
+
+            if (is_a($this->modelInst(), "DataObjectSet")) {
+                if ($this->modelInst()->find("id", $model->id)) {
+                    return '<a href="' . $this->namespace . '/edit/' . $model->id . URLEND . '">' . $description . '</a>';
+                }
+            }
+        }
+
+        return $description;
+    }
+
+    /**
      * hides the deleted object
-     *
-     * @name hideDeletedObject
-     * @access public
+     * @param AjaxResponse $response
+     * @param array $data
+     * @return AjaxResponse
      */
     public function hideDeletedObject($response, $data)
     {
@@ -608,7 +608,6 @@ class Controller extends RequestHandler
     public function safe($data, $form = null, $controller = null, $overrideCreated = false, $priority = 1, $action = 'save_success')
     {
         $givenModel = isset($form) ? $form->getModel() : null;
-        // TODO: Add test if $model is Object
         if (($model = $this->save($data, $priority, false, false, $overrideCreated, $givenModel)) !== false) {
             return $this->actionComplete($action, $model);
         } else {
@@ -622,7 +621,6 @@ class Controller extends RequestHandler
      * Saves data to the database. It decides if to create a new record or not whether an id is set or not.
      * It marks the record as draft if versions are enabled on this model.
      *
-     * @access    public
      * @param    array $data
      * @param Form $form
      * @param gObject $controller
@@ -640,7 +638,6 @@ class Controller extends RequestHandler
      *
      * it saves data to the database. you can define which priority should be selected and if permissions are relevant.
      *
-     * @access    public
      * @param    array $data data
      * @param    integer $priority Defines what type of save it is: 0 = autosave, 1 = save, 2 = publish
      * @param    boolean $forceInsert forces the database to insert a new record of this data and neglect permissions
@@ -761,7 +758,6 @@ class Controller extends RequestHandler
      */
     public function redirectback($param = null, $value = null)
     {
-
         if (isset($this->request->get_params["redirect"])) {
             $redirect = $this->request->get_params["redirect"];
         } else if (isset($this->request->post_params["redirect"])) {
@@ -804,9 +800,11 @@ class Controller extends RequestHandler
 
             $form->add(new HTMLField("description", '<div class="confirmDescription">' . $description . '</div>'));
         }
-        $form->get();
-        return true;
+        if(is_array($form->get())) {
+            return true;
+        }
 
+        return false;
     }
 
     /**
@@ -826,7 +824,11 @@ class Controller extends RequestHandler
             $field
         ), lang("prompt", "Insert Text..."), md5("prompt_" . $messsage . $this->classname), $validators, null, $redirectOnCancel);
         $data = $form->get();
-        return $data["prompt_text"];
+        if(is_array($data)) {
+            return $data["prompt_text"];
+        }
+
+        return null;
     }
 
     /**
@@ -836,83 +838,47 @@ class Controller extends RequestHandler
     /**
      * adds a password to the keychain
      *
-     * @name keyChainAdd
-     * @access public
-     * @param string - password
-     * @param bool - use cookie
-     * @param int - cookie-livetime
+     * @deprecated
+     * @param string $password
+     * @param null $cookie
+     * @param null $cookielt
      */
     public static function keyChainAdd($password, $cookie = null, $cookielt = null)
     {
-        if (!isset($cookie)) {
-            $cookie = false;
-        }
-
-        if (!isset($cookielt)) {
-            $cookielt = 14 * 24 * 60 * 60;
-        }
-
-        $keychain = self::getCurrentKeychain();
-        $keychain[] = $password;
-
-        GlobalSessionManager::globalSession()->set(self::SESSION_KEYCHAIN, $keychain);
-
-        if ($cookie) {
-            setCookie("keychain_" . md5(md5($password)), md5($password), NOW + $cookielt);
-        }
+        Core::Deprecate(2.0, "keychain()->add");
+        Keychain::sharedInstance()->add($password);
     }
 
     /**
      * checks if a password is in keychain
      *
-     * @name keyChainCheck
-     * @access public
+     * @deprecated
+     * @param string $password
      * @return bool
      */
     public static function KeyChainCheck($password)
     {
-        $keychain = self::getCurrentKeychain();
-        if ((in_array($password, $keychain)) ||
-            (
-                isset($_COOKIE["keychain_" . md5(md5($password))]) &&
-                $_COOKIE["keychain_" . md5(md5($password))] == md5($password)
-            ) ||
-            isset($_GET[getPrivateKey()])
-        ) {
-            return true;
-        } else {
-            return false;
-        }
+        Core::Deprecate(2.0, "keychain()->check");
+        return Keychain::sharedInstance()->check($password);
     }
 
     /**
      * removes a password from keychain
      *
-     * @name keyChainRemove
-     * @access public
+     * @deprecated
+     * @param string $password
      */
     public static function keyChainRemove($password)
     {
-        $keychain = self::getCurrentKeychain();
-
-        if ($key = array_search($password, $keychain)) {
-            unset($keychain[$key]);
-        }
-
-        GlobalSessionManager::globalSession()->set(self::SESSION_KEYCHAIN, $keychain);
-
-        setCookie("keychain_" . md5(md5($password)), null, -1);
+        Core::Deprecate(2.0, "keychain()->remove");
+        Keychain::sharedInstance()->remove($password);
     }
 
     /**
-     * returns current keychain-array.
+     * @return Keychain
      */
-    protected static function getCurrentKeychain() {
-        if(GlobalSessionManager::globalSession()->hasKey(self::SESSION_KEYCHAIN)) {
-            return GlobalSessionManager::globalSession()->get(self::SESSION_KEYCHAIN);
-        }
-
-        return array();
+    public function keychain() {
+        return isset($this->keychain) ? $this->keychain : Keychain::sharedInstance();
     }
 
     /**

@@ -220,6 +220,13 @@ class DataSetTests extends GomaUnitTest {
         $list->filter();
         $this->assertEqual($list->find("name", "patrick", true), $this->patrick);
         $this->assertNull($list->find("name", "patrick"));
+
+        $list->addFilter(array("name" => array("LIKE", "Janine")));
+        $this->assertEqual($filteredList->first(), $this->janine);
+        $list->addFilter(array("age" => 19));
+        $this->assertEqual($filteredList->first(), $this->janine);
+        $list->addFilter(array("age" => 21));
+        $this->assertEqual($filteredList->first(), null);
     }
 
     public function testMove() {

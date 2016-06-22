@@ -75,24 +75,14 @@ class ContentController extends FrontedController
      * - Permission-checks with Password
      * - sub-pages
      *
-     * @name extendHasAction
-     * @access public
-     * @param string - action
-     * @return bool|void
+     * @param string $action
+     * @param bool $hasAction
      */
     public function extendHasAction($action, &$hasAction)
     {
-        $check = $this->checkForReadPermission();
-        if(is_array($check)) {
-            return $this->showPasswordForm($check);
-        }
-
-        array_push(self::$activeNodes, $this->modelInst()->id);
-
         // check for sub-page
         if($this->willHandleWithSubpage($action)) {
             $hasAction = true;
-            return true;
         }
     }
 
@@ -129,9 +119,9 @@ class ContentController extends FrontedController
             $this->callExtending("providePasswords", $passwords);
             if ($model->read_permission->password != "" || $passwords) {
                 $password = $model->read_permission->password;
-                if (!$this->KeyChainCheck($password)) {
+                if (!$this->keychain()->check($password)) {
                     foreach ($passwords as $pwd) {
-                        if ($this->KeyChainCheck($pwd)) {
+                        if ($this->keychain()->check($pwd)) {
                             return true;
                         }
                     }
@@ -155,10 +145,10 @@ class ContentController extends FrontedController
 
         // set password + breadcrumb
         if ($pwd = $this->prompt(lang("password", "password"), array($validator), null, null, true)) {
-            $this->keyChainAdd($pwd);
+            $this->keychain()->add($pwd);
             return true;
         } else {
-            return false;
+            return GomaResponse::redirect(ROOT_PATH . BASE_SCRIPT . $this->namespace . "/../");
         }
     }
 
@@ -168,6 +158,7 @@ class ContentController extends FrontedController
      * @param FormValidator $obj
      * @param array $passwords
      * @return bool|string
+     * @throws FormInvalidDataException
      */
     public function validatePassword($obj, $passwords)
     {
@@ -177,23 +168,32 @@ class ContentController extends FrontedController
             }
         }
 
-        return lang("captcha_wrong", "The Code was wrong.");
-
+        throw new FormInvalidDataException("prompt_text", lang("captcha_wrong", "The Code was wrong."));
     }
 
     /**
      * action-handling
      *
-     * @name extendHandleAction
-     * @access public
-     * @return bool|void
+     * @param string $action
+     * @param string $content
+     * @return void
+     * @throws Exception
      */
     public function extendHandleAction($action, &$content)
     {
+        $check = $this->checkForReadPermission();
+        if(is_array($check)) {
+            if(($response = $this->showPasswordForm($check)) !== true) {
+                $content = $response;
+                return;
+            }
+        }
+
+        array_push(self::$activeNodes, $this->modelInst()->id);
+
         if ($content === null && $action != "" && $this->subPage != null) {
             $content = ControllerResolver::instanceForModel($this->subPage)->handleRequest($this->request);
-
-            return true;
+            return;
         }
 
         if ($action == "index") {

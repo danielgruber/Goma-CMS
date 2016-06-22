@@ -79,13 +79,13 @@ class RequestForm extends gObject {
 	/**
 	 * constructing the form
 	 *
-	 *@name __construct
-	 *@access public
-	 *@param array - fields
-	 *@param string - title
-	 *@param string - key
-	 *@param array - validators
-	 *@param string - title of the okay-button
+	 * @param $controller
+	 * @param $fields
+	 * @param $title
+	 * @param string $key
+	 * @param array $validators
+	 * @param null $btnokay
+	 * @param null $redirect
 	 */
 	public function __construct($controller, $fields, $title, $key = "", $validators = array(), $btnokay = null, $redirect = null) {
 		parent::__construct();

@@ -11,7 +11,7 @@
  *
  * @version     1.5.2
  */
-class DataObjectSet extends ViewAccessableData implements Countable {
+class DataObjectSet extends ViewAccessableData implements IDataSet {
 
 	const ID = "DataObjectSet";
 
@@ -680,10 +680,11 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 
 	/**
 	 * filters the data
-	 * @param array $filter
 	 * @return $this
 	 */
-	public function filter($filter) {
+	public function filter() {
+		$filter = call_user_func_array(array("DataSet", "getFilterFromArgs"), func_get_args());
+
 		if(isset($filter) && $this->filter != $filter) {
 			$this->filter = $filter;
 			$this->clearCache();
@@ -693,8 +694,14 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 
 	/**
 	 * adds a filter
+	 *
+	 * @param
+	 * @param
+	 * @return $this
 	 */
-	public function addFilter($filter) {
+	public function addFilter() {
+		$filter = call_user_func_array(array("DataSet", "getFilterFromArgs"), func_get_args());
+
 		if(isset($filter)) {
 			$this->filter = array_merge((array) $this->filter, (array) $filter);
 			$this->clearCache();
@@ -709,6 +716,14 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 */
 	public function groupBy($field) {
 		return $this->dbDataSource()->getGroupedRecords($this->version, $field, $this->getFilterForQuery(), $this->getSortForQuery(), array(), $this->getJoinForQuery(), $this->search);
+	}
+
+	/**
+	 * @param string $field
+	 * @return DataSet
+	 */
+	public function getGroupedSet($field) {
+		return new DataSet($this->groupBy($field));
 	}
 
 	/**
@@ -787,16 +802,23 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	/**
 	 * resorts the data
 	 *
-	 * @param string $column
-	 * @param string $type
 	 * @return $this
+	 * @example $list->sort('Name'); // default ASC sorting
+	 * @example $list->sort('Name DESC'); // DESC sorting
+	 * @example $list->sort('Name', 'ASC');
 	 */
-	public function sort($column, $type = "") {
-		if(!isset($column)) {
+	public function sort() {
+		$args = func_get_args();
+		if(count($args) == 0 || $args[0] === null){
 			$this->sort = null;
 			$this->clearCache();
 			return $this;
 		}
+		if(count($args)>2){
+			throw new InvalidArgumentException('Sort takes zero, one or two arguments');
+		}
+		$column = $args[0];
+		$type = isset($args[1]) ? $args[1] : null;
 
 		if(!is_string($column))
 			throw new InvalidArgumentException("First argument of sort must be a string.");
@@ -841,7 +863,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	/**
 	 * checks if we can sort by a specified field
 	 *
-	 * @name canSortBy
+	 * @param string $field
 	 * @return bool
 	 */
 	public function canSortBy($field) {
@@ -851,7 +873,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	/**
 	 * checks if we can sort by a specified field
 	 *
-	 * @name canSortBy
+	 * @param $field
 	 * @return bool
 	 */
 	public function canFilterBy($field) {
@@ -1469,6 +1491,34 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 			return array("start" => $this->page * $this->perPage - $this->perPage, "end" => $end, "whole" => $this->countWholeSet());
 		}
 		return false;
+	}
+
+	/**
+	 * finds first matching record for key and value in this DataObjectSet.
+	 *
+	 * @param string $name
+	 * @param string $value
+	 * @param bool $caseInsensitive
+	 * @return DataObject|null
+	 */
+	public function find($name, $value, $caseInsensitive = false) {
+		if(($this->items && $this->page === null) || $this->fetchMode == self::FETCH_MODE_CREATE_NEW) {
+			foreach($this->items as $item) {
+				if($caseInsensitive && strtolower(self::getItemProp($item, $name)) == strtolower($value)) {
+					return $item;
+				} else if(self::getItemProp($item, $name) == $value) {
+					return $item;
+				}
+			}
+
+			return $this->staging->find($name, $value, $caseInsensitive);
+		} else {
+			$set = clone $this;
+			$set->addFilter(array(
+				$name => !$caseInsensitive ? $value : array("LIKE", $value)
+			));
+			return $set->first() ? $set->first() : $this->staging->find($name, $value, $caseInsensitive);
+		}
 	}
 }
 

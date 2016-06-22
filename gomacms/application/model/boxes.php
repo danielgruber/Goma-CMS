@@ -572,12 +572,10 @@ class login_meinaccount extends Box {
 
 	/**
 	 * renders the box
-	 *
-	 * @name getContent
 	 */
 	public function getContent()
 	{
-		return tpl::render('boxes/login.html', array('users_online' => LiveCounterController::countMembersOnline()));
+		return tpl::render('boxes/login.html');
 	}
 }
 

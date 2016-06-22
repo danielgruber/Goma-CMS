@@ -1003,7 +1003,9 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 				return $item[$prop];
 			}
 
-			return $item->{$prop};
+			if(is_string($prop)) {
+				return $item->{$prop};
+			}
 		}
 
 		return property_exists($item, $prop) ? $item->$prop : null;

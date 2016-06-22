@@ -1222,8 +1222,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
         // default submission
         $form->setSubmission(isset($submission) ? $submission : "submit_form");
 
-        $form->addValidator(new DataValidator($this), "datavalidator");
-
         $form->setResult(clone $this);
 
         // some default fields

@@ -316,6 +316,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 	 * @example $list->filter(array('Name'=>array('aziz','bob'), 'Age'=>array(21, 43)));
 	 * @example $list->filter(array('Name'=>array('LIKE','bob'))) // all records with name bob, case-insensitive and comparable to the SQL-LIKE
 	 * @example $list->filter(array('Age' => array("<", 40))) // everybody with age lower 40
+	 * @example $list->filter(array(array('Age' => array("<", 40)))) // everybody with age lower 40
 	 *          // aziz with the age 21 or 43 and bob with the Age 21 or 43
 	 */
 	public function filter() {
@@ -354,67 +355,76 @@ class ArrayList extends ViewAccessableData implements Countable {
 	 * @return bool
 	 */
 	static function itemMatchesFilter($item, $filter) {
+		$filterResult = true;
+		$filtered = 0;
+
 		foreach($filter as $column => $value) {
-			$columnProp = self::getItemProp($item, $column);
-			if(!is_array($value)) {
-				if($columnProp != $value) {
-					return false;
+			if(is_string($value) && strtolower($value) === "or") {
+				if($filtered > 0 && $filterResult) {
+					return true;
 				}
 
-
-			} else if(isset($value[0], $value[1]) && count($value) == 2 && ($value[0] == "LIKE" || $value[0] == ">" || $value[0] == "<" || $value[0] == "!=" || $value[0] == "<=" || $value[0] == ">=" || $value[0] == "<>")) {
-				switch($value[0]) {
-					case "LIKE":
-						$value[1] = preg_quote($value[1], "/");
-						$value[1] = str_replace('%', '.*', $value[1]);
-						$value[1] = str_replace('_', '.', $value[1]);
-						$value[1] = str_replace('\\.*', "%", $value[1]);
-						$value[1] = str_replace('\\.', "_", $value[1]);
-
-						if(!preg_match("/" . $value[1] . "/i", $columnProp))
-							return false;
-						break;
-					case "<":
-						if(strcmp($value[1], $columnProp) == 0)
-							return false;
-
-					case "<=":
-						if(strcmp($value[1], $columnProp) == -1)
-							return false;
-						break;
-					case ">":
-						if(strcmp($value[1], $columnProp) == 0)
-							return false;
-					case ">=":
-						if(strcmp($value[1], $columnProp) == 1)
-							return false;
-						break;
-					case "<>":
-					case "!=":
-						if($value[1] == $columnProp)
-							return false;
-						break;
-				}
+				$filterResult = true;
+				$filtered = 0;
 			} else {
-				if(isset($value[0])) {
-					$found = false;
-					foreach($value as $data) {
-						if($columnProp == $data) {
-							$found = true;
-						}
+				$columnProp = self::getItemProp($item, $column);
+				if (!is_array($value)) {
+					if ($columnProp != $value) {
+						$filterResult = false;
 					}
+				} else if (isset($value[0], $value[1]) && count($value) == 2 && ($value[0] == "LIKE" || $value[0] == ">" || $value[0] == "<" || $value[0] == "!=" || $value[0] == "<=" || $value[0] == ">=" || $value[0] == "<>")) {
+					switch ($value[0]) {
+						case "LIKE":
+							$value[1] = preg_quote($value[1], "/");
+							$value[1] = str_replace('%', '.*', $value[1]);
+							$value[1] = str_replace('_', '.', $value[1]);
+							$value[1] = str_replace('\\.*', "%", $value[1]);
+							$value[1] = str_replace('\\.', "_", $value[1]);
 
-					if(!$found)
-						return false;
+							if (!preg_match("/" . $value[1] . "/i", $columnProp))
+								$filterResult = false;
+							break;
+						case "<":
+							if (strcmp($value[1], $columnProp) == 0)
+								$filterResult = false;
+
+						case "<=":
+							if (strcmp($value[1], $columnProp) == -1)
+								$filterResult = false;
+							break;
+						case ">":
+							if (strcmp($value[1], $columnProp) == 0)
+								$filterResult = false;
+						case ">=":
+							if (strcmp($value[1], $columnProp) == 1)
+								$filterResult = false;
+							break;
+						case "<>":
+						case "!=":
+							if ($value[1] == $columnProp)
+								$filterResult = false;
+							break;
+					}
 				} else {
-					if(!self::itemMatchesFilter($item, $value)) {
-						return false;
+					if (isset($value[0])) {
+						$found = false;
+						foreach ($value as $data) {
+							if ($columnProp == $data) {
+								$found = true;
+							}
+						}
+
+						if (!$found)
+							$filterResult = false;
+					} else if ($value && !self::itemMatchesFilter($item, $value)) {
+						$filterResult = false;
 					}
 				}
+				$filtered++;
 			}
 		}
 
-		return true;
+		return $filterResult && ($filtered > 0 || count($filter) == 0);
 	}
 
 	/**

@@ -264,20 +264,18 @@ class RequestHandler extends gObject {
 	/**
 	 * on before handle action
 	 *
-	 *@name onBeforeHandleAction
-	 *@param string - action
-	 *@param string - content
-	 *@param bool - handleWithMethod
+	 *@param string $action
+	 *@param string $content
+	 *@param bool $handleWithMethod
 	 */
 	public function onBeforeHandleAction($action, $content, &$handleWithMethod) {
 
 	}
 
 	/**
-	 *@name extendHandleAction
-	 *@access public
-	 *@param string - action
-	 *@param string - content
+	 *@param string $action
+	 *@param string $content
+	 * @return void
 	 */
 	public function extendHandleAction($action, &$content) {
 
@@ -285,9 +283,8 @@ class RequestHandler extends gObject {
 
 	/**
 	 * extends hasAction
-	 *
-	 *@name extendHasAction
-	 *@access public
+	 * @param string $action
+	 * @param boolean $hasAction
 	 */
 	public function extendHasAction($action, &$hasAction) {
 

@@ -25,6 +25,20 @@ class CheckBox extends FormField {
 	}
 
 	/**
+	 * @return array|bool|string|ViewAccessableData
+	 */
+	public function getModel()
+	{
+		if($this->POST) {
+			if (!$this->isDisabled() && $this->getRequest()->post_params && !$this->parent->getFieldPost($this->PostName())) {
+				return false;
+			}
+		}
+
+		return parent::getModel();
+	}
+
+	/**
 	 * sets the value
 	 */
 	public function setValue() {

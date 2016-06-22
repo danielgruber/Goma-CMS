@@ -147,6 +147,7 @@ class ArrayListTest extends GomaUnitTest
         $this->assertEqual($filteredList->count(), 1);
 
         $this->assertEqual($list->filter(array("name" => "janine"))->count(), 0);
+        $this->assertEqual($list->filter(array(array("name" => "janine")))->count(), 0);
 
         $this->assertEqual($list->first(), $this->daniel);
 
@@ -157,6 +158,20 @@ class ArrayListTest extends GomaUnitTest
 
         $this->assertEqual($list->find("name", "patrick", true), $this->patrick);
         $this->assertNull($list->find("name", "patrick"));
+    }
+
+    public function testFilterOr() {
+        $list = new ArrayList($orgArray = array(
+            $this->daniel,
+            $this->kathi,
+            $this->janine,
+            $this->patrick,
+            $this->julian
+        ));
+
+        $this->assertEqual($list->filter(array(
+            array("name" => "Janine"), "OR", array("name" => "Daniel")
+        ))->count(), 2);
     }
 
     public function testMove() {

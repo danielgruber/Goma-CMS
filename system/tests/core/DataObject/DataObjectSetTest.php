@@ -485,6 +485,29 @@ class DataObjectSetTests extends GomaUnitTest
             $i++;
         }
     }
+
+    public function findTest() {
+        $set = new DataObjectSet("DumpDBElementPerson");
+        $set->setVersion(DataObject::VERSION_PUBLISHED);
+
+        /** @var MockIDataObjectSetDataSource $source */
+        $source = $set->getDbDataSource();
+
+        $source->records = array(
+            $this->julian,
+            $this->daniel,
+            $this->janine,
+            $this->kathi
+        );
+
+        $this->assertEqual($set->find("name", "julian"), $this->julian);
+        $set->forceData();
+        $this->assertEqual($set->find("name", "julian"), $this->julian);
+
+        $this->assertEqual($set->find("age", "19"), $this->janine);
+        $this->assertEqual($set->find("name", "JULIAN", false), null);
+        $this->assertEqual($set->find("name", "JULIAN", true), $this->julian);
+    }
 }
 
 class MockIDataObjectSetDataSource implements IDataObjectSetDataSource {

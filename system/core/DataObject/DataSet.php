@@ -10,7 +10,7 @@
  *
  * @version     2.0
  */
-class DataSet extends ArrayList {
+class DataSet extends ArrayList implements IDataSet {
     const ID = "DataSet";
 
     /**
@@ -108,10 +108,46 @@ class DataSet extends ArrayList {
      */
     public function filter()
     {
-        $this->updateSet(array(func_get_args()), $this->page, $this->perPage);
-        $this->filter = array(func_get_args());
+        $this->filter = call_user_func_array(array("DataSet", "getFilterFromArgs"), func_get_args());
+        $this->updateSet($this->filter, $this->page, $this->perPage);
 
         return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function addFilter()
+    {
+        $filter = call_user_func_array(array("DataSet", "getFilterFromArgs"), func_get_args());
+
+        $this->filter = array_merge((array) $this->filter, (array) $filter);
+        $this->updateSet($this->filter, $this->page, $this->perPage);
+        return $this;
+    }
+
+    /**
+     * @return array|mixed
+     * @internal
+     */
+    public static function getFilterFromArgs() {
+        if(count(func_get_args())>2){
+            throw new InvalidArgumentException('filter takes one array or two arguments');
+        }
+
+        if(count(func_get_args()) == 1 && !is_array(func_get_arg(0)) && !is_string(func_get_arg(0)) && !is_null(func_get_arg(0))){
+            throw new InvalidArgumentException('filter takes one string/array or two arguments. got ' . gettype(func_get_arg(0)) . ".");
+        }
+
+        if(count(func_get_args()) == 2) {
+            return array(
+                func_get_arg(0) => func_get_arg(1)
+            );
+        } else if(count(func_get_args()) == 1) {
+            return func_get_arg(0);
+        }
+
+        return array();
     }
 
     /**
@@ -125,9 +161,7 @@ class DataSet extends ArrayList {
         $source = $this->dataSource;
 
         if(isset($filter)) {
-            foreach($filter as $part) {
-                $source = call_user_func_array(array($source, "filter"), $part);
-            }
+            $source = call_user_func_array(array($source, "filter"), array($filter));
         }
 
         $this->filteredDataSource = $source;
@@ -305,6 +339,7 @@ class DataSet extends ArrayList {
     public function getRange($start, $length) {
         $set = clone $this;
         $set->items = $this->dataSource->getRange($start, $length);
+        $set->inExpansion = $this->inExpansion;
         return $set;
     }
 

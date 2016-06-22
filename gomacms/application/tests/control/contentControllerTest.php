@@ -44,11 +44,23 @@ class contentControllerTest extends GomaUnitTest
         $controller = new ContentController();
         $controller->setModelInst($page);
         if($shouldBeInKeychain) {
-            $controller->keyChainAdd($password);
+            $controller->keychain()->add($password);
         } else {
-            $controller->keyChainRemove($password);
+            $controller->keychain()->remove($password);
         }
 
         return $controller->checkForReadPermission();
+    }
+
+    /**
+     *
+     */
+    public function testPassword() {
+        $request = new Request("get", "");
+        $controller = new ContentController();
+        $controller->setModelInst($page = new Page());
+        $page->read_permission->password = "1234";
+
+        
     }
 }
