@@ -183,7 +183,7 @@ class Controller extends RequestHandler
     /**
      * returns the model-object
      *
-     * @param ViewAccessableData|null $model
+     * @param ViewAccessableData|string|null $model
      * @return ViewAccessableData|IDataSet
      */
     public function modelInst($model = null)
@@ -211,22 +211,13 @@ class Controller extends RequestHandler
             $this->model = $this->model_inst->DataClass();
         }
 
-        if (isset($this->model_inst) && is_object($this->model_inst) && is_a($this->model_inst, "DataSet") && !$this->model_inst->isPagination() && $this->pages && $this->perPage) {
-            $page = isset($_GET["pa"]) ? $_GET["pa"] : null;
-            if ($this->perPage)
-                $this->model_inst->activatePagination($page, $this->perPage);
-            else
-                $this->model_inst->activatePagination($page);
-        }
-
         return (is_object($this->model_inst)) ? $this->model_inst : new ViewAccessAbleData();
     }
 
     /**
      * returns the controller-model
      *
-     * @name model
-     * @access public
+     * @param string|null $model
      * @return null|string
      */
     public function model($model = null)
@@ -250,26 +241,7 @@ class Controller extends RequestHandler
 
         return $this->model;
     }
-
-    /**
-     * returns the count of records in the model according to this controller
-     *
-     * @name countModelRecords
-     * @access public
-     * @return int
-     */
-    public function countModelRecords()
-    {
-        if (is_a($this->modelInst(), "DataObjectSet"))
-            return $this->modelInst()->count();
-        else {
-            if ($this->modelInst()->bool())
-                return 1;
-        }
-
-        return 0;
-    }
-
+    
     /**
      * handles requests
      *
@@ -495,14 +467,8 @@ class Controller extends RequestHandler
      */
     public function edit()
     {
-        if(is_a($this->modelInst(), "IDataSet")) {
-            $model = $this->modelInst()->find("id", $this->getParam("id"));
-        } else {
-            $model = $this->modelInst();
-        }
-
         /** @var DataObject $model */
-        if($model) {
+        if($model = $this->findSingleModel()) {
             if (!$model->can("Write")) {
                 if (StaticsManager::getStatic($this->classname, "showWithoutRight") || $this->modelInst()->showWithoutRight) {
                     $disabled = true;
@@ -525,13 +491,7 @@ class Controller extends RequestHandler
      */
     public function delete()
     {
-        if(is_a($this->modelInst(), "IDataSet")) {
-            $model = $this->modelInst()->find("id", $this->getParam("id"));
-        } else {
-            $model = $this->modelInst();
-        }
-
-        if($model) {
+        if($model = $this->findSingleModel()) {
             if(!$model->can("Delete")) {
                 return $this->actionComplete("less_rights");
             }
@@ -550,6 +510,17 @@ class Controller extends RequestHandler
                     return $this->actionComplete("delete_success", $preservedModel);
                 }
             }
+        }
+    }
+
+    /**
+     * finds single model if set or by id.
+     */
+    protected function findSingleModel() {
+        if(is_a($this->modelInst(), "IDataSet")) {
+           return $this->getParam("id") ? $this->modelInst()->find("id", $this->getParam("id")) : null;
+        } else {
+            return $this->modelInst();
         }
     }
 
