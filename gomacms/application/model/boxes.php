@@ -97,9 +97,6 @@ class Boxes extends DataObject implements Notifier {
 
 	/**
 	 * gets all available types
-	 *
-	 * @name getBoxTypes
-	 * @access public
 	 */
 	public function getBoxTypes()
 	{
@@ -114,9 +111,6 @@ class Boxes extends DataObject implements Notifier {
 
 	/**
 	 * gets the width
-	 *
-	 * @name getWidth
-	 * @access public
 	 */
 	public function getWidth()
 	{
@@ -131,9 +125,6 @@ class Boxes extends DataObject implements Notifier {
 
 	/**
 	 * gets the class box_with_border if border is set
-	 *
-	 * @name getborder_class
-	 * @access public
 	 */
 	public function getborder_class()
 	{
@@ -169,8 +160,8 @@ class Boxes extends DataObject implements Notifier {
 
 	/**
 	 * returns if edit is on
-	 *
-	 * @name canWrite
+	 * @param Boxes|null $row
+	 * @return bool
 	 */
 	public function canWrite($row)
 	{
@@ -184,8 +175,8 @@ class Boxes extends DataObject implements Notifier {
 
 	/**
 	 * returns if deletion is allowed
-	 *
-	 * @name canDelete
+	 * @param Boxes $row
+	 * @return bool
 	 */
 	public function canDelete($row = null)
 	{
@@ -199,8 +190,8 @@ class Boxes extends DataObject implements Notifier {
 
 	/**
 	 * returns if inserting is allowed
-	 *
-	 * @name canInsert
+	 * @param Boxes $row
+	 * @return bool
 	 */
 	public function canInsert($row = null)
 	{
@@ -218,9 +209,6 @@ class Boxes extends DataObject implements Notifier {
 	 * - title
 	 * - icon
 	 * this API may extended with notification settings later
-	 *
-	 * @name NotifySettings
-	 * @access public
 	 */
 	public static function NotifySettings()
 	{
@@ -246,221 +234,6 @@ class Boxes extends DataObject implements Notifier {
 	}
 
 
-}
-
-class BoxesController extends FrontedController {
-	/**
-	 * some urls
-	 *
-	 * @name url_handlers
-	 * @access public
-	 */
-	public $url_handlers = array(
-		"\$pid!/add"               => "add",
-		"\$pid!/edit/\$id!"        => "edit",
-		"\$pid!/delete/\$id"       => "delete",
-		"\$pid!/saveBoxWidth/\$id" => "saveBoxWidth",
-		"\$pid!/saveBoxOrder"      => "saveBoxOrder"
-	);
-
-	/**
-	 * rights
-	 *
-	 * @name allowed_actions
-	 * @access public
-	 */
-	public $allowed_actions = array(
-		"add"          => "->canEdit",
-		"edit"         => "->canEdit",
-		"delete"       => "->canEdit",
-		"saveBoxWidth" => "->canEdit",
-		"saveBoxOrder" => "->canEdit"
-	);
-
-	/**
-	 * returns if edit is on
-	 */
-	public function canEdit()
-	{
-
-		$data = DataObject::get_by_id("pages", $this->getParam("pid"));
-		if ($data && $data->can("Write")) {
-			return true;
-		}
-
-		return Permission::check("PAGES_WRITE");
-	}
-
-	/**
-	 * renders boxes
-	 *
-	 * @name renderBoxes
-	 * @access public
-	 * @param string - id
-	 */
-	public static function renderBoxes($id, $count = null)
-	{
-		$data = DataObject::get("boxes", array("seiteid" => $id));
-
-		return gObject::instance("boxesController")->setModelInst($data)->render($id, $count);
-	}
-
-	/**
-	 * edit-functionallity
-	 */
-	public function edit()
-	{
-		Core::setTitle(lang("edit"));
-
-		return parent::Edit();
-	}
-
-	/**
-	 * add-functionality
-	 */
-	public function add()
-	{
-		$boxes = new Boxes(array(
-			"seiteid" => $this->getParam("pid")
-		));
-
-		return $this->form("add", $boxes);
-	}
-
-	/**
-	 * saves box width
-	 */
-	public function saveBoxWidth()
-	{
-		if (isset($this->request->post_params["width"])) {
-			$data = DataObject::get_by_id("boxes", $this->getParam("id"));
-			if ($data) {
-				$data->width = $this->request->post_params["width"];
-				$data->writeToDB();
-
-				// TODO: Find better way
-				return new JSONResponseBody("ok");
-			}
-		}
-	}
-
-	/**
-	 * saves box orders
-	 *
-	 * @return JSONResponseBody
-	 */
-	public function saveBoxOrder()
-	{
-		if (isset($this->request->post_params["box_new"])) {
-			foreach ($this->request->post_params["box_new"] as $sort => $id) {
-				if ($data = DataObject::get_by_id("boxes", $id)) {
-					$data->sort = $sort;
-					$data->writeToDB();
-				}
-			}
-
-			return new JSONResponseBody("ok");
-		}
-	}
-
-	/**
-	 * renders boxes
-	 * @param string $pid
-	 * @param int|null $count
-	 * @return string
-	 * @throws Exception
-	 */
-	final public function render($pid = null, $count = 0)
-	{
-		if (isset($pid)) {
-			$data = DataObject::get("boxes", array("seiteid" => $pid));
-			$this->model_inst = $data;
-		}
-
-		$this->callExtending("beforeRenderBoxes", $pid);
-
-		$cacher = new Cacher("boxes2_" . $pid . "_" . Core::adminAsUser() . "_" . member::$id . "_" . $this->modelInst()->maxCount("last_modified"));
-		if ($cacher->checkValid()) {
-			return $this->modelInst()->customise(array("pageid" => $pid, "boxlimit" => (int)$count, "cache" => $cacher->getData()))->renderWith("boxes/boxes.html");
-		} else {
-			$output = $this->modelInst()->customise(array("pageid" => $pid, "boxlimit" => (int)$count))->renderWith("boxes/boxes.html");
-
-			if ($this->checkCachable()) {
-				$cacher->write($output, 86400);
-			}
-
-			return $output;
-		}
-	}
-
-	/**
-	 * checks if the current set of boxes is cachable.
-	 */
-	public function checkCachable()
-	{
-		/** @var Box $record */
-		foreach ($this->modelInst() as $record) {
-			if (!$record->isCacheable()) {
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	/**
-	 * hides the deleted object
-	 *
-	 * @name hideDeletedObject
-	 * @access public
-	 */
-	public function hideDeletedObject($response, $data)
-	{
-		$response->exec('$("#box_new_' . $data["id"] . '").hide(300, function(){
-			$(this).remove();
-			if($("#boxes_new_' . $data["seiteid"] . '").find(" > .box_new").length == 0) {
-				$("#boxes_new_' . $data["seiteid"] . '").html("' . convert::raw2js(BoxesController::RenderBoxes($data["seiteid"])) . '");
-			}
-		});');
-
-		return $response;
-	}
-
-	/**
-	 * index
-	 */
-	public function index()
-	{
-		return '<div class="error">' . lang("less_rights") . '</div>';
-	}
-
-	/**
-	 * saves via ajax
-	 *
-	 * @name ajaxSave
-	 * @access public
-	 */
-	public function ajaxSave($data, $response)
-	{
-		if ($this->save($data, 2) !== false) {
-			Notification::notify("boxes", lang("box_successful_saved", "The data was successfully written!"), lang("saved"));
-			//$response->exec(new Dialog(lang("successful_saved", "The data was successfully written!"), lang("okay"), 3));
-			$response->exec('$("#boxes_new_' . convert::raw2js($data["seiteid"]) . '").html("' . convert::raw2js(BoxesController::renderBoxes($data["seiteid"])) . '");');
-			$response->exec('dropdownDialog.get(ajax_button.parents(".dropdownDialog").attr("id")).hide();');
-
-			return $response->render();
-		} else {
-
-			$response->exec(new Dialog(lang("mysql_error"), lang("error"), 5));
-
-			return $response->render();
-		}
-	}
-
-	public function isCacheable()
-	{
-		return false;
-	}
 }
 
 
@@ -608,9 +381,6 @@ class boxpage extends Page {
 
 	/**
 	 * gets a object of this record with id and versionid set to 0
-	 *
-	 * @name duplicate
-	 * @access public
 	 */
 	public function duplicate()
 	{
@@ -678,9 +448,6 @@ class boxPageController extends PageController {
 
 	/**
 	 * generates a button switch-view
-	 *
-	 * @name frontedBar
-	 * @access public
 	 */
 	public function frontedBar()
 	{

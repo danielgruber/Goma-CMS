@@ -13,37 +13,26 @@
 class contentAdmin extends LeftAndMain {
     /**
      * the class from which the tree should be rendered
-     *
-     * @name tree_class
      */
     public $tree_class = "pages";
 
     /**
      * the text in the admin-panel
-     *
-     * @name text
      */
     public $text = '{$_lang_content}';
 
     /**
      * permissions you need to view the adminItem
-     *
-     * @name rights
      */
     public $rights = "ADMIN_CONTENT";
 
     /**
      * template of the admin-panel (default)
-     *
-     * @name template
-     * @access public
      */
     public $template = "admin/content_index.html";
 
     /**
      * models this admin-panel manages
-     *
-     * @name models
      */
     public $models = array("pages");
 
@@ -53,8 +42,6 @@ class contentAdmin extends LeftAndMain {
 
     /**
      * colors in the tree
-     *
-     * @name colors
      */
     public $colors = array(
         "withmainbar" => array(
@@ -69,8 +56,6 @@ class contentAdmin extends LeftAndMain {
 
     /**
      * extend actions
-     *
-     * @name allowed_actions
      */
     public $allowed_actions = array(
         "revert_changes", "unpublish", "preview"
@@ -88,8 +73,6 @@ class contentAdmin extends LeftAndMain {
     /**
      * gets the title of the root node
      *
-     * @name getRootNode
-     * @access public
      * @return string
      */
     protected function getRootNode()
@@ -172,56 +155,60 @@ class contentAdmin extends LeftAndMain {
      */
     public function revert_changes()
     {
-        if ((is_a($this->modelInst(), "DataObject") || $this->modelInst()->Count() == 1)) {
-            if ($this->confirm(lang("revert_changes_confirm", "Do you really want to revert changes and go back to the last published version?"))) {
-                $data = DataObject::get_one($this->modelInst()->classname, array("id" => $this->model_inst->id));
-                if ($data) {
-                    $data->writeToDB(false, false, 2, true);
-                    if ($this->request->is_ajax()) {
-                        $response = new AjaxResponse();
-                        Notification::notify("pages", lang("revert_changes_success", "The last version was recovered successfully."), lang("reverted"));
-                        $response->exec("reloadTree(function(){ LoadTreeItem('" . $data->class_name . "_" . $data->versionid . "'); });");
+        if($model = $this->getSingleModel()) {
+            return $this->confirmByForm(
+                lang("revert_changes_confirm", "Do you really want to revert changes and go back to the last published version?"),
+                function() {
+                    if($publishedData = DataObject::get_one($this->modelInst()->classname, array("id" => $this->model_inst->id))) {
+                        $publishedData->writeToDB(false, true, 2, true);
+                        if ($this->request->is_ajax()) {
+                            $response = new AjaxResponse();
+                            Notification::notify("pages", lang("revert_changes_success", "The last version was recovered successfully."), lang("reverted"));
+                            $response->exec("reloadTree(function(){ LoadTreeItem('" . $publishedData->class_name . "_" . $publishedData->versionid . "'); });");
 
-                        return $response;
-                    } else {
-                        addcontent::addSuccess(lang("revert_changes_success", "The last version was recovered successfully."));
-                        return $this->redirectBack();
+                            return $response;
+                        } else {
+                            addcontent::addSuccess(lang("revert_changes_success", "The last version was recovered successfully."));
+                        }
                     }
-
+                    return $this->redirectBack();
                 }
-            }
+            );
         }
     }
 
     /**
      * unpublishes the current version
      *
-     * @name unpublish
-     * @access public
      * @return AjaxResponse
      */
     public function unpublish()
     {
-        if ((is_a($this->modelInst(), "DataObject") || $this->modelInst()->Count() == 1) && $this->modelInst()->unpublish()) {
-            if (Core::is_ajax()) {
-                $response = new AjaxResponse();
-                Notification::notify("pages", lang("unpublish_success", "The site was successfully unpublished."), lang("unpublished"));
-                $response->exec("reloadTree(); $('.form_field_unpublish').remove();");
+        if($model = $this->getSingleModel()) {
+            try {
+                $model->unpublish();
+                if (Core::is_ajax()) {
+                    $response = new AjaxResponse();
+                    Notification::notify("pages", lang("unpublish_success", "The site was successfully unpublished."), lang("unpublished"));
+                    $response->exec("reloadTree(); $('.form_field_unpublish').remove();");
 
-                return $response;
-            } else {
-                AddContent::addSuccess(lang("unpublish_success", "The site was successfully unpublished."));
-                return $this->redirectBack();
+                    return $response;
+                } else {
+                    AddContent::addSuccess(lang("unpublish_success", "The site was successfully unpublished."));
+
+                    return $this->redirectBack();
+                }
+            } catch(Exception $e) {
+                if (Core::is_ajax()) {
+                    $response = new AjaxResponse();
+                    $response->exec('alert(' . $e->getMessage() . ');');
+
+                    return $response;
+                } else {
+                    AddContent::addError($e->getMessage());
+                    return $this->redirectBack();
+                }
             }
-        }
-        if (Core::is_ajax()) {
-            $response = new AjaxResponse();
-            $response->exec('alert(' . var_export(lang("less_rights"), true) . ');');
-
-            return $response;
-        } else {
-            AddContent::addError(lang("less_rights"));
-            return $this->redirectBack();
         }
     }
 
@@ -292,7 +279,6 @@ class contentAdmin extends LeftAndMain {
      */
     protected function getFormForAdd($model)
     {
-
         $controller = clone $this;
         $controller->selectModel($model, true);
         $form = new Form($controller, "add_page");
@@ -389,10 +375,9 @@ class contentAdmin extends LeftAndMain {
     /**
      * saves data for editing a site via ajax
      *
-     * @name ajaxSave
-     * @access public
-     * @param array - data
-     * @param object - response
+     * @param array $data
+     * @param FormAjaxResponse $response
+     * @return FormAjaxResponse
      */
     public function ajaxSaveGenerate($data, $response)
     {

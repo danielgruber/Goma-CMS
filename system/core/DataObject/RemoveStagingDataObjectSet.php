@@ -8,6 +8,7 @@ defined("IN_GOMA") OR die();
  *
  * @author Goma-Team
  * @copyright 2016 Goma-Team
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  *
  * @version 1.0
  */
@@ -112,16 +113,4 @@ abstract class RemoveStagingDataObjectSet extends DataObjectSet {
      * @return array
      */
     abstract protected function argumentFilterForHidingRemovedStageForQuery($filter);
-
-    /**
-     * @return bool
-     */
-    abstract public function canSortSet();
-
-    /**
-     * @param DataObject $item
-     * @param int $position
-     * @return mixed
-     */
-    //abstract public function move($item, $position);
 }

@@ -48,4 +48,37 @@ class ControllerTest extends GomaUnitTest {
 		$this->assertEqual($model->blah, 2);
 		$this->assertEqual($model->blub, "test");
 	}
+
+	/**
+	 *
+	 */
+	public function testModelInst() {
+		$controller = new Controller();
+		$controller->model = "user";
+
+		$this->assertIsA($controller->modelInst(), "DataObjectSet");
+		$this->assertEqual($controller->modelInst()->DataClass(), "user");
+		$this->assertNull($this->unitTestGetSingleModel($controller));
+
+		$controller->setRequest($request = new Request("get", "test"));
+		$request->params["id"] = DataObject::get_one("user")->id;
+		$this->assertIsA($this->unitTestGetSingleModel($controller), "user");
+		$this->assertEqual($this->unitTestGetSingleModel($controller), DataObject::get_one("user"));
+
+		$this->assertIsA($controller->modelInst("admin"), "admin");
+		$this->assertEqual($controller->modelInst()->DataClass(), "admin");
+
+		$controller->model = "admin";
+		$controller->model_inst = null;
+
+		$this->assertIsA($this->unitTestGetSingleModel($controller), "admin");
+		$this->assertIsA($controller->modelInst("admin"), "admin");
+		$this->assertEqual($controller->modelInst()->DataClass(), "admin");
+	}
+
+	public function unitTestGetSingleModel($controller) {
+		$reflectionMethod = new ReflectionMethod("controller", "getSingleModel");
+		$reflectionMethod->setAccessible(true);
+		return $reflectionMethod->invoke($controller);
+	}
 }

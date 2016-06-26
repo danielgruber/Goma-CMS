@@ -2,21 +2,17 @@
 defined("IN_GOMA") OR die();
 
 /**
- * Describe your class
+ * Sortable Set.
  *
- * @package Goma
+ * @package Goma-Team
  *
- * @author D
- * @copyright 2016 D
+ * @author Goma-Team
+ * @copyright 2016 Goma-Team
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  *
  * @version 1.0
  */
-interface SortableDataObjectSet {
-    /**
-     * @return bool
-     */
-    public function canSortSet();
-
+interface SortableDataObjectSet extends IDataSet {
     /**
      * moves item to given position.
      *

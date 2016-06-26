@@ -297,18 +297,17 @@ class LeftAndMain extends AdminItem {
 	 * @return FormAjaxResponse
 	 */
 	public function ajaxSave($data, $response, $form = null, $controller = null, $forceInsert = false, $forceWrite = false, $overrideCreated = false) {
-		return $this->confirmByForm("Should i?", function() use($data, $response, $form, $controller, $forceInsert, $forceWrite, $overrideCreated) {
-			if($model = $this->save($data, 1, $forceInsert, $forceWrite, $overrideCreated)) {
-				// notify the user
-				Notification::notify($model->classname, lang("SUCCESSFUL_SAVED", "The data was successfully written!"), lang("SAVED"));
+		try {
+			$model = $this->save($data, 1, $forceInsert, $forceWrite, $overrideCreated);
+			// notify the user
+			Notification::notify($model->classname, lang("SUCCESSFUL_SAVED", "The data was successfully written!"), lang("SAVED"));
 
-				$response->exec("var href = '".BASE_URI . $this->adminURI()."record/".$model->id."/edit".URLEND."'; if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) { if(location.href == href) location.reload(); else location.href = href; } else { reloadTree(function(){ goma.ui.ajax(undefined, {url: href, showLoading: true, pushToHistory: true}); }, ".var_export($model["id"], true)."); }");
-				return $response;
-			} else {
-				$response->exec('alert('.var_export(lang("less_rights"), true).');');
-				return $response;
-			}
-		});
+			$response->exec("var href = '".BASE_URI . $this->adminURI()."record/".$model->id."/edit".URLEND."'; if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) { if(location.href == href) location.reload(); else location.href = href; } else { reloadTree(function(){ goma.ui.ajax(undefined, {url: href, showLoading: true, pushToHistory: true}); }, ".var_export($model["id"], true)."); }");
+			return $response;
+		} catch(Exception $e) {
+			$response->exec('alert('.var_export($e->getMessage(), true).');');
+			return $response;
+		}
 	}
 
 

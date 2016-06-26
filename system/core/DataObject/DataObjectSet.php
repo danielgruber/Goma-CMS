@@ -275,6 +275,7 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 
 	/**
 	 * sets the data and datacache of this set
+	 * @deprecated
 	 */
 	public function setData($data = array()) {
 		Core::Deprecate("2.0", "setFetchMode");
@@ -308,6 +309,7 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 		if($fetchMode == self::FETCH_MODE_EDIT || $fetchMode == self::FETCH_MODE_CREATE_NEW) {
 			$this->fetchMode = $fetchMode;
 
+			$this->items = $this->staging->ToArray();
 			if($fetchMode == self::FETCH_MODE_CREATE_NEW) {
 				$this->count = $this->staging->count();
 			}
@@ -477,7 +479,7 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 			$this->count = (int) $this->dbDataSource()->getAggregate(
 				$this->version, "count", "*", false,
 				$this->getFilterForQuery(), array(), null,
-				$this->getJoinForQuery(), $this->search);
+				$this->getJoinForQuery(), $this->search) + $this->staging->count();
 		}
 
 		return $this->count;
@@ -982,7 +984,7 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 	 * @return $this
 	 */
 	public function push($record, $write = false) {
-		if(!gObject::method_exists($record, "writeToDB")) {
+		if(!gObject::method_exists($record, "writeToDBInRepo")) {
 			throw new InvalidArgumentException("DataObjectSet::push requires DataObject as first argument.");
 		}
 
@@ -1130,19 +1132,7 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 			}
 
 			try {
-				if($snap_priority > 1) {
-					if($forceInsert) {
-						$repository->add($record, $forceWrite);
-					} else {
-						$repository->write($record, $forceWrite);
-					}
-				} else {
-					if($forceInsert) {
-						$repository->addState($record, $forceWrite);
-					} else {
-						$repository->writeState($record, $forceWrite);
-					}
-				}
+				$record->writeToDBInRepo($repository, $forceInsert, $forceWrite, $snap_priority);
 
 				$this->staging->remove($record);
 			} catch(Exception $e) {
@@ -1152,12 +1142,25 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 		}
 
 		$this->clearCache();
+		$this->fetchMode = DataObjectSet::FETCH_MODE_EDIT;
 
 		if(count($exceptions) > 0) {
 			throw new DataObjectSetCommitException($exceptions, $errorRecords, count($errorRecords) . " could not be written.");
 		}
 
 		$this->dbDataSource()->clearCache();
+	}
+
+	/**
+	 * @deprecated
+	 * @param bool $forceInsert
+	 * @param bool $forceWrite
+	 * @param int $snap_priority
+	 * @throws DataObjectSetCommitException
+	 */
+	public function write($forceInsert = false, $forceWrite = false, $snap_priority = 2) {
+		Core::Deprecate(2.0, "commitStaging");
+		$this->commitStaging($forceInsert, $forceWrite, $snap_priority);
 	}
 
 	/**
@@ -1503,7 +1506,7 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 	 */
 	public function find($name, $value, $caseInsensitive = false) {
 		if(($this->items && $this->page === null) || $this->fetchMode == self::FETCH_MODE_CREATE_NEW) {
-			foreach($this->items as $item) {
+			foreach((array) $this->items as $item) {
 				if($caseInsensitive && strtolower(self::getItemProp($item, $name)) == strtolower($value)) {
 					return $item;
 				} else if(self::getItemProp($item, $name) == $value) {

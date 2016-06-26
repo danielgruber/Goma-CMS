@@ -800,7 +800,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
      */
     public function writeToDB($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true, $silent = false, $overrideCreated = false)
     {
-        $this->writeToDBInRepo(Core::repository(), $forceInsert, $forceWrite, $snap_priority, $forcePublish, $history, $silent, $overrideCreated);
+        $this->writeToDBInRepo(Core::repository(), $forceInsert, $forceWrite, $snap_priority, $history, $silent, $overrideCreated);
     }
 
     /**
@@ -810,12 +810,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
      * @param bool $forceInsert
      * @param bool $forceWrite
      * @param int $snap_priority
-     * @param bool $forcePublish
      * @param bool $history
      * @param bool $silent
      * @param bool $overrideCreated
      */
-    public function writeToDBInRepo($repository, $forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true, $silent = false, $overrideCreated = false) {
+    public function writeToDBInRepo($repository, $forceInsert = false, $forceWrite = false, $snap_priority = 2, $history = true, $silent = false, $overrideCreated = false) {
         if(!$history) {
             HistoryWriter::disableHistory();
         }
@@ -1121,8 +1120,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
     public function isDeleted() {
         return (!$this->isPublished() &&
             (   !isset($this->data["publishedid"]) ||
-                $this->data["publishedid"] == 0 ||
-                $this->data["stateid"] == 0));
+                $this->data["publishedid"] == 0) &&
+                $this->stateid == 0);
     }
 
     //!Forms

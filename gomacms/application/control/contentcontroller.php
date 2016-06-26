@@ -211,7 +211,7 @@ class ContentController extends FrontedController
             $content = is_a($content, "GomaResponse") ? $content->getBody() : $content;
 
             $contentmd5 = md5($content);
-            $cache = new Cacher("uploadTracking_" . $contentmd5);
+            $cache = new Cacher("uploadTracking_" . $contentmd5 . "_" . Director::$requestController->modelInst()->versionid);
             if ($cache->checkValid()) {
                 return true;
             } else {
@@ -225,12 +225,15 @@ class ContentController extends FrontedController
                     if ($cacher->checkValid()) {
                         return true;
                     } else {
-                        Director::$requestController->modelInst()->UploadTracking()->setData(array());
+                        /** @var ManyMany_DataObjectSet $uploadTracking */
+                        $uploadTracking = Director::$requestController->modelInst()->UploadTracking();
+                        /** @var Uploads $upload */
                         foreach ($uploadObjects as $upload) {
-                            Director::$requestController->modelInst()->UploadTracking()->push($upload);
+                            if(!$uploadTracking->find("versionid", $upload->versionid)) {
+                                $uploadTracking->push($upload);
+                            }
                         }
-
-                        Director::$requestController->modelInst()->UploadTracking()->write(false, true);
+                        $uploadTracking->commitStaging(false, true);
                         $cacher->write(1, 14 * 86400);
                     }
                 }
@@ -251,7 +254,6 @@ class ContentController extends FrontedController
      * @return array
      */
     protected static function fetchUploadObjects($content, &$uploadHash, &$lowestmtime) {
-
         $uploadHash = "";
         $lowestmtime = NOW;
         $uploadObjects = array();

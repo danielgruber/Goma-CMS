@@ -113,6 +113,8 @@ class DataObjectSetTests extends GomaUnitTest
         $object = new HasMany_DataObjectSet("user");
         $object->setFetchMode(DataObjectSet::FETCH_MODE_CREATE_NEW);
         $this->assertEqual($object->count(), 0);
+        $this->assertEqual($object->first(), null);
+        $this->assertEqual($object->last(), null);
     }
 
     public function testDataObject() {
@@ -508,6 +510,54 @@ class DataObjectSetTests extends GomaUnitTest
         $this->assertEqual($set->find("name", "JULIAN", false), null);
         $this->assertEqual($set->find("name", "JULIAN", true), $this->julian);
     }
+
+    public function findTestNew() {
+        $set = new DataObjectSet("DumpDBElementPerson");
+        $set->setVersion(DataObject::VERSION_PUBLISHED);
+
+        /** @var MockIDataObjectSetDataSource $source */
+        $source = $set->getDbDataSource();
+
+        $source->records = array(
+            $this->julian,
+            $this->daniel,
+            $this->janine,
+            $this->kathi
+        );
+
+        $set->setFetchMode(DataObjectSet::FETCH_MODE_CREATE_NEW);
+        $this->assertEqual($set->ToArray(), array());
+
+        $this->assertEqual($set->find("name", "julian"), null);
+        $set->forceData();
+        $this->assertEqual($set->find("name", "julian"), null);
+
+        $set->add($this->julian);
+        $this->assertEqual($set->find("name", "julian"), $this->julian);
+        $set->forceData();
+        $this->assertEqual($set->find("name", "julian"), $this->julian);
+        $set->add($this->janine);
+
+        $this->assertEqual($set->find("age", "19"), $this->janine);
+        $this->assertEqual($set->find("name", "JULIAN", false), null);
+        $this->assertEqual($set->find("name", "JULIAN", true), $this->julian);
+    }
+
+    public function testCommitStaging() {
+        $set = new DataObjectSet("DumpDBElementPerson");
+        $set->setFetchMode(DataObjectSet::FETCH_MODE_CREATE_NEW);
+
+        $set->commitStaging();
+        $this->assertEqual($set->getFetchMode(), DataObjectSet::FETCH_MODE_EDIT);
+
+        $set->add($this->janine);
+        try {
+            $set->commitStaging();
+            $this->assertEqual(true, false);
+        } catch(Exception $e) {
+            $this->assertEqual($e->getMessage(), "1 could not be written.");
+        }
+    }
 }
 
 class MockIDataObjectSetDataSource implements IDataObjectSetDataSource {
@@ -757,7 +807,7 @@ class DumpDBElementPerson extends DataObject {
         ));
     }
 
-    public function writeToDB($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true, $silent = false, $overrideCreated = false)
+    public function writeToDBInRepo($repository, $forceInsert = false, $forceWrite = false, $snap_priority = 2, $history = true, $silent = false, $overrideCreated = false)
     {
         throw new Exception("Should not be written.");
     }

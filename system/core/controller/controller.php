@@ -190,28 +190,40 @@ class Controller extends RequestHandler
     {
         if (is_object($model) && is_a($model, "ViewAccessableData")) {
             $this->model_inst = $model;
-            $this->model = $model->dataClass;
-        } else if (isset($model) && ClassInfo::exists($model)) {
-            $this->model = $model;
+            $this->model = $model->DataClass();
+            return $this->model_inst;
         }
 
-        if (!is_object($this->model_inst) || (isset($model) && ClassInfo::exists($model))) {
-            if (isset($this->model)) {
-                $this->model_inst = gObject::instance($this->model);
+        if(!$this->createDefaultSetFromModel($model)) {
+            if(!is_object($this->model_inst)) {
+                $this->createDefaultSetFromModel($this->model) ||
+                $this->createDefaultSetFromModel(substr($this->classname, 0, -10)) ||
+                $this->createDefaultSetFromModel(substr($this->classname, 0, -11));
             } else {
-                if (ClassInfo::exists($model = substr($this->classname, 0, -10))) {
-                    $this->model = $model;
-                    $this->model_inst = gObject::instance($this->model);
-                } else if (ClassInfo::exists($model = substr($this->classname, 0, -11))) {
-                    $this->model = $model;
-                    $this->model_inst = gObject::instance($this->model);
-                }
+                $this->model = $this->model_inst->DataClass();
             }
-        } else if (!isset($this->model)) {
-            $this->model = $this->model_inst->DataClass();
         }
 
         return (is_object($this->model_inst)) ? $this->model_inst : new ViewAccessAbleData();
+    }
+
+    /**
+     * @param string $model
+     * @return bool
+     */
+    public function createDefaultSetFromModel($model) {
+        if(isset($model) && ClassInfo::exists($model)) {
+            if(is_subclass_of($model, "IDataObjectSetDataSource")) {
+                $this->model_inst = DataObject::get($model);
+                $this->model = $model;
+                return true;
+            } else if(is_subclass_of($model, "ViewAccessableData")) {
+                $this->model_inst = gObject::instance($model);
+                $this->model = $model;
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

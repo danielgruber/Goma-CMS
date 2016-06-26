@@ -102,4 +102,40 @@ class contentControllerTest extends GomaUnitTest
         $chain->add("1234");
         $this->assertNoPattern("/prompt_text/", $controller->handleRequest($request));
     }
+
+    public function testTrackLinking() {
+        $upload = Uploads::addFile("img.jpg", "system/tests/resources/img_1000_480.png", "test.cms");
+        $page = new Page(array(
+            "data" => '<a href="'.$upload->path.'" lala="pu">Blub 123 haha</a>'
+        ));
+        $page->writeToDB(false, true);
+
+        Director::$requestController = new ContentController();
+        Director::$requestController->setModelInst($page);
+
+        ContentController::outputHook($page->data);
+
+        $this->assertEqual($page->UploadTracking()->count(), 1);
+        $this->assertEqual($page->UploadTracking()->first()->id, $upload->id);
+
+        $page->remove(true);
+    }
+
+    public function testTrackImage() {
+        $upload = Uploads::addFile("img.jpg", "system/tests/resources/img_1000_480.png", "test.cms");
+        $page = new Page(array(
+            "data" => '<img src="'.$upload->path.'" lala="pu" />'
+        ));
+        $page->writeToDB(false, true);
+
+        Director::$requestController = new ContentController();
+        Director::$requestController->setModelInst($page);
+
+        ContentController::outputHook($page->data);
+
+        $this->assertEqual($page->UploadTracking()->count(), 1);
+        $this->assertEqual($page->UploadTracking()->first()->id, $upload->id);
+
+        $page->remove(true);
+    }
 }

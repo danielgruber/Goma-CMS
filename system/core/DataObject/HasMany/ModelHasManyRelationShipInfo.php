@@ -6,6 +6,7 @@ defined("IN_GOMA") OR die();
  *
  * @package Goma
  *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author Goma Team
  * @copyright 2016 Goma Team
  *

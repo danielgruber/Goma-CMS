@@ -10,7 +10,8 @@
  *
  * @version     1.2
  */
-class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
+// TODO: Improve stuff with publishedids and relationship-data.
+class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet implements SortableDataObjectSet {
 
     const MANIPULATION_DELETE_SPECIFIC = "many_many_deleterecords";
     const MANIPULATION_DELETE_EXISTING = "many_many_deleteexisting";
@@ -47,6 +48,11 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
      * update extra fields stage.
      */
     protected $updateExtraFieldsStage;
+
+    /**
+     * sort-information.
+     */
+    protected $sortInformation = array();
 
     /**
      * ManyMany_DataObjectSet constructor.
@@ -372,13 +378,15 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
         /** @var DataObject $item */
         $item = parent::getConverted($item);
 
-        if(isset($this->relationShip)) {
-            $item->extendedCasting = array_merge($item->extendedCasting, $this->relationShip->getExtraFields());
-        }
+        if($item) {
+            if (isset($this->relationShip)) {
+                $item->extendedCasting = array_merge($item->extendedCasting, $this->relationShip->getExtraFields());
+            }
 
-        if(isset($this->manyManyData) && isset($this->manyManyData[$item->versionid])) {
-            foreach($this->manyManyData[$item->versionid] as $key => $data) {
-                $item->setField($key, $data);
+            if (isset($this->manyManyData) && isset($this->manyManyData[$item->versionid])) {
+                foreach ($this->manyManyData[$item->versionid] as $key => $data) {
+                    $item->setField($key, $data);
+                }
             }
         }
 
@@ -558,7 +566,10 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
 
         $baseTable = $this->relationShip->getTargetBaseTableName();
         if(isset($this->manyManyData)) {
-            $filter[] = $baseTable . ".id IN ('".implode("','", array_keys($this->manyManyData))."') ";
+            $recordidQuery = new SelectQuery($baseTable, "", array(
+               "versionid" => array_keys($this->manyManyData)
+            ));
+            $filter[] = $baseTable . ".recordid IN (".$recordidQuery->build("distinct recordid").") ";
         } else {
             $filter[] = " {$baseTable}.recordid IN (".$this->getRecordIdQuery()->build("distinct recordid").") ";
         }
@@ -636,14 +647,6 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
     }
 
     /**
-     * @return bool
-     */
-    public function canSortSet()
-    {
-        return true;
-    }
-
-    /**
      * checks if we can sort by a specefied field
      *
      * @param string $field
@@ -652,5 +655,37 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
     public function canSortBy($field) {
         $extra = $this->relationShip ? $this->relationShip->getExtraFields() : array();
         return isset($extra[strtolower(trim($field))]) || parent::canSortBy($field);
+    }
+
+    /**
+     * moves item to given position.
+     *
+     * @param DataObject $item
+     * @param int $position
+     * @return mixed
+     */
+    public function move($item, $position)
+    {
+        // TODO: Implement move() method.
+    }
+
+    /**
+     * sets sort by array of ids.
+     *
+     * @param int []
+     */
+    public function setSortByIdArray($ids)
+    {
+        // TODO: Implement setSortByIdArray() method.
+    }
+
+    /**
+     * uasort.
+     *
+     * @param Callable
+     */
+    public function sortCallback($callback)
+    {
+        // TODO: Implement sortCallback() method.
     }
 }

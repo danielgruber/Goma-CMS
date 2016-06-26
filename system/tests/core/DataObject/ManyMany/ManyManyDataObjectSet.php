@@ -50,4 +50,9 @@ class ManyManyDataObjectSet extends GomaUnitTest implements TestAble {
         $set->filter("name = 'blub'");
         $this->assertEqual($set->getFilterForQuery(), array("name = 'blub'", $relationShip->getTargetBaseTableName() . ".id IN ('".implode("','", array(1, 2, 3))."') "));
     }
+
+    public function testEmpty() {
+        $set = new ManyMany_DataObjectSet();
+        $set->setFetchMode(DataObjectSet::FETCH_MODE_CREATE_NEW);
+    }
 }

@@ -22,7 +22,8 @@
  * @property string filename
  * @property int parentid
  *
- * @method HasMany_DataObjectSet children($filter = null)
+ * @method ManyMany_DataObjectSet UploadTracking($filter = null, $sort = null)
+ * @method HasMany_DataObjectSet children($filter = null, $sort = null)
  */
 
 class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
@@ -113,8 +114,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
      * a page has a parent page
      * a page has permissions
      *
-     *@name has_one
-     *@var array
+     * @var array
      */
     static $has_one = array(	"read_permission" 		=> "Permission",
                                 "edit_permission"		=> "Permission",
@@ -123,9 +123,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
 
     /**
      * link-tracking
-     *
-     *@name many_many
-     *@access public
      */
     static $many_many = array(
         "UploadTracking"	=> "Uploads"
@@ -582,14 +579,15 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
      * @throws FormInvalidDataException
      */
     public function onBeforeWrite($modelWriter) {
-
         parent::onBeforeWrite($modelWriter);
 
         $this->data["uploadtrackingids"] = array();
 
         if($this->sort == 10000) {
-            $this->data["sort"] = DataObject::get("pages", array("parentid" => $this->data["parentid"]))->last()->sort;
+            $this->data["sort"] = DataObject::get("pages", array("parentid" => $this->parentid))->last()->sort;
         }
+
+        $this->UploadTracking()->setFetchMode(DataObjectSet::FETCH_MODE_CREATE_NEW);
 
         $this->_validatePageFileName();
         $this->_validatePageType();
