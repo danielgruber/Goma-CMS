@@ -174,10 +174,13 @@ class ObjectRadioButton extends RadioButton  {
         $nodes = $data->getExtra("radioButtons");
         foreach($nodes as $node) {
             if (is_array($node["title"]) && isset($node["title"][1])) {
-                $field = $this->form()->getField($node["title"][1]);
-                $node["title"] = $node["title"][0];
+                if($field = $this->form()->getField($node["title"][1])) {
+                    $node["title"] = $node["title"][0];
 
-                $data->addChild($field->exportBasicInfo($fieldErrors));
+                    $data->addChild($field->exportBasicInfo($fieldErrors));
+                } else {
+                    throw new LogicException("Could not find Field " . $node["title"][1]);
+                }
             }
         }
 

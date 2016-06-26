@@ -8,22 +8,17 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.1.1
+ * @version     1.2
  */
 class FormAction extends FormField implements FormActionHandler
 {
     /**
      * the submission-method on the controller for this form-action
-     *
-     * @name submit
-     * @access protected
      */
     protected $submit;
 
     /**
      * defines that these fields doesn't have a value
-     *
-     * @name hasNoValue
      */
     public $hasNoValue = true;
 
@@ -38,8 +33,6 @@ class FormAction extends FormField implements FormActionHandler
     protected $submitWithoutData = false;
 
     /**
-     * @name __construct
-     * @access public
      * @param string - name
      * @param string - title
      * @param string - optional submission
@@ -68,8 +61,6 @@ class FormAction extends FormField implements FormActionHandler
     /**
      * generates the node
      *
-     * @name createNode
-     * @access public
      * @return HTMLNode
      */
     public function createNode()
@@ -130,10 +121,12 @@ class FormAction extends FormField implements FormActionHandler
     /**
      * sets the submit-method
      * @param string|array $submit
+     * @return $this
      */
     public function setSubmit($submit)
     {
         $this->submit = $submit;
+        return $this;
     }
 
     /**
@@ -152,24 +145,31 @@ class FormAction extends FormField implements FormActionHandler
 
     /**
      * adds a class to the input
-     *
-     * @name addClass
-     * @access public
+     * @param string $class
+     * @return $this
      */
     public function addClass($class)
     {
         $this->input->addClass($class);
+        return $this;
     }
 
     /**
      * removes a class from the input
-     *
-     * @name removeClass
-     * @access public
+     * @param string $class
+     * @return $this
      */
     public function removeClass($class)
     {
         $this->input->removeClass($class);
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getClasses() {
+        return explode(" ", $this->input->attr("classes"));
     }
 
     /**

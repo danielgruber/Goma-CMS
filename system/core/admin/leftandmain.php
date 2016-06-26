@@ -10,14 +10,14 @@
  *
  * @version     2.2.8
  */
- 
+
 class LeftAndMain extends AdminItem {
-	
+
 	/**
 	 * the base template of the view
 	*/
 	public $baseTemplate = "admin/leftandmain.html";
-	
+
 	/**
 	 * defines the url-handlers
 	*/
@@ -28,29 +28,29 @@ class LeftAndMain extends AdminItem {
 		"add/\$model"					=> "cms_add",
 		"versions"						=> "versions"
 	);
-	
+
 	/**
 	 * defines the allowed actions
 	*/
 	public $allowed_actions = array(
 		"cms_edit", "cms_add", "cms_del", "updateTree", "savesort", "versions"
 	);
-	
+
 	/**
 	 * this var defines the tree-class
 	*/
 	public $tree_class = "";
-	
+
 	/**
 	 * marked node
 	*/
 	public $marked = 0;
-	
+
 	/**
 	 * sort-field
 	*/
 	protected $sort_field;
-	
+
 	/**
 	 * render-class.
 	*/
@@ -90,10 +90,10 @@ class LeftAndMain extends AdminItem {
 		if($this->request->is_ajax()) {
 			return $content;
 		}
-		
+
 		// add resources
 		Resources::add("system/core/admin/leftandmain.js", "js", "tpl");
-		
+
 		if(isset($this->sort_field)) {
 			Resources::addData("var LaMsort = true;");
 		} else {
@@ -101,7 +101,7 @@ class LeftAndMain extends AdminItem {
 		}
 
 		Resources::addData("var adminURI = '".$this->adminURI()."'; var marked_node = '".$this->marked."';");
-		
+
 		$data = $this->ModelInst();
 
 		if(is_array($content)) {
@@ -120,24 +120,24 @@ class LeftAndMain extends AdminItem {
 				"TREEOPTIONS" => $this->generateTreeOptions()
 			)
 		)->renderWith($this->baseTemplate);
-		
+
 		// parent-serve
 		return parent::serve($output);
 	}
-	
+
 	/**
 	 * generates a set of options as HTML, that can be used to have more than just a search
 	 * to customise the tree. For example a multilingual-plugin should add a select-option
-	 * to filter by language.	
+	 * to filter by language.
 	*/
 	public function generateTreeOptions() {
 		$tree_class = $this->tree_class;
 		if($tree_class == "") {
 			throw new LogicException("Failed to load Tree-Class. Please define \$tree_class in ".$this->classname);
 		}
-		
+
 		$html = new HTMLNode("div");
-		
+
 		if(gObject::method_exists($tree_class, "generateTreeOptions")) {
 			call_user_func_array(array($tree_class, "generateTreeOptions"), array($html, $this));
 		}
@@ -145,14 +145,14 @@ class LeftAndMain extends AdminItem {
 		/** @var gObject $treeInstance */
 		$treeInstance = new $tree_class;
 		$treeInstance->callExtending("generateTreeOptions", $html, $this);
-		
+
 		if($html->children()) {
 			return $html->render();
 		}
-		
+
 		return "";
 	}
-	
+
 	/**
 	 * generates the tree-links.
 	*/
@@ -173,7 +173,7 @@ class LeftAndMain extends AdminItem {
 	public function generateContextMenu($child) {
 		$data = array();
 		if($child->treeclass) {
-			
+
 			$data = array(
 				array(
 					"icon"		=> "images/16x16/edit.png",
@@ -187,9 +187,9 @@ class LeftAndMain extends AdminItem {
 				)
 			);
 		}
-		
+
 		$this->callExtending("generateContextMenu", $data);
-		
+
 		return $data;
 	}
 
@@ -234,18 +234,18 @@ class LeftAndMain extends AdminItem {
 		if($tree_class == "") {
 			throw new LogicException("Failed to load Tree-Class. Please define \$tree_class in ".$this->classname);
 		}
-		
+
 		if(!gObject::method_exists($tree_class, "build_tree")) {
 			throw new LogicException("Tree-Class does not have a method build_tree. Maybe you have to update your version of goma?");
 		}
-		
+
 		$options = array("version" => "state", "search" => $search, "filter" => array());
-			
+
 		// give the tree-class the ability to modify the options.
 		if(gObject::method_exists($tree_class, "argumentTree")) {
 			$options = $this->callArgumentTree($tree_class, $options);
 		}
-		
+
 		// iterate through extensions to give them the ability to change the options.
 		$treeClassInstance = new $tree_class;
 		foreach($treeClassInstance->getextensions() as $ext)
@@ -255,7 +255,7 @@ class LeftAndMain extends AdminItem {
 			}
 		}
 		unset($treeClassInstance);
-		
+
 		// generate tree
 		$tree = call_user_func_array(array($tree_class, "build_tree"), array(0, $options));
 		/** @var TreeRenderer $treeRenderer */
@@ -263,14 +263,14 @@ class LeftAndMain extends AdminItem {
 		$treeRenderer->setLinkCallback(array($this, "generateTreeLink"));
 		$treeRenderer->setActionCallback(array($this, "generateContextMenu"));
 		$treeRenderer->mark($this->getParam("id"));
-		
+
 		// check for logical opened tree-items.
 		if(isset($this->getRequest()->get_params["edit_id"])) {
 			$this->setExpanded($treeRenderer, $this->getRequest()->get_params["edit_id"]);
 		} else if($this->getParam("id")) {
 			$this->setExpanded($treeRenderer, $this->getParam("id"));
 		}
-		
+
 		return $treeRenderer->render(true);
 	}
 	/**
@@ -284,9 +284,9 @@ class LeftAndMain extends AdminItem {
 			GomaResponseBody::create($this->createTree($search))->setParseHTML(false)
 		);
 	}
-	
+
 	/**
-	 * Actions of editing 
+	 * Actions of editing
 	*/
 
 	/**
@@ -297,19 +297,21 @@ class LeftAndMain extends AdminItem {
 	 * @return FormAjaxResponse
 	 */
 	public function ajaxSave($data, $response, $form = null, $controller = null, $forceInsert = false, $forceWrite = false, $overrideCreated = false) {
-		if($model = $this->save($data, 1, $forceInsert, $forceWrite, $overrideCreated)) {
-			// notify the user
-			Notification::notify($model->classname, lang("SUCCESSFUL_SAVED", "The data was successfully written!"), lang("SAVED"));
-			
-			$response->exec("var href = '".BASE_URI . $this->adminURI()."record/".$model->id."/edit".URLEND."'; if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) { if(location.href == href) location.reload(); else location.href = href; } else { reloadTree(function(){ goma.ui.ajax(undefined, {url: href, pushToHistory: true}); }, ".var_export($model["id"], true)."); }");
-			return $response;
-		} else {
-			$response->exec('alert('.var_export(lang("less_rights"), true).');');
-			return $response;
-		}
+		return $this->confirmByForm("Should i?", function() use($data, $response, $form, $controller, $forceInsert, $forceWrite, $overrideCreated) {
+			if($model = $this->save($data, 1, $forceInsert, $forceWrite, $overrideCreated)) {
+				// notify the user
+				Notification::notify($model->classname, lang("SUCCESSFUL_SAVED", "The data was successfully written!"), lang("SAVED"));
+
+				$response->exec("var href = '".BASE_URI . $this->adminURI()."record/".$model->id."/edit".URLEND."'; if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) { if(location.href == href) location.reload(); else location.href = href; } else { reloadTree(function(){ goma.ui.ajax(undefined, {url: href, showLoading: true, pushToHistory: true}); }, ".var_export($model["id"], true)."); }");
+				return $response;
+			} else {
+				$response->exec('alert('.var_export(lang("less_rights"), true).');');
+				return $response;
+			}
+		});
 	}
-	
-	
+
+
 	/**
 	 * saves sort
 	*/
@@ -328,7 +330,7 @@ class LeftAndMain extends AdminItem {
 
 		throw new BadRequestException();
 	}
-	
+
 	/**
 	 * hides the deleted object
 	*/
@@ -350,8 +352,8 @@ class LeftAndMain extends AdminItem {
 		if($model = $this->save($data, 2, false, false, $overrideCreated)) {
 			// notify the user
 			Notification::notify($model->classname, lang("successful_published", "The data was successfully published!"), lang("published"));
-			
-			$response->exec("var href = '".BASE_URI . $this->adminURI()."record/".$model->id."/edit".URLEND."'; if(getInternetExplorerVersion() <= 9 && getInternetExplorerVersion() != -1) { if(location.href == href) location.reload(); else location.href = href; } else {reloadTree(function(){ goma.ui.ajax(undefined, {url: href, pushToHistory: true});}, ".$model->id."); }");
+
+			$response->exec("var href = '".BASE_URI . $this->adminURI()."record/".$model->id."/edit".URLEND."'; if(getInternetExplorerVersion() <= 9 && getInternetExplorerVersion() != -1) { if(location.href == href) location.reload(); else location.href = href; } else {reloadTree(function(){ goma.ui.ajax(undefined, {url: href, showLoading: true, pushToHistory: true});}, ".$model->id."); }");
 
 			return $response;
 		} else {
@@ -418,22 +420,22 @@ class LeftAndMain extends AdminItem {
 	 */
 	public function cms_add() {
 		$model = clone $this->modelInst();
-		
+
 		if($this->getParam("model")) {
 			if($selectedModel = $this->getModelByName($this->getParam("model"))) {
 				$model = $selectedModel;
 			}
 		} else {
 			Resources::addJS('$(function(){$(".leftbar_toggle, .leftandmaintable tr > .left").addClass("active");$(".leftbar_toggle, .leftandmaintable tr > .left").removeClass("not_active");$(".leftbar_toggle").addClass("index");});');
-		
+
 			$model = new ViewAccessableData();
 			return $model->customise(array("adminuri" => $this->adminURI(), "types" => $this->types()))->renderWith("admin/leftandmain_add.html");
 		}
-		
+
 		if(DataObject::Versioned($model->dataClass) && $model->canWrite($model)) {
 			$model->queryVersion = "state";
 		}
-		
+
 		return $this->selectModel($model)->form();
 	}
 
@@ -444,7 +446,7 @@ class LeftAndMain extends AdminItem {
 	 */
 	public function index() {
 		Resources::addJS('$(function(){$(".leftbar_toggle, .leftandmaintable tr > .left").addClass("active");$(".leftbar_toggle, .leftandmaintable tr > .left").removeClass("not_active");$(".leftbar_toggle").addClass("index");});');
-		
+
 		if(!$this->template)
 			return "";
 

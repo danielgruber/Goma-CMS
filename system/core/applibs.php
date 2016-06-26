@@ -971,9 +971,9 @@ class PermissionException extends GomaException {
      * @param string $missingPerm
      * @param Exception $previous
      */
-	public function __construct($m = "You're not permitted to access this resource.", $code = null, $missingPerm = null, Exception $previous = null) {
+	public function __construct($m = null, $code = null, $missingPerm = null, Exception $previous = null) {
         $this->missingPerm = $missingPerm;
-		parent::__construct($m, $code, $previous);
+		parent::__construct(isset($m) ? $m : lang("less_rights"), $code, $previous);
 	}
 
     public function getMissingPerm() {

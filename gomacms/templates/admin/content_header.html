@@ -14,21 +14,25 @@
 			
 		</span>
 	</span>
-	
-	<% IF $this->ID != 0 && $this->stateid %>
-	
+
+	<% IF $this->ID != 0 %>
 		<div class="pageinfo versionControls">
-		
-			<% IF isPublished() %>
-				<div class="state">
-					<div class="draft"><% lang("draft", "draft") %></div>
-					<div class="publish active"><% lang("published", "published") %></div>
+			<% IF isDeleted() %>
+				<div class="deleted">
+					<% lang("deleted") %>
 				</div>
 			<% ELSE %>
-				<div class="state">
-					<div class="draft active"><% lang("draft", "draft") %></div>
-					<div class="publish"><% lang("published", "published") %></div>
-				</div>
+				<% IF isPublished() %>
+					<div class="state">
+						<div class="draft"><% lang("draft", "draft") %></div>
+						<div class="publish active"><% lang("published", "published") %></div>
+					</div>
+				<% ELSE IF $stateid %>
+					<div class="state">
+						<div class="draft active"><% lang("draft", "draft") %></div>
+						<div class="publish"><% lang("published", "published") %></div>
+					</div>
+				<% END %>
 			<% END %>
 		</div>
 	<% END %>

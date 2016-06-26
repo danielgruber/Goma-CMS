@@ -106,9 +106,9 @@ class AjaxSubmitButton extends FormAction {
 		}
 
 		try {
-			$this->handleSubmit($response);
+			$response = $this->handleSubmit($response);
 
-			if($response->getLeaveCheck() === null) {
+			if(is_a($response, "AjaxFormResponse") && $response->getLeaveCheck() === null) {
 				$response->setLeaveCheck(false);
 			}
 

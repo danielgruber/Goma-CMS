@@ -698,11 +698,12 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
                 define("PREVIEW_URL", BASE_URI . BASE_SCRIPT.'?r='.$this->id);
                 Resources::addJS("$(function(){ if(typeof pages_pushPreviewURL != 'undefined') pages_pushPreviewURL(false, '".BASE_URI . BASE_SCRIPT."?r=".$this->id . "&".$this->baseClass."_state', false); });");
             }
-
         }
 
-
-        $form->add($links = new HTMLField('links', $this->customise(array("icon" => ClassInfo::getClassIcon($this->classname), "classtitle" => convert::raw2text(ClassInfo::getClassTitle($this->classname))))->renderWith("admin/content_header.html")));
+        $form->add($links = new HTMLField('links', $this->customise(array(
+            "icon" => ClassInfo::getClassIcon($this->classname),
+            "classtitle" => convert::raw2text(ClassInfo::getClassTitle($this->classname))
+        ))->renderWith("admin/content_header.html")));
         $links->container->addClass("hidden");
 
         $form->add(new TabSet('tabs', array(

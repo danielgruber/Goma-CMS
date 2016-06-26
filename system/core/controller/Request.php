@@ -520,7 +520,6 @@ class Request extends gObject {
 		return $this->phpInputFile;
 	}
 
-
 	/**
 	 * clean-up for saved file-data
 	 */
@@ -528,5 +527,32 @@ class Request extends gObject {
 		if(isset($this->phpInputFile) && file_exists($this->phpInputFile)) {
 			@unlink($this->phpInputFile);
 		}
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function canReplyJavaScript() {
+		return (isset($this->headers["accept"]) && preg_match('/text\/javascript/i', $this->headers["accept"]));
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function canReplyHTML() {
+		return (isset($this->headers["accept"]) && preg_match('/text/html/i', $this->headers["accept"]));
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function canReplyPlain() {
+		return (isset($this->headers["accept"]) && preg_match('/text/plain/i', $this->headers["accept"]));
+	}
+	/**
+	 * @return bool
+	 */
+	public function canReplyJSON() {
+		return (isset($this->headers["accept"]) && preg_match('/text/json/i', $this->headers["accept"]));
 	}
 }

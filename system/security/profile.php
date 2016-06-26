@@ -104,8 +104,8 @@ class ProfileController extends FrontedController {
 		$info = $userdata->renderWith("profile/info.html");
 		$this->tabs->addTab(lang("general", "General Information"), $info, "info");
 
-		Core::addBreadcrumb($userdata->nickname, URL . URLEND);
-		Core::setTitle($userdata->nickname);
+		Core::addBreadcrumb($userdata->title, URL . URLEND);
+		Core::setTitle($userdata->title);
 
 		$this->callExtending("beforeRender", $userdata);
 

@@ -299,6 +299,10 @@ if (goma.ui === undefined) {
 
 				node.addClass("loading");
 
+				if(options.showLoading) {
+					node.html('<div class="loading">'+lang("loading")+'</div>');
+				}
+
 				if (unload !== false) {
 					data = goma.ui.fireUnloadEvents(node);
 					if (typeof data == "string") {
@@ -546,7 +550,6 @@ if (goma.ui === undefined) {
 				}
 
 				goma.ui.loadResources(xhr, progress).done(function () {
-
 					if (xhr === undefined) {
 						throw new Error("xhr is not defined but required param.");
 					}
@@ -576,8 +579,6 @@ if (goma.ui === undefined) {
 					} else {
 						node.html(html);
 					}
-
-
 
 					RunAjaxResources(xhr);
 
@@ -782,8 +783,6 @@ if (goma.ui === undefined) {
 
 			/**
 			 * this method can only be called after loadResources
-			 *
-			 *@name runResources
 			 */
 			runResources: function (request) {
 				var js = request.getResponseHeader("X-JavaScript-Load"),
@@ -1032,8 +1031,11 @@ if (window.loader === undefined) {
 
 				$.ajax({
 					url: $this.attr("href"),
-					data: {ajaxfy: true, "ajaxcontent": true, "container": $container},
-					dataType: "html"
+					data: {"container": $container},
+					dataType: "html",
+					headers: {
+						accept: "text/javascript; charset=utf-8"
+					}
 				}).done(function (html, textStatus, jqXHR) {
 					eval_script(html, jqXHR);
 					$this.html(_html);

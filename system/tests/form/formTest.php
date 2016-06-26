@@ -267,4 +267,38 @@ class FormTest extends GomaUnitTest implements TestAble {
 		$form = new Form(new Controller(), "BLAH");
 		$this->assertEqual($form->name(), "blah");
 	}
+
+	public function testAddRemoveAction() {
+		$action1 = new FormAction("action1");
+		$action2 = new FormAction("action2");
+
+		$action1->action1 = 1;
+		$action2->action2 = 1;
+
+		$form = new Form(new Controller(), "BLAH", array(), array(
+			$action2
+		));
+		$form->addAction($action1);
+
+		$this->assertEqual($form->action1, $action1);
+		$this->assertEqual($form->action2, $action2);
+
+		$form->removeAction("action1");
+		$this->assertEqual($form->action1, null);
+	}
+
+	public function testAddDuplicateAction() {
+		$action1 = new FormAction("action1");
+		$action2 = new FormAction("action1");
+
+		$action1->action1 = 1;
+		$action2->action2 = 1;
+
+		$form = new Form(new Controller(), "BLAH", array(), array(
+			$action2
+		));
+		$form->addAction($action1);
+
+		$this->assertEqual($form->action1, $action1);
+	}
 }

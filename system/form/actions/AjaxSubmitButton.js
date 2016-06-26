@@ -25,10 +25,12 @@ var initAjaxSubmitbutton = function(id, divId, formObject, field, url, appendix)
             type: "post",
             data: form.serialize(),
             dataType: "html",
+            headers: {
+                accept: "text/javascript; charset=utf-8"
+            },
             complete: function()
             {
-                $("body").css("cursor", "default");
-                $("body").css("cursor", "auto");
+                $(document.body).css("cursor", "default").css("cursor", "auto");
                 container.find(".loading").remove();
                 button.css("display", "inline");
 
@@ -38,11 +40,10 @@ var initAjaxSubmitbutton = function(id, divId, formObject, field, url, appendix)
                 goma.ui.updateFlexBoxes();
             },
             success: function(script, textStatus, jqXHR) {
-
                 goma.ui.loadResources(jqXHR).done(function(){;
                     var method = new Function("field", "form", script);
-                    RunAjaxResources(jqXHR);
                     var r = method.call(form.get(0), field, formObject);
+                    RunAjaxResources(jqXHR);
 
                     goma.ui.updateFlexBoxes();
 

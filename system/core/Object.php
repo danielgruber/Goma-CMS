@@ -365,7 +365,7 @@ abstract class gObject
      * @link http://php.net/manual/de/language.oop5.overloading.php
      *
      * @param string $methodName Name of the method.
-     * @param string $args Arguments.
+     * @param array $args Arguments.
      *
      * @return mixed The return of the function.
      */

@@ -31,36 +31,6 @@
 	bottom: 0.4em;
 }
 
-
-/*.historyoptions {
-	height: 2.5em;
-	border-bottom: 1px solid #ddd;
-}
-.historyoptions ul {
-	list-style: none;
-	margin: 0;
-	padding: 0;
-}
-.historyoptions ul li {
-	float: left;
-}
-.historyoptions ul li a {
-	display: block;
-	padding: 0.75em 1em;
-	color: #777;
-	font-size: 1em;
-	line-height: 1em;
-	text-decoration: none;
-}
-.historyoptions ul li a:hover {
-	color: #222;
-}
-.historyoptions ul li a.active {
-	border-bottom: 1px solid #24ACB8;
-	color: #24ACB8;
-}*/
-
-
 .history .no_entries {
 	color: #999;
 	font-size: 16pt;
@@ -93,7 +63,7 @@
 }
 
 .history .event .date {
-	float: right;
+	margin-left: 1.5em;
 	color: #888;
 	margin: 0.4em;
 	font-size: 0.8em;

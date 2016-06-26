@@ -468,7 +468,7 @@ class Controller extends RequestHandler
     public function edit()
     {
         /** @var DataObject $model */
-        if($model = $this->findSingleModel()) {
+        if($model = $this->getSingleModel()) {
             if (!$model->can("Write")) {
                 if (StaticsManager::getStatic($this->classname, "showWithoutRight") || $this->modelInst()->showWithoutRight) {
                     $disabled = true;
@@ -491,7 +491,7 @@ class Controller extends RequestHandler
      */
     public function delete()
     {
-        if($model = $this->findSingleModel()) {
+        if($model = $this->getSingleModel()) {
             if(!$model->can("Delete")) {
                 return $this->actionComplete("less_rights");
             }
@@ -515,8 +515,10 @@ class Controller extends RequestHandler
 
     /**
      * finds single model if set or by id.
+     *
+     * @return DataObject|ViewAccessableData|null
      */
-    protected function findSingleModel() {
+    protected function getSingleModel() {
         if(is_a($this->modelInst(), "IDataSet")) {
            return $this->getParam("id") ? $this->modelInst()->find("id", $this->getParam("id")) : null;
         } else {

@@ -23,7 +23,11 @@ self.dropdownDialogs = [];
 
 		this.elem = $(elem);
 		if(this.elem.length === 0) {
-			throw new Error("element for dropdown-dialog must exist.");
+			if(position != "fixed") {
+				throw new Error("element for dropdown-dialog must exist.");
+			} else {
+				this.elem = $("body");
+			}
 		}
 
 		this.setPosition(position);
@@ -50,9 +54,9 @@ self.dropdownDialogs = [];
 
 	dropdownDialog.prototype = {
 		subDialogs: [],
+		copyElement: true,
 
 		checkEdit: function() {
-
 			if(this.dropdown.find("> div > .content > div").html() != this.html) {
 				this.html = this.dropdown.find("> div > .content > div").html();
 				this.definePosition(this.position);
@@ -144,9 +148,7 @@ self.dropdownDialogs = [];
 		/**
 		 * defines the position of the dropdown
 		 *
-		 *@name definePosition
-		 *@access public
-		 *@param string - position: if to set this.position
+		 * @param position: string if to set this.position
 		 */
 		definePosition: function(position) {
 			//if(typeof profiler != "undefined") profiler.mark("dropdownDialog.definePosition");
@@ -424,9 +426,11 @@ self.dropdownDialogs = [];
 			}
 
 			// close-button
-			this.dropdown.find(" > div  > .content > .close").remove();
-			if(!this.elem.hasClass("hideClose") && this.closeButton)
+			if(!this.elem.hasClass("hideClose") && this.closeButton) {
 				this.dropdown.find(" > div > .content > div").prepend('<a class="close" href="javascript:;">&times;</a>');
+			} else {
+				this.dropdown.find(" > div  > .content > .close").remove();
+			}
 
 			// closing over elements in dropdown
 			var that = this;
@@ -539,7 +543,12 @@ self.dropdownDialogs = [];
 		 *@name play_html
 		 */
 		player_html: function(uri) {
-			this.setContent($(uri).html());
+			if(!this.copyElement) {
+				$(uri).fadeIn("fast");
+				this.setContent($(uri));
+			} else {
+				this.setContent($(uri).html());
+			}
 		},
 
 		/**
@@ -733,7 +742,8 @@ self.dropdownDialogs = [];
 						obj.instances[i].remove();
 					}
 				}
-			}
+			};
+
 			this.each(function(){
 				var instance = new dropdownDialog(o.uri, this, o.position);
 				obj.instances.push(instance);

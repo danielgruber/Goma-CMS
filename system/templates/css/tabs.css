@@ -28,19 +28,19 @@
 	float: left;
 	padding: 0;
 	margin: 0;
-	
+
 }
 .tabs > ul li a, .tabs > ul li .tab {
-	
+
 	display: block;
 	padding: 0.5em 1em;
-	
+
 	color: #666;
 	background: #eee;
-	
+
 	margin: 0 1px;
 	margin-top: 0.29em;
-	
+
 	-webkit-border-radius: 0;
 	-moz-border-radius: 0;
 	border-radius: 0;
@@ -51,17 +51,17 @@
 	border-top-right-radius: 0.31em;
 	border-top-left-radius: 0.31em;
 	-webkit-appearance: none;
-	
+
 	text-transform: capitalize;
-	
+
 	border: 1px solid #ccc;
-	
+
 	text-decoration: none;
 	outline: 0 !important;
 	cursor: pointer !important;
-	
+
 	font-size: 1em;
-	
+
 	-webkit-box-shadow: none;
 	box-shadow: none;
 	-moz-box-shadow: none;
@@ -80,7 +80,10 @@
 	cursor: text;
 	margin-top: 0;
 	padding-top: 0.63em;
+}
+.tabs > ul li button.active, .tabs > ul li input.active {
 	padding-bottom: 0.75em;
+	margin-bottom: -1px;
 }
 .tabs > ul > li > a.active {
 	color: #444;

@@ -863,6 +863,7 @@ class mysqliDriver implements SQLDriver
 
         foreach($manipulation as $info) {
             if(isset($info["sql"])) {
+                // TODO: Error Handling
                 SQL::query($info["sql"]);
             }
         }

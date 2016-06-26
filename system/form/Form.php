@@ -26,6 +26,7 @@ class Form extends AbstractFormComponentWithChildren {
 	 * session-prefix for form.
 	 */
 	const SESSION_PREFIX = "form";
+	const DEFAULT_SUBMSSION = "@default";
 
 	/**
 	 * you can use data-handlers, to edit data before it is given to the
@@ -35,7 +36,7 @@ class Form extends AbstractFormComponentWithChildren {
 
 	/**
 	 * actions
-	 * @var FormAction[]
+	 * @var array
 	 */
 	public $actions = array();
 
@@ -96,6 +97,19 @@ class Form extends AbstractFormComponentWithChildren {
 	 * @var bool
 	 */
 	protected $leaveCheck = true;
+
+	/**
+	 * @param RequestHandler|null $controller
+	 * @param string|null $name
+	 * @param array $fields
+	 * @param array $actions
+	 * @param Request|null $request
+	 * @param array|ViewAccessableData|null $model
+	 * @return Form
+	 */
+	public static function create($controller = null, $name = null, $fields = array(), $actions = array(), $request = null, $model = null) {
+		return new Form($controller, $name, $fields, $actions, array(), $request, $model);
+	}
 
 	/**
 	 * @param RequestHandler $controller
@@ -687,7 +701,7 @@ class Form extends AbstractFormComponentWithChildren {
 				if(isset($post[$field->postname()]) ||
 					(isset($post["default_submit"]) && !$field->input->hasClass("cancel") && !$field->input->name != "cancel")) {
 					if($field->canSubmit($result) && $submit = $field->getSubmit($result)) {
-						if($submit == "@default") {
+						if($submit == self::DEFAULT_SUBMSSION) {
 							$submission = $form->submission;
 						} else {
 							$submission = $submit;
@@ -758,8 +772,7 @@ class Form extends AbstractFormComponentWithChildren {
 
 	/**
 	 * adds an action
-	 *@name addAction
-	 *@access public
+	 * @param FormAction $action
 	 */
 	public function addAction($action) {
 		$action->setForm($this);
@@ -771,12 +784,15 @@ class Form extends AbstractFormComponentWithChildren {
 
 	/**
 	 * removes an action
-	 *@name removeAction
-	 *@access public
+	 * @param FormAction|string $action
 	 */
 	public function removeAction($action) {
 		if(is_object($action)) {
 			$action = $action->name;
+		}
+
+		if (isset($this->fields[$action])) {
+			unset($this->fields[$action]);
 		}
 
 		unset($this->actions[$action]);
