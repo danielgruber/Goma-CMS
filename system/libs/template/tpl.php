@@ -328,7 +328,7 @@ class tpl extends gObject
 		}
 		$class->customise($replacement);
 
-		if (PROFILE) Profiler::mark("tpl::parser Run");
+		if (PROFILE) Profiler::mark("tpl::parser Run " . $tmpname);
 
 		$caller = new tplCaller($class, $tpl);
 		$data = $class;
@@ -361,7 +361,7 @@ class tpl extends gObject
 			$tpl = str_replace($hash, '', $content);
 		}
 
-		if (PROFILE) Profiler::unmark("tpl::parser Run");
+		if (PROFILE) Profiler::unmark("tpl::parser Run " . $tmpname);
 		if (PROFILE) Profiler::unmark("tpl::parser");
 
 		return $tpl;

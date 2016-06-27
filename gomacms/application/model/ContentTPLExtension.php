@@ -12,27 +12,24 @@
 class ContentTPLExtension extends Extension {
     /**
      * prepended content
-     *
-     *@name prependedContent
-     *@access public
      */
     public static $prependedContent = array();
 
     /**
      * appended content
-     *
-     *@name appendedContent
-     *@access public
      */
     public static $appendedContent = array();
 
     /**
      * active mainbar cache
-     *
-     *@name active_mainbar
-     *@access protected
+     * @var Page[]
      */
     protected static $active_mainbar;
+
+    /**
+     * @var DataObjectSet[]
+     */
+    protected static $mainbars;
 
     /**
      * methods
@@ -97,9 +94,8 @@ class ContentTPLExtension extends Extension {
         {
             return false;
         }
-        $id = contentController::$activeids[$level - 2];
-        return (DataObject::count("pages", array("parentid" => $id, "mainbar" => 1)) > 0);
 
+        return $this->mainbar($level)->count() > 0;
     }
 
     /**
@@ -109,26 +105,28 @@ class ContentTPLExtension extends Extension {
      */
     public function mainbar($level = 1)
     {
-        if($level == 1)
-        {
-            return DataObject::get("pages", array("parentid"	=> 0,"mainbar"	=> 1));
-        } else
-        {
-            if(!isset(contentController::$activeids[$level - 2]))
+        if(!isset(self::$mainbars[$level])) {
+            if($level == 1)
             {
-                return false;
+                self::$mainbars[$level] = DataObject::get("pages", array("parentid"	=> 0,"mainbar"	=> 1));
+            } else
+            {
+                if(!isset(contentController::$activeids[$level - 2]))
+                {
+                    return false;
+                }
+                $id = contentController::$activeids[$level - 2];
+                self::$mainbars[$level] = DataObject::get("pages", array("parentid"	=> $id, "mainbar"	=> 1));
             }
-            $id = contentController::$activeids[$level - 2];
-            return DataObject::get("pages", array("parentid"	=> $id, "mainbar"	=> 1));
         }
+
+        return self::$mainbars[$level];
     }
 
     /**
      * gets mainbar items by parentid of page
      *
-     * @name mainbarByID
-     * @access public
-     * @param int page-id of parent page.
+     * @param int $id page-id of parent page.
      * @return DataObjectSet
      */
     public function mainbarByID($id) {
@@ -138,9 +136,7 @@ class ContentTPLExtension extends Extension {
     /**
      * returns a page-object by id
      *
-     * @name pageByID
-     * @access public
-     * @param int id
+     * @param int $id
      * @return Pages|false
      */
     public function pageByID($id) {
@@ -150,9 +146,7 @@ class ContentTPLExtension extends Extension {
     /**
      * returns a page-object by path
      *
-     * @name pageByPath
-     * @access public
-     * @param string path
+     * @param string $path
      * @return Pages|false
      */
     public function pageByPath($path) {
@@ -161,8 +155,8 @@ class ContentTPLExtension extends Extension {
 
     /**
      * gets the title of the active mainbar
-     * @name active_mainbar_title
-     * @param  int level
+     *
+     * @param int $level
      * @return string|null
      */
     public function active_mainbar_title($level = 2)
@@ -173,7 +167,7 @@ class ContentTPLExtension extends Extension {
     /**
      * gets the url of the active mainbar
      * @name active_mainbar_title
-     * @param int level
+     * @param int $level
      * @return string|null
      */
     public function active_mainbar_url($level = 2)
@@ -184,48 +178,38 @@ class ContentTPLExtension extends Extension {
     /**
      * returns the active-mainbar-object
      *
-     * @name active_mainbar
-     * @access public
-     * @param int level
+     * @param int $level
      * @return bool|DataObject
      */
     public function active_mainbar($level = 2)
     {
-
         if(!isset(contentController::$activeids[$level - 2]))
         {
             return false;
         }
+
         $id = contentController::$activeids[$level - 2];
-        if($level == 2 && isset(self::$active_mainbar)) {
-            $data = self::$active_mainbar;
-        } else {
-            $data = DataObject::get_one("pages", array("id"	=> $id));
-            if($level == 2) {
-                self::$active_mainbar = $data;
-            }
+        if(isset(self::$active_mainbar[$level . "_" . $id])) {
+            return self::$active_mainbar[$level . "_" . $id];
         }
+
+        $data = DataObject::get_one("pages", array("id"	=> $id));
+        self::$active_mainbar[$level . "_" . $id] = $data;
         return $data;
     }
 
     /**
      * returns the active page
      *
-     * @name active_page
-     * @access public
      * @return bool|DataObject
      */
     public function active_page()
     {
-
         return $this->active_mainbar(2);
     }
 
     /**
      * returns the prepended content
-     *
-     * @access public
-     * @return string
      */
     public static function prependedContent() {
         $div = new HTMLNode('div', array(), self::$prependedContent);
@@ -235,9 +219,6 @@ class ContentTPLExtension extends Extension {
 
     /**
      * returns the appended content
-     *
-     *  @access public
-     * @return string
      */
     public static function appendedContent() {
         $div = new HTMLNode('div', array(), self::$appendedContent);
