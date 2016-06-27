@@ -45,7 +45,7 @@ class GomaResponseBody extends gObject {
     {
         parent::__construct();
 
-        $this->body = isset($body) ? $body : "";
+        $this->setBody($body);
     }
 
     /**
@@ -62,6 +62,10 @@ class GomaResponseBody extends gObject {
      */
     public function setBody($body)
     {
+        if(is_array($body)) {
+            throw new InvalidArgumentException("setBody requires String or object with __toString");
+        }
+
         $this->body = $body;
         return $this;
     }
@@ -71,7 +75,7 @@ class GomaResponseBody extends gObject {
      */
     public function __toString()
     {
-        return $this->body;
+        return (string) $this->body;
     }
 
     /**

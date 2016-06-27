@@ -289,6 +289,14 @@ class Controller extends RequestHandler
      * @return string|GomaResponse
      */
     public function __output($content) {
+        /** @var ControllerRedirectBackResponse $content */
+        if(is_a($content, "ControllerRedirectBackResponse")) {
+            if($content->getFromUrl() != $this->namespace && !$content->getHintUrl()) {
+                $content->setHintUrl($this->namespace);
+                $content->setParentControllerResolved(true);
+            }
+        }
+
         $this->callExtending("handleOutput", $content);
 
         return $content;
@@ -532,7 +540,7 @@ class Controller extends RequestHandler
      */
     protected function getSingleModel() {
         if(is_a($this->modelInst(), "IDataSet")) {
-           return $this->getParam("id") ? $this->modelInst()->find("id", $this->getParam("id")) : null;
+            return $this->getParam("id") ? $this->modelInst()->find("id", $this->getParam("id")) : null;
         } else {
             return $this->modelInst();
         }
@@ -739,7 +747,7 @@ class Controller extends RequestHandler
      * @access    public
      * @param    string $param get-parameter
      * @param    string $value value of the get-parameter
-     * @return GomaResponse
+     * @return ControllerRedirectBackResponse
      */
     public function redirectback($param = null, $value = null)
     {
@@ -748,13 +756,14 @@ class Controller extends RequestHandler
         } else if (isset($this->request->post_params["redirect"])) {
             $redirect = $this->request->post_params["redirect"];
         } else {
-            $redirect = BASE_URI . BASE_SCRIPT . $this->originalNamespace;
+            $redirect = null;
         }
 
-        if (isset($param) && isset($value))
-            $redirect = self::addParamToURL($redirect, $param, $value);
-
-        return GomaResponse::redirect($redirect);
+        return ControllerRedirectBackResponse::create(
+            $redirect,
+            $this->request ? $this->request->getShiftedPart() : null,
+            $this->request->canReplyJavaScript()
+        )->setParam($param, $value);
     }
 
     /**

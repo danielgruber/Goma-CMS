@@ -2332,7 +2332,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
      * gets the base-table
      */
     public function BaseTable() {
-        return (ClassInfo::$class_info[ClassInfo::$class_info[$this->classname]["baseclass"]]["table"]);
+        return isset(ClassInfo::$class_info[$this->BaseClass()]["table"]) ? ClassInfo::$class_info[$this->BaseClass()]["table"] : null;
     }
 
     //!Dev-Area: Generation of DataBase

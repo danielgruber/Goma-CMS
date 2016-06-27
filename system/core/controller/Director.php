@@ -95,7 +95,6 @@ class Director extends gObject {
                 $output = self::$requestController->serve($output);
             }
         }
-
         if(PROFILE)
             Profiler::unmark("serve");
 

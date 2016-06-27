@@ -163,7 +163,9 @@ class GomaResponse extends gObject {
      */
     public function setBody($body)
     {
-        if(is_a($body, "GomaResponseBody")) {
+        if(is_a($body, "GomaResponse")) {
+            throw new InvalidArgumentException();
+        } else if(is_a($body, "GomaResponseBody")) {
             $this->body = $body;
         } else {
             if(!isset($this->body)) {
@@ -211,6 +213,10 @@ class GomaResponse extends gObject {
      */
     public function redirectRequest($url, $permanent = false)
     {
+        if(!preg_match('/^(http|https|ftp)\:\/\//i', $url) && !preg_match("/^(\/|\.\/)/i", $url)) {
+            $url = BASE_URI . BASE_SCRIPT . $url;
+        }
+
         $request = clone $this;
 
         $request->setStatus($permanent ? 301 : 302);
