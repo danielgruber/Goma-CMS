@@ -23,14 +23,20 @@ class AuthenticationService {
      * @return UserAuthentication
      */
     public static function getAuthRecord($sessionid) {
+        if(PROFILE) Profiler::mark("AuthService getAuthRecord");
+
         $record = DataObject::get_one("UserAuthentication", array(
             "token" => $sessionid
         ));
 
         if($record && $record->last_modified < time() - self::$expirationLimit) {
             $record->remove(true);
+
+            if(PROFILE) Profiler::unmark("AuthService getAuthRecord");
             return null;
         }
+
+        if(PROFILE) Profiler::unmark("AuthService getAuthRecord");
 
         return $record;
     }

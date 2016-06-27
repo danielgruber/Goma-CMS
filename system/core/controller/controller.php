@@ -213,7 +213,7 @@ class Controller extends RequestHandler
      */
     public function createDefaultSetFromModel($model) {
         if(isset($model) && ClassInfo::exists($model)) {
-            if(is_subclass_of($model, "IDataObjectSetDataSource")) {
+            if(ClassInfo::hasInterface($model, "IDataObjectSetDataSource")) {
                 $this->model_inst = DataObject::get($model);
                 $this->model = $model;
                 return true;

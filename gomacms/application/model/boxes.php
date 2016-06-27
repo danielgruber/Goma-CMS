@@ -435,7 +435,6 @@ class boxpage extends Page {
 	{
 		return BoxesController::renderBoxes($this->id);
 	}
-
 }
 
 class boxPageController extends PageController {

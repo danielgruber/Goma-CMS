@@ -80,36 +80,36 @@ class Member extends gObject {
 		if($auth = AuthenticationService::getAuthRecord(GlobalSessionManager::globalSession()->getId())) {
 			$user = $auth->user;
 
-			if(!$user) {
-				return false;
+			if($user) {
+
+				if ($user["timezone"]) {
+					Core::setCMSVar("TIMEZONE", $user["timezone"]);
+					date_default_timezone_set(Core::getCMSVar("TIMEZONE"));
+				}
+
+				self::$id = $user->id;
+				self::$nickname = $user->nickname;
+
+				self::$groups = DefaultPermission::forceGroups($user);
+
+				self::$groupType = self::$groups->first()->type;
+
+				// every group has at least the type 1, 0 is just for guests
+				if (self::$groupType == 0) {
+					self::$groupType = 1;
+					self::$groups->first()->type = 1;
+					self::$groups->first()->write(false, true, 2, false, false);
+				}
+
+				self::$loggedIn = $user;
+				if (PROFILE) Profiler::unmark("member::Init");
+
+				return true;
 			}
-
-			if($user["timezone"]) {
-				Core::setCMSVar("TIMEZONE", $user["timezone"]);
-				date_default_timezone_set(Core::getCMSVar("TIMEZONE"));
-			}
-
-			self::$id = $user->id;
-			self::$nickname = $user->nickname;
-
-			self::$groups = DefaultPermission::forceGroups($user);
-
-			self::$groupType = self::$groups->first()->type;
-
-			// every group has at least the type 1, 0 is just for guests
-			if(self::$groupType == 0) {
-				self::$groupType = 1;
-				self::$groups->first()->type = 1;
-				self::$groups->first()->write(false, true, 2, false, false);
-			}
-
-			self::$loggedIn = $user;
-			if(PROFILE) Profiler::unmark("member::Init");
-			return true;
-		} else {
-			if(PROFILE) Profiler::unmark("member::Init");
-			return false;
 		}
+
+		if(PROFILE) Profiler::unmark("member::Init");
+		return false;
 	}
 
 	/**

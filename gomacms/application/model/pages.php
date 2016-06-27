@@ -209,6 +209,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
         $this->parentSet = $value;
         if($value == "root") {
             $this->setParentId(0);
+            $this->parent = null;
         }
     }
 
@@ -250,12 +251,11 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
     {
         if($this->parentSet == "root") {
             $this->setField("parentid", "0");
+            $this->parent = null;
         } else {
             $this->setField("parentid", $value);
+            $this->data["parent"] = null;
         }
-
-        $this->viewcache = array();
-        $this->data["parent"] = null;
     }
 
     /**
@@ -478,8 +478,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
         }
         $perm->name = "";
         $this->setField($name, $perm);
-
-        $this->viewcache = array();
     }
 
     /**

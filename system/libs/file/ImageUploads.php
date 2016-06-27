@@ -457,7 +457,7 @@ class ImageUploads extends Uploads {
             $imageUploads->writeToDB(true, true);
         }
 
-        $this->viewcache = array();
+        $this->data["imageversions"] = null;
 
         return $imageUploads;
     }

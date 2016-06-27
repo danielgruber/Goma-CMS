@@ -137,7 +137,7 @@ class SessionManager implements ISessionManager {
     public function set($key, $value) {
         $matchValue = (is_array($value) || is_object($value)) ? serialize($value) : $value;
 
-        if(strlen($matchValue) > self::FILE_THRESHOLD) {
+        if(strlen($matchValue) > self::FILE_THRESHOLD || is_object($value)) {
             $random = randomString(20);
 
             FileSystem::write(self::getFilePathForKey($random), $matchValue, LOCK_EX, 0773);

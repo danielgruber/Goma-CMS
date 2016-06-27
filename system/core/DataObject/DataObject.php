@@ -17,8 +17,6 @@
  *
  * @property    int versionid
  * @property    int id
- * @property    string baseTable
- * @property    string baseClass
  * @property    string class_name
  * @property    int last_modified timestamp
  * @property    int created timestamp
@@ -62,26 +60,16 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
 
     /**
      * default sorting
-     *
-     *@name default_sort
      */
     static $default_sort = "id";
 
     /**
      * enables or disabled history
-     *
-     *@name history
-     *@access public
      */
     static $history = true;
 
     /**
      * show read-only edit if not enough rights
-     *
-     *@name showWithoutRight
-     *@access public
-     *@var bool
-     *@default false
      */
     public $showWithoutRight = false;
 
@@ -91,37 +79,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
     public $prefix = "";
 
     /**
-     * RIGHTS
-     */
-
-    /**
-     * a personal-field, this must contain the id of the user, so the user can edit it
-     *@name writeField
-     *@access public
-     */
-    public $writeField = "";
-
-    /**
-     * rights needed for inserting data
-     *@name insertRights
-     *@access public
-     */
-    public $insertRights = "";
-
-    /**
      * admin-rights
      *
      * admin can do everything, implemented in can-methods
      */
     public $admin_rights;
-
-
-    // some form things ;)
-
-    /**
-     * cache for results
-     */
-    static $results = array();
 
     /**
      * field-titles
@@ -137,23 +99,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
      */
     public $fieldInfo = array();
 
-
     /**
      * this var identifies with which version a DataObjectSet got the data
      * THIS doens't provide feedback if the version is published or not
-     *
-     *@name queryVersion
-     *@access public
      */
     public $queryVersion = DataObject::VERSION_PUBLISHED;
-
-    /**
-     * view-cache
-     *
-     *@name viewcache
-     *@access protected
-     */
-    protected $viewcache = array();
 
     /**
      * storage engine.
@@ -164,6 +114,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
      * sort of many-many-tables.
      */
     static $many_many_sort = array();
+
+    public $baseClass;
+    public $baseTable;
 
     //!Global Static Methods
     /**
@@ -436,6 +389,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
             "created"		=> time(),
             "autorid"		=> member::$id
         ), (array) $this->defaults, ArrayLib::map_key("strtolower", (array) $record));
+
+        $this->baseClass = $this->BaseClass();
+        $this->baseTable = $this->BaseTable();
 
         $this->initValues();
     }
@@ -928,8 +884,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
      */
     public function remove($force = false, $forceAll = false, $history = true)
     {
+        $baseTable = $this->baseTable;
+        $baseClass = $this->baseClass;
         // check if table in db and if not, create it
-        if ($this->baseTable != "" && !isset(ClassInfo::$database[$this->baseTable])) {
+        if ($baseTable != "" && !isset(ClassInfo::$database[$baseTable])) {
             if($this->classname != $this->baseClass) {
                 gObject::instance($this->baseClass)->buildDB();
             }
@@ -942,7 +900,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
         }
 
         $manipulation = array();
-        $baseClass = ClassInfo::$class_info[$this->classname]["baseclass"];
 
         if (!isset($this->data))
             return true;
@@ -964,7 +921,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
             if (!isset($manipulation[$baseClass . "_state"]))
                 $manipulation[$baseClass . "_state"] = array(
                     "command"		=> "delete",
-                    "table_name"	=> $this->baseTable . "_state",
+                    "table_name"	=> $baseTable . "_state",
                     "where"			=> array(
 
                     ));
@@ -1024,9 +981,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
             return false;
         }
 
-        $this->disconnect();
-
-        DataObjectQuery::clearCache($this->baseClass);
+        $this->clearCache();
 
         $this->onBeforeRemove($manipulation);
         $this->callExtending("onBeforeRemove", $manipulation);
@@ -1470,42 +1425,34 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
         return $title;
     }
 
-    //!Queries
-
-    /**
-     * extensions
-     */
-
     /**
      * cache the part, which is the same every DataObject
-     *@name query_cache
-     *@access protected
-     *@var array
+     * @var SelectQuery[]
      */
     protected static $query_cache = array();
 
     /**
      * builds the Query
-     * @name buildQuery
-     * @access public
+     *
      * @param string|int - version
-     * @param array - filter
-     * @param array - sort
-     * @param array - limit
-     * @param array - joins
-     * @param bool - if to include class-filter
+     * @param array $filter
+     * @param array $sort
+     * @param array $limit
+     * @param array $join
+     * @param bool $forceClasses if to include class-filter
      * @return SelectQuery
      */
     public function buildQuery($version, $filter, $sort = array(), $limit = array(), $join = array(), $forceClasses = true)
     {
         if (PROFILE) Profiler::mark("DataObject::buildQuery");
 
-
+        $baseTable = $this->baseTable;
+        $baseClass = $this->baseClass;
         // check if table in db and if not, create it
-        if ($this->baseTable != "" && !isset(ClassInfo::$database[$this->baseTable])) {
+        if ($baseTable != "" && !isset(ClassInfo::$database[$baseTable])) {
 
-            if($this->classname != $this->baseClass) {
-                gObject::instance($this->baseClass)->buildDB();
+            if($this->classname != $baseClass) {
+                gObject::instance($baseClass)->buildDB();
             }
 
             foreach(array_merge(array($this->classname), ClassInfo::getChildren($this->classname)) as $child) {
@@ -1516,15 +1463,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
 
         if (PROFILE) Profiler::mark("DataObject::buildQuery hairy");
 
-        $baseClass = $this->baseClass;
-        $baseTable = $this->baseTable;
-
         // cache the most hairy part
-        if (!isset(self::$query_cache[$this->baseClass]))
+        if (!isset(self::$query_cache[$baseClass]))
         {
             $query = new SelectQuery($baseTable);
 
-            if ($classes = ClassInfo::dataclasses($this->baseClass))
+            if ($classes = ClassInfo::dataclasses($baseClass))
             {
                 foreach($classes as $class => $table)
                 {
@@ -1535,17 +1479,17 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
                 }
             }
 
-            self::$query_cache[$this->baseClass] = $query;
+            self::$query_cache[$baseClass] = $query;
         }
 
         /** @var SelectQuery $query */
-        $query = clone self::$query_cache[$this->baseClass];
+        $query = clone self::$query_cache[$baseClass];
 
         if (PROFILE) Profiler::unmark("DataObject::buildQuery hairy");
 
         if (is_array($filter)) {
             if (isset($filter["versionid"])) {
-                $filter["".$this->baseTable.".id"] = $filter["versionid"];
+                $filter["".$baseTable.".id"] = $filter["versionid"];
                 unset($filter["versionid"]);
 
                 if($version === null) {
@@ -1554,6 +1498,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
             }
         }
 
+        // TODO: Resolve
         if ($version !== false && self::versioned($this->classname)) {
             if (isset($_GET[$baseClass . "_version"]) && $this->memberCanViewVersions($version)) {
                 $version = $_GET[$baseClass . "_version"];
@@ -2130,13 +2075,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
 
     /**
      * resets the DataObject
-     *@name reset
-     *@access public
      */
     public function reset()
     {
         parent::reset();
-        $this->viewcache = array();
         $this->data = array();
     }
 
@@ -2562,9 +2504,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
 
     /**
      * generates some ClassInfo
-     *
-     *@name generateClassInfo
-     *@access public
      */
     public function generateClassInfo() {
         if (defined("SQL_LOADUP") && SQL::getFieldsOfTable($this->baseTable . "_state")) {
@@ -2582,8 +2521,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
     /**
      * preserve Defaults
      *
-     * @name preserveDefaults
-     * @access public
      * @return bool
      */
     public function preserveDefaults($prefix = DB_PREFIX, &$log) {
@@ -2634,9 +2571,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
 
     /**
      * clean up DB
-     *
-     *@name cleanUpDB
-     *@åccess public
      */
     public function cleanUpDB($prefix = DB_PREFIX, &$log = null) {
         $this->callExtending("cleanUpDB", $prefix);

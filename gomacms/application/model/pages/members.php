@@ -19,49 +19,24 @@ class members extends Page
 		 *@name name
 		*/
 		static $cname = '{$_lang_mem_members}';
-		
+
 		/**
 		 * gets the data for memberlist
-		 *
-		 *@name member
-		 *@access public
 		*/
 		public function member()
 		{
-				if(isset($this->viewcache["members"]))
-					return $this->viewcache["members"];
-					
-				// online - not yet fully supported
-				if(isset($_GET["online"]))
-				{
-					if($GLOBALS['cms_ajaxbar'] == 1)
-					{
-							$time_online = $GLOBALS['cms_ajaxbar_timeout'] / 1000 + 2;
-					} else
-					{
-							$time_online = 300;
-					}
-					$last = TIME - $time_online;
-					$this->viewcache["members"] = DataObject::get("user"," statistics.last_update > ".convert::raw2sql($last)."", array(), array(), array('statistics' => 'statistics.user = `users`.`id`'));
-					return $this->viewcache["members"];
-				} else {
-					$this->viewcache["members"] = DataObject::get("user", array(), array(), array(), array(), null, true);
-					return $this->viewcache["members"];
-				}
+			return DataObject::get("user", array(), array(), array(), array(), null, true);
 		}
-		
+
 		/**
 		 * generates the form for this page
-		 *
-		 *@name getForm
-		 *@access public
 		*/
 		public function getForm(&$form)
 		{
-				parent::getForm($form);
-				
-				$form->remove("pagecomments");
-				$form->remove("rating");
+			parent::getForm($form);
+
+			$form->remove("pagecomments");
+			$form->remove("rating");
 		}
 }
 

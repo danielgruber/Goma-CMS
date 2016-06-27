@@ -42,7 +42,7 @@ class ClassManifest {
 
 		if(PROFILE)
 			Profiler::mark("Manifest::load");
-		
+
 		self::loadInterface($class) || self::loadClass($class) || self::generateAlias($class);
 		
 		if(class_exists('Core', false)) {
