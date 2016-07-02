@@ -929,7 +929,6 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 				$start = 0;
 			}
 		}
-		$sortForArrayList = $this->sort ? array($this->sort["field"] => $this->sort["type"]) : null;
 
 		if($this->fetchMode == self::FETCH_MODE_CREATE_NEW) {
 			return $this->getStagingWithFilterAndSort()->getRange($start, $length)->ToArray();
