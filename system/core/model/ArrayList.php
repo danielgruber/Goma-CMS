@@ -443,7 +443,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 		$args = func_get_args();
 
 		$columnsToSort = array();
-		if(count($args)==0){
+		if(count($args)==0 || func_get_arg(0) === null){
 			return $this;
 		}
 		if(count($args)>2){

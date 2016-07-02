@@ -479,7 +479,7 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 			$this->count = (int) $this->dbDataSource()->getAggregate(
 				$this->version, "count", "*", false,
 				$this->getFilterForQuery(), array(), null,
-				$this->getJoinForQuery(), $this->search) + $this->staging->count();
+				$this->getJoinForQuery(), $this->search) + $this->getStagingWithFilterAndSort()->count();
 		}
 
 		return $this->count;
@@ -633,7 +633,7 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 	public function forceData() {
 		if(!isset($this->items)) {
 			if($this->fetchMode == self::FETCH_MODE_CREATE_NEW) {
-				$this->items = $this->staging->ToArray();
+				$this->items = $this->getStagingWithFilterAndSort()->ToArray();
 			} else {
 				if($this->page !== null && $this->getPageCount() < $this->page) {
 					$this->page = $this->getPageCount();
@@ -679,6 +679,19 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 		return $this;
 	}
 
+	/**
+	 * @return ArrayList
+	 */
+	public function getStagingWithFilterAndSort() {
+		try {
+			$sortForArrayList = $this->sort ? array($this->sort["field"] => $this->sort["type"]) : null;
+
+			return $this->staging->filter((array)$this->filter)->sort($sortForArrayList);
+		} catch(Exception $e) {
+			log_exception($e);
+			return new ArrayList();
+		}
+	}
 
 	/**
 	 * filters the data
@@ -896,9 +909,6 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 
 	/**
 	 * returns the current version
-	 *
-	 *@name getVersion
-	 *@access public
 	 */
 	public function getVersion() {
 		return $this->version;
@@ -919,9 +929,10 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 				$start = 0;
 			}
 		}
+		$sortForArrayList = $this->sort ? array($this->sort["field"] => $this->sort["type"]) : null;
 
 		if($this->fetchMode == self::FETCH_MODE_CREATE_NEW) {
-			return $this->staging->getRange($start, $length)->ToArray();
+			return $this->getStagingWithFilterAndSort()->getRange($start, $length)->ToArray();
 		}
 
 		$result = $this->getResultFromCache($start, $length);
@@ -932,7 +943,7 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 		if (count($result) < $length) {
 			$missing = $length - count($result);
 
-			return array_merge($result, $this->staging->getRange(0, $missing)->ToArray());
+			return array_merge($result, $this->getStagingWithFilterAndSort()->getRange(0, $missing)->ToArray());
 		}
 
 		return $result;
@@ -997,13 +1008,15 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 				$record->{$key} = $value;
 		}
 
-		if($this->count !== null) {
+		$matchesFilter = $this->filter ? ArrayList::itemMatchesFilter($record, (array) $this->filter) : true;
+
+		if($this->count !== null && $matchesFilter) {
 			$this->count++;
 		}
 
 		$this->staging->add($record);
 
-		if($this->page === null || count($this->items) < $this->perPage) {
+		if(($this->page === null || count($this->items) < $this->perPage) && $matchesFilter) {
 			if($this->items != null) {
 				$this->items[] = $record;
 			}
@@ -1514,13 +1527,13 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 				}
 			}
 
-			return $this->staging->find($name, $value, $caseInsensitive);
+			return $this->getStagingWithFilterAndSort()->find($name, $value, $caseInsensitive);
 		} else {
 			$set = clone $this;
 			$set->addFilter(array(
 				$name => !$caseInsensitive ? $value : array("LIKE", $value)
 			));
-			return $set->first() ? $set->first() : $this->staging->find($name, $value, $caseInsensitive);
+			return $set->first() ? $set->first() : $this->getStagingWithFilterAndSort()->find($name, $value, $caseInsensitive);
 		}
 	}
 }

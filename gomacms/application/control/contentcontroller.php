@@ -217,8 +217,6 @@ class ContentController extends FrontedController
             } else {
                 $uploadObjects = self::fetchUploadObjects($content, $uploadHash, $lowestmtime);
 
-                $cache->write(1, Uploads::$cache_life_time - (NOW - $lowestmtime));
-
                 if (count($uploadObjects) > 0) {
                     $hash = md5($uploadHash);
                     $cacher = new Cacher("track_" . Director::$requestController->modelInst()->versionid . "_" . $hash);
@@ -238,7 +236,7 @@ class ContentController extends FrontedController
                     }
                 }
 
-
+                $cache->write(1, Uploads::$cache_life_time - (NOW - $lowestmtime));
             }
         }
 

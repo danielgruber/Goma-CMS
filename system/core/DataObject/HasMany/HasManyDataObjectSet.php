@@ -152,12 +152,13 @@ class HasMany_DataObjectSet extends RemoveStagingDataObjectSet {
     }
 
     /**
-     * @param null|IModelRepository $repository
+     * @param IModelRepository $repository
      * @param bool $forceWrite
      * @param int $snap_priority
-     * @param IModelRepository $repository
+     * @param IModelRepository|null $repository
      * @return mixed
      * @throws MySQLException
+     * @throws PermissionException
      */
     public function commitRemoveStaging($repository, $forceWrite = false, $snap_priority = 2, $repository = null) {
         /** @var DataObject $item */

@@ -37,7 +37,6 @@ class ClassManifest {
 	 * @return	void
 	 */
 	public static function load($class) {
-
 		$class = self::resolveClassName($class);
 
 		if(PROFILE)

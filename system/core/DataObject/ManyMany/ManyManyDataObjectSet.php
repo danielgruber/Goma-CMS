@@ -425,8 +425,13 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet implements Sorta
      * @param null|IModelRepository $repository
      * @param null $oldId
      * @throws MySQLException
+     * @throws PermissionException
      */
     public function commitStaging($forceInsert = false, $forceWrite = false, $snap_priority = 2, $repository = null, $oldId = null) {
+        if(!$forceWrite && !$this->ownRecord->can("Write")) {
+            throw new PermissionException();
+        }
+
         $manipulation = array();
         $sort = 0;
         $addedRecords = array();

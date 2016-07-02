@@ -276,6 +276,15 @@ class ArrayListTest extends GomaUnitTest
         }
     }
 
+    public function testItemMatches() {
+        $this->assertTrue(ArrayList::itemMatchesFilter($this->nik, array(
+            "name" => "Nik"
+        )));
+        $this->assertFalse(ArrayList::itemMatchesFilter($this->patrick, array(
+            "name" => "Nik"
+        )));
+    }
+
     // TODO: Create insert test
 }
 

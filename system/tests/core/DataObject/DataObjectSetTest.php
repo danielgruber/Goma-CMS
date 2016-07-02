@@ -558,6 +558,46 @@ class DataObjectSetTests extends GomaUnitTest
             $this->assertEqual($e->getMessage(), "1 could not be written.");
         }
     }
+
+    public function testStagingFilter() {
+        $set = new DataObjectSet("DumpDBElementPerson");
+
+        $set->setVersion(DataObject::VERSION_PUBLISHED);
+
+        /** @var MockIDataObjectSetDataSource $source */
+        $source = $set->getDbDataSource();
+
+        $source->records = array(
+            $this->julian,
+            $this->daniel,
+            $this->janine,
+            $this->kathi
+        );
+
+        $this->assertEqual($set->count(), 4);
+
+        $set->filter(array("blah = 'blub'"));
+        $this->assertEqual($set->count(), 0);
+        $this->assertEqual($set->first(), null);
+
+        $set->add($this->patrick);
+
+        $this->assertEqual($set->count(), 0);
+        $this->assertEqual($set->first(), null);
+
+        $set->filter();
+
+        $this->assertEqual($set->count(), 5);
+        $set->add($this->nik);
+        $this->assertEqual($set->count(), 6);
+        $this->assertEqual($set->last(), $this->nik);
+
+        $set->filter("name", "Nik");
+        $this->assertEqual($set->count(), 1);
+
+        $set->addFilter(array("true"));
+        $this->assertEqual($set->count(), 0);
+    }
 }
 
 class MockIDataObjectSetDataSource implements IDataObjectSetDataSource {

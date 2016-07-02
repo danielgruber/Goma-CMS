@@ -445,8 +445,11 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
      * checks if the offset exists
      */
 	public function offsetExists($offset) {
-		// third call
-		return $this->__cancall($offset) || gObject::method_exists($this->classname, $offset);
+		if(is_string($offset)) {
+			return $this->__cancall($offset) || gObject::method_exists($this->classname, $offset);
+		}
+
+		return false;
 	}
 
     /**
