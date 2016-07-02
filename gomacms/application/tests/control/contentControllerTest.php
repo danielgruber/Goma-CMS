@@ -104,9 +104,10 @@ class contentControllerTest extends GomaUnitTest
     }
 
     public function testTrackLinking() {
-        $upload = Uploads::addFile("img.jpg", "system/tests/resources/img_1000_480.png", "test.cms");
+        $upload1 = Uploads::addFile("img.jpg", "system/tests/resources/img_1000_480.png", "test.cms");
+        $upload2 = Uploads::addFile("img.jpg", "system/tests/resources/img_1000_750.jpg", "test.cms");
         $page = new Page(array(
-            "data" => '<a href="'.$upload->path.'" lala="pu">Blub 123 haha</a>'
+            "data" => '<a href="'.$upload1->path.'" lala="pu">Blub 123 haha</a> <a href="'.$upload2->path.'" lala="pu">Blub 123 haha</a>'
         ));
         $page->writeToDB(false, true);
 
@@ -115,16 +116,18 @@ class contentControllerTest extends GomaUnitTest
 
         ContentController::outputHook($page->data);
 
-        $this->assertEqual($page->UploadTracking()->count(), 1);
-        $this->assertEqual($page->UploadTracking()->first()->id, $upload->id);
+        $this->assertEqual($page->UploadTracking()->count(), 2);
+        $this->assertEqual($page->UploadTracking()->first()->id, $upload1->id);
+        $this->assertEqual($page->UploadTracking()->last()->id, $upload2->id);
 
         $page->remove(true);
     }
 
     public function testTrackImage() {
-        $upload = Uploads::addFile("img.jpg", "system/tests/resources/img_1000_480.png", "test.cms");
+        $upload1 = Uploads::addFile("img.jpg", "system/tests/resources/img_1000_480.png", "test.cms");
+        $upload2 = Uploads::addFile("img.jpg", "system/tests/resources/img_1000_750.jpg", "test.cms");
         $page = new Page(array(
-            "data" => '<img src="'.$upload->path.'" lala="pu" />'
+            "data" => '<img src="'.$upload1->path.'" lala="pu" /> <img src="'.$upload2->path.'" lala="pu" />'
         ));
         $page->writeToDB(false, true);
 
@@ -133,8 +136,9 @@ class contentControllerTest extends GomaUnitTest
 
         ContentController::outputHook($page->data);
 
-        $this->assertEqual($page->UploadTracking()->count(), 1);
-        $this->assertEqual($page->UploadTracking()->first()->id, $upload->id);
+        $this->assertEqual($page->UploadTracking()->count(), 2);
+        $this->assertEqual($page->UploadTracking()->first()->id, $upload1->id);
+        $this->assertEqual($page->UploadTracking()->last()->id, $upload2->id);
 
         $page->remove(true);
     }
