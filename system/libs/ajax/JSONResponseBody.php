@@ -31,4 +31,16 @@ class JSONResponseBody extends GomaResponseBody
 
         return json_encode($this->body);
     }
+
+    /**
+     * this is required to allow arrays.
+     *
+     * @param string $body
+     * @return $this
+     */
+    public function setBody($body)
+    {
+        $this->body = $body;
+        return $this;
+    }
 }

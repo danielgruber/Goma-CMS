@@ -196,6 +196,7 @@ class GomaResponse extends gObject {
 
     /**
      * @param mixed $status
+     * @return $this
      */
     public function setStatus($status)
     {
@@ -204,6 +205,8 @@ class GomaResponse extends gObject {
         }
 
         $this->status = $status;
+
+        return $this;
     }
 
     /**
@@ -391,7 +394,7 @@ class GomaResponse extends gObject {
      */
     public function getShouldServe()
     {
-        return $this->shouldServe;
+        return $this->shouldServe();
     }
 
     /**
@@ -407,11 +410,13 @@ class GomaResponse extends gObject {
     /**
      * @param GomaResponse $response
      * @internal
+     * @return $this
      */
     public function merge($response) {
         $this->header = array_merge($response->header, $this->header);
         if($this->status == 200 && $response->status != 200) {
             $this->status = $response->status;
         }
+        return $this;
     }
 }

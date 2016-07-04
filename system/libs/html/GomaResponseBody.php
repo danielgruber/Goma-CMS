@@ -132,5 +132,4 @@ class GomaResponseBody extends gObject {
         return $body;
     }
 
-
 }
