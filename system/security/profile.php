@@ -17,17 +17,11 @@ class ProfileController extends FrontedController {
 
 	/**
 	 * allowed actions
-	 *
-	 *@name allowed_actions
-	 *@access public
 	 */
 	public $allowed_actions = array("edit", "login", "logout", "switchlang");
 
 	/**
 	 * profile actions
-	 *
-	 *@name profile_actions
-	 *@access public
 	 */
 	public $profile_actions;
 
@@ -43,9 +37,6 @@ class ProfileController extends FrontedController {
 
 	/**
 	 * shows the edit-screen
-	 *
-	 * @name edit
-	 * @access public
 	 * @return string
 	 */
 	public function edit() {
@@ -72,24 +63,17 @@ class ProfileController extends FrontedController {
 	/**
 	 * default screen
 	 *
-	 * @name index
-	 * @access public
 	 * @return bool|string
 	 */
 	public function index($id = null) {
-		$id = ($id == null) ? $this->getParam("id") : $id;
-		if(!$id && !member::login()) {
-			HTTPResponse::redirect(BASE_URI);
-			exit;
-		}
-
+		$id = ($id == null) ? $this->getParam("action") : $id;
 		if($id == null) {
-			$id = member::$id;
-			Core::addBreadCrumb(lang("profile"), "profile/");
-			Core::setTitle(lang("profile"));
+			if($id = member::$id) {
+				return GomaResponse::redirect(BASE_URI . BASE_SCRIPT . "profile/" . $id . URLEND);
+			} else {
+				return GomaResponse::redirect(BASE_URI);
+			}
 		}
-
-
 
 		$this->tabs = new Tabs("profile_tabs");
 		$this->profile_actions = new HTMLNode("ul");
