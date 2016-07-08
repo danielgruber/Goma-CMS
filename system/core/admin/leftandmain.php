@@ -10,7 +10,6 @@
  *
  * @version     2.2.8
  */
-
 class LeftAndMain extends AdminItem {
 
 	/**
@@ -103,12 +102,6 @@ class LeftAndMain extends AdminItem {
 		Resources::addData("var adminURI = '".$this->adminURI()."'; var marked_node = '".$this->marked."';");
 
 		$data = $this->ModelInst();
-
-		if(is_array($content)) {
-			echo "<pre>";
-			print_r(debug_backtrace());
-			exit;
-		}
 
 		$output = $data->customise(
 			array(

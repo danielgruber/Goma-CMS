@@ -25,7 +25,7 @@ class FormMultiFieldInvalidDataException extends GomaException
 
     /**
      * FormInvalidDataException constructor.
-     * @param array $fieldsMessages
+     * @param string[] $fieldsMessages
      * @param null|int $code
      * @param Exception|null $previous
      */

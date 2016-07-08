@@ -40,7 +40,6 @@ class HTMLParser extends gObject
         }
 
         if ($includeResourcesInBody) {
-
             // we have everything a normal HTML Page should have.
             if (strpos($html, "</title>") && strpos($html, "</body>")) {
 

@@ -23,7 +23,10 @@ function ImageUploadController(field, updateUrl, options) {
     this.super = this.field.fileUpload;
 
     this.registerEventHandler();
-    this.updateCropArea(this.field.upload);
+    this.updateCropArea({
+        status: this.field.upload != 0,
+        file: this.field.upload
+    });
 
     if(typeof options == "object") {
         for(var i in options) {
@@ -47,7 +50,7 @@ ImageUploadController.prototype = {
     aspectRatio: null,
 
     updateCropArea: function(data) {
-        if(data == null) {
+        if(data == null || !data.status) {
             if(this.cropAreaPlaced) {
                 this.super.actions.find(".crop").remove();
                 this.cropAreaPlaced = false;

@@ -11,9 +11,6 @@
 class FileUpload extends FormField {
 	/**
 	 * url-handlers. used for controller.
-	 *
-	 * @name 	url_handlers
-	 * @access 	public
 	 */
 	public $url_handlers = array(
 		"ajaxUpload" => "ajaxUpload",
@@ -22,9 +19,6 @@ class FileUpload extends FormField {
 
 	/**
 	 * used for controller.
-	 *
-	 * @name 	allowed_actions
-	 * @access 	public
 	 */
 	public $allowed_actions = array(
 		"ajaxUpload",
@@ -32,9 +26,6 @@ class FileUpload extends FormField {
 	);
 	/**
 	 * all allowed file-extensions for this field.
-	 *
-	 * @name 	allowed_file_types
-	 * @access 	public
 	 */
 	public $allowed_file_types = array(
 		"jpg",
@@ -63,9 +54,6 @@ class FileUpload extends FormField {
 
 	/**
 	 * collection
-	 *
-	 * @name 	collection
-	 * @access 	public
 	 */
 	public $collection = "FormUpload";
 
@@ -172,62 +160,28 @@ class FileUpload extends FormField {
 	/**
 	 * ajax upload
 	 *
-	 * @name    ajaxUpload
-	 * @access    public
 	 * @return string
 	 */
 	public function ajaxUpload() {
-		if(!isset($_SERVER["HTTP_X_FILE_NAME"]))
-			$_SERVER["HTTP_X_FILE_NAME"] = "";
-
-		if($this->allowed_file_types == "*" || preg_match('/\.(' . implode("|", $this->allowed_file_types) . ')$/i', $_SERVER["HTTP_X_FILE_NAME"])) {
-			if($this->request->inputStreamFile()) {
-				$tmp_name = $this->request->inputStreamFile();
-
-				// filesize problem, file has not been uploaded completly or is corrupted.
-				if(filesize($tmp_name) != $_SERVER["HTTP_X_FILE_SIZE"]) {
-					$this->sendFailureJSON();
-				}
-			} else {
-
-				// no file given
-				$this->sendFailureJSON();
-			}
-
-			// prepare upload-information
-			$upload = array(
-				"name" => $_SERVER["HTTP_X_FILE_NAME"],
-				"size" => $_SERVER["HTTP_X_FILE_SIZE"],
-				"error" => 0,
-				"tmp_name" => $tmp_name
-			);
-
+		if(isset($this->request->post_params["file"])) {
 			try {
-				$response = $this->handleUpload($upload);
-				// clean up
-				if (isset($tmp_name))
-					@unlink($tmp_name);
-
+				$response = $this->handleUpload($this->request->post_params["file"]);
 				/** @var Uploads $response */
 				if (is_object($response)) {
-					HTTPResponse::setHeader("Content-Type", "text/x-json");
-
-					return json_encode(array(
+					return new JSONResponseBody(array(
 						"status" => 1,
 						"file" => $this->getFileResponse($response)
 					));
 				} else if (is_string($response)) {
-
-					// we got an string error, so send it via JSON.
-					$this->sendFailureJSON($response);
+					return $this->sendFailureJSON($response);
 				} else {
-					$this->sendFailureJSON();
+					return $this->sendFailureJSON();
 				}
 			} catch(Exception $e) {
-				$this->sendFailureJSON($e->getMessage());
+				return $this->sendFailureJSON($e->getMessage());
 			}
 		} else {
-			$this->sendFailureJSON(lang("files.filetype_failure", "The filetype isn't allowed."));
+			return $this->sendFailureJSON();
 		}
 	}
 
@@ -250,40 +204,43 @@ class FileUpload extends FormField {
 
 	/**
 	 * sends error with optional status-message in JSON-Format and sets JSON-Header.
+	 * @param null|string $error
+	 * @return GomaResponse
 	 */
 	public function sendFailureJSON($error = null) {
-		HTTPResponse::setHeader("Content-Type", "text/x-json");
+		$error = isset($error) ? $error : lang("files.upload_failure");
 
-		$this->printFailureJSON($error);
+		return new JSONResponseBody(array(
+			"status" => 0,
+			"error" => $error
+		));
 	}
 
 	/**
 	 * prints failure as JSON without JSON-Header.
 	 * @param null|string $error
+	 * @return GomaResponse
 	 */
 	public function printFailureJSON($error = null) {
-		HTTPResponse::sendHeader();
+		$error = isset($error) ? $error : lang("files.upload_failure");
 
-		$error = isset($error) ? $error :  lang("files.upload_failure");
-
-		echo json_encode(array(
+		return new GomaResponse(array(
+			"content-type" => "text/plain"
+		), json_encode(array(
 			"status" => 0,
 			"errstring" => $error
-		));
-		exit;
+		)));
 	}
 
 	/**
 	 * frame upload
 	 *
-	 * @name frameUpload
-	 * @access public
 	 * @return string
 	 */
 	public function frameUpload() {
-		if(isset($_FILES["file"])) {
+		if(isset($this->request->post_params["file"])) {
 			try {
-				$response = $this->handleUpload($_FILES["file"]);
+				$response = $this->handleUpload($this->request->post_params["file"]);
 				/** @var Uploads $response */
 				if (is_object($response)) {
 					return json_encode(array(
@@ -305,8 +262,6 @@ class FileUpload extends FormField {
 
 	/**
 	 * this shouldn't do anything
-	 *@name setValue
-	 *@access public
 	 */
 	public function setValue() {
 	}

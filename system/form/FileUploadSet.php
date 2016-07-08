@@ -14,9 +14,6 @@ class FileUploadSet extends FormField
 {
     /**
      * url-handlers
-     *
-     * @name url_handlers
-     * @access public
      */
     public $url_handlers = array(
         "ajaxUpload" => "ajaxUpload",
@@ -26,9 +23,6 @@ class FileUploadSet extends FormField
 
     /**
      * actions
-     *
-     * @name allowed_actions
-     * @access public
      */
     public $allowed_actions = array(
         "ajaxUpload",
@@ -39,8 +33,6 @@ class FileUploadSet extends FormField
 
     /**
      * all allowed file-extensions
-     * @name allowed_file_types
-     * @access public
      */
     public $allowed_file_types = array(
         "jpg",
@@ -204,22 +196,11 @@ class FileUploadSet extends FormField
     public function ajaxUpload()
     {
         try {
-            if ($this->request->inputStreamFile()) {
-                $tmp_name = $this->request->inputStreamFile();
-
-                if (filesize($tmp_name) != $this->request->getHeader("x-file-size")) {
-                    return $this->sendJSONError(lang("files.upload_failure"));
-                }
-            } else {
+            if (!isset($this->request->post_params["file"])) {
                 return $this->sendJSONError(lang("files.upload_failure"));
             }
 
-            $upload = array(
-                "name" => $this->request->getHeader("x-file-name"),
-                "size" => $this->request->getHeader("x-file-size"),
-                "error" => 0,
-                "tmp_name" => $tmp_name
-            );
+            $upload = $this->request->post_params["file"];
 
             return new JSONResponseBody(array("status" => 1, "file" => $this->getFileArray($this->handleUpload($upload))));
         } catch(Exception $e) {

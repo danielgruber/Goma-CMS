@@ -37,6 +37,7 @@ function FileUpload(form, field, formelement, url, size, types) {
 		url: url + "/frameUpload/",
 		ajaxurl: url + "/ajaxUpload/",
 		browse: this.browse,
+		usePut: false,
 		
 		max_size: size,
 		
@@ -128,7 +129,7 @@ function FileUpload(form, field, formelement, url, size, types) {
 
 				$this.field.upload = null;
 			} else if(data.status == 0) {
-				$this.infoZone.html('<div class="error">'+data.errstring+'</div>');
+				$this.infoZone.html('<div class="error">'+data.error+'</div>');
 			} else {
 				$this.field.upload = data.file;
 				if(data.file["icon128"]) {

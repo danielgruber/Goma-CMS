@@ -5,7 +5,7 @@ defined("IN_GOMA") OR die();
  * Base-Class for FormFields and Form, which handles logic of result and model.
  *
  * @property FormState state
- * @package vorort.news
+ * @package Goma
  *
  * @author Goma-Team
  * @copyright 2016 Goma-Team
@@ -133,7 +133,6 @@ abstract class AbstractFormComponentWithChildren extends AbstractFormComponent {
      * @return AbstractFormComponent|null
      */
     public function getField($name) {
-
         return (isset($this->fields[strtolower($name)])) ? $this->fields[strtolower($name)] : null;
     }
 
@@ -263,6 +262,10 @@ abstract class AbstractFormComponentWithChildren extends AbstractFormComponent {
     public function registerField($name, $field) {
         if($this->parent) {
             $this->parent->registerField($name, $field);
+        }
+
+        if(!is_a($field, "AbstractFormComponent")) {
+            throw new InvalidArgumentException('$field must be AbstractFormComponent');
         }
 
         $this->fields[strtolower($name)] = $field;

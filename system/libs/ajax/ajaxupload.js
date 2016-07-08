@@ -74,7 +74,9 @@ var AjaxUpload = function(DropZone, options) {
 
 AjaxUpload.prototype = {
     uploadRateRefreshTime: 500,
+    usePut: true,
     frames: [],
+    name: "file",
 
     queue: [],
     currentIndex: 0,
@@ -345,10 +347,10 @@ AjaxUpload.prototype = {
     /**
      * ajax upload
      *
-     *@name transferAjax
-     *@param files
+     * @param files
      */
     transferAjax: function(files) {
+        var _this = this;
         if(!this.multiple) {
             if(files.length > 1) {
                 this.errTooManyFiles();
@@ -375,7 +377,17 @@ AjaxUpload.prototype = {
 
             this.queue[_xhr.upload.fileIndex] = {
                 send: function() {
-                    return this.xhr.send(this.upload.fileObj);
+                    if (!_this.usePut) {
+                        var formData = new FormData();
+
+                        formData.append(_this.name, this.upload.fileObj);
+
+                        this.xhr.formData = formData;
+
+                        return this.xhr.send(this.xhr.formData);
+                    } else {
+                        return this.xhr.send(this.upload.fileObj);
+                    }
                 },
                 abort: function() {
                     return this.xhr.abort();
@@ -425,12 +437,17 @@ AjaxUpload.prototype = {
             }
         }, false);
 
-        xhr.open("PUT", this.ajaxurl);
+        if(this.usePut) {
+            xhr.open("PUT", this.ajaxurl);
+
+            xhr.setRequestHeader("X-File-Name", file.fileName.replace(/[^\w\.\-]/g, '-'));
+            xhr.setRequestHeader("X-File-Size", file.fileSize.toString());
+            xhr.setRequestHeader("content-type", "application/octet-stream");
+        } else {
+            xhr.open("POST", this.ajaxurl);
+        }
         xhr.setRequestHeader("Cache-Control", "no-cache");
         xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-        xhr.setRequestHeader("X-File-Name", file.fileName.replace(/[^\w\.\-]/g, '-'));
-        xhr.setRequestHeader("X-File-Size", file.fileSize.toString());
-        xhr.setRequestHeader("content-type", "application/octet-stream");
 
         xhr.onreadystatechange = function (event) {
             if (xhr.readyState === 4) {

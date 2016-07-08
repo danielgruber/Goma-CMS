@@ -91,6 +91,7 @@ var FileUploadSet = function(name, table, url) {
 		url: url + "/frameUpload/",
 		ajaxurl: url + "/ajaxUpload/",
 		browse: this.browse,
+		usePut: false,
 		
 		multiple: true,
 		
