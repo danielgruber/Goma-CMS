@@ -732,11 +732,14 @@ slicedAjaxUpload.prototype = {
 
             // add listeners
             upload.addEventListener("progress", function(event){
-                event.total = this.file.size;
-                event.loaded = this.alreadyDoneFileSize() + event.loaded;
-
-                if(this.progress != null) {
-                    this.progress.apply(this, [event]);
+                if(this.progress != null && event.lengthComputable) {
+                    this.progress.apply(this, [{
+                        total: this.file.size,
+                        loaded: this.alreadyDoneFileSize() + event.loaded,
+                        lengthComputable: true,
+                        timeStamp: event.timeStamp,
+                        type: "gomaprogress"
+                    }]);
                 }
             }.bind(this), false);
 
