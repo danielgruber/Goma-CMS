@@ -98,7 +98,7 @@ class GomaFormResponse extends GomaResponse {
      */
     public function shouldServe()
     {
-        if(!$this->isStringResponse()) {
+        if($this->isStringResponse()) {
             if(!is_string($this->renderedForm)) {
                 return false;
             }
