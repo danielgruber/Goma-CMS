@@ -25,9 +25,6 @@ class BackupAdmin extends TableView
 
     /**
      * url-handlers
-     *
-     *@name url_handlers
-     *@access public
     */
     public $url_handlers = array(
         "execRestore/\$rand!"	=> "execRestore"
@@ -35,9 +32,6 @@ class BackupAdmin extends TableView
 
     /**
      * allowed actions
-     *
-     *@name allowed_actions
-     *@access public
     */
     public $allowed_actions = array(
         "execRestore"
@@ -45,27 +39,18 @@ class BackupAdmin extends TableView
 
     /**
      * title of this view in admin
-     *
-     *@name text
-     *@access public
     */
     public $text = '{$_lang_backups}';
 
     /**
      * permissions needed to view this in admin
-     *
-     *@name rights
-     *@access public
     */
     public $rights = "ADMIN_BACKUP";
 
     /**
      * models, which are assigned to this admin-view
-     *
-     *@name models
-     *@access public
     */
-    public $models = array("BackupModel");
+    public $model = "BackupModel";
 
     /**
      * icon
@@ -74,9 +59,6 @@ class BackupAdmin extends TableView
 
     /**
      * fields we want to show in the table
-     *
-     *@name fields
-     *@access public
     */
     public $fields = array(
         "name" 			=> '{$_lang_filename}',
@@ -88,9 +70,6 @@ class BackupAdmin extends TableView
 
     /**
      * actions, which are shown in the table or below
-     *
-     *@name actions
-     *@access public
     */
     public $actions = array(
         "restore"		=> '<img src="images/icons/fatcow-icons/16x16/site_backup_and_restore.png" alt="{$_lang_backup_restore}" title="{$_lang_backup_restore}" />',
@@ -130,12 +109,9 @@ class BackupAdmin extends TableView
     /**
      * upload a backup
      *
-     * @name upload
-     * @access public
      * @return mixed|string
      */
     public function upload() {
-
         $form = new Form($this, "Backup_Upload", array(
             $file = new FileUpload("file", lang("backup_upload", "Upload a Backup..."), array("gfs", "sgfs"))
         ), array(
@@ -211,8 +187,6 @@ class BackupAdmin extends TableView
 
     /**
      * creates a backup
-     *
-     *@name add_complete
     */
     public function add_complete() {
         if(class_exists("SettingsController")) {
@@ -277,9 +251,6 @@ class BackupAdmin extends TableView
 
     /**
      * executes the restore
-     *
-     *@name execRestore
-     *@access public
     */
     public function execRestore() {
         $rand = $this->getParam("rand");

@@ -28,9 +28,7 @@ class userAdmin extends adminItem {
 	/**
 	 * models
 	*/
-	public $models = array(
-		"user"
-	);
+	public $model = "user";
 	
 	static $icon = "system/templates/admin/images/user.png";
 

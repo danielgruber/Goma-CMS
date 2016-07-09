@@ -10,6 +10,7 @@
  *
  * last modified: 27.02.2015
 */
+// TODO: Fix multiple model support
 class adminItem extends AdminController implements PermProvider {
 	/**
 	 * rights of this item
@@ -25,25 +26,19 @@ class adminItem extends AdminController implements PermProvider {
 	 * text of the link
 	*/
 	public $text;
-	
-	/**
-	 * url_handlers
-	*/
-	public $url_handlers = array(
-		"model/\$model!/\$id!" => "handlerecordformodel"
-	);
-	
+
 	/**
 	 * allowed_actions
 	*/
 	public $allowed_actions = array
 	(
-		"cms_edit", "cms_add", "cms_del", "handlerecordformodel"
+		"cms_edit", "cms_add", "cms_del"
 	);
 	
 	/**
 	 * this property contains all models, this model uses
 	 * @var array
+	 * @deprecated
 	*/
 	public $models = array();
 	
@@ -51,23 +46,37 @@ class adminItem extends AdminController implements PermProvider {
 	 * instances of the models
 	*/
 	public $modelInstances = array();
-	
+
 	/**
 	 * controller inst of the model if set
-	*/ 
+	*/
 	public $controllerInst;
-	
+
 	/**
 	 * the template
 	 * @var string
 	*/
 	public $template = "";
-	
+
 	/**
-	  * where
-	*/
-	public $filter = array();
-	
+	 * adminItem constructor.
+	 * @param null $keyChain
+	 */
+	public function __construct($keyChain = null)
+	{
+		parent::__construct($keyChain);
+
+		if(!$this->model) {
+			if (isset($this->models)) {
+				if (count($this->models) == 1) {
+					$this->model = $this->models[0];
+				} else if (count($this->models) > 1) {
+					throw new InvalidArgumentException("adminItem does not support more than 1 model.");
+				}
+			}
+		}
+	}
+
 	/**
 	 * if is visible
 	*/
@@ -109,53 +118,9 @@ class adminItem extends AdminController implements PermProvider {
 	}
 
 	/**
-	 * creates model-inst
-	 *
-	 * @param ViewAccessableData|null $firstModel
-	 * @return DataObject|gObject|null|ViewAccessAbleData
-	 */
-	public function modelInst($firstModel = null) {
-		if(isset($firstModel) && is_object($firstModel)) {
-			$this->autoSelectModel(true, $firstModel);
-			return $this->model_inst;
-		} else if(is_object($this->model_inst)) {
-			return $this->model_inst;
-		}
-		
-		if(count($this->models) == 1)
-		{
-			$firstModel = ArrayLib::first($this->models);
-			if(!is_object($this->model_inst))
-				$this->model_inst = $this->decorateModel(DataObject::get($firstModel, $this->filter), array(), $this);
-			
-			$this->modelInstances = array($firstModel => $this->model_inst);
-			
-			return $this->model_inst;
-		} else if(count($this->models) > 1) {
-			$models = array();
-			foreach($this->models as $model) {
-				$models[$model] = $this->decorateModel(DataObject::get($model, $this->filter));
-			}
-
-			/** @var ViewAccessableData $model */
-			foreach($models as $model) {
-				$model->customise($models);
-			}
-			
-			$this->modelInstances = $models;
-			// select model
-			$this->autoSelectModel(true, $firstModel);
-			
-			return $this->model_inst;
-		} else {
-			throw new LogicException("No Model for Admin-Module " . $this->classname);
-		}
-	}
-
-	/**
 	 * gives back a instance if this controller with the given model
 	 *
-	 * @param string $name
+	 * @param ViewAccessableData|string $name
 	 * @param bool $onThis set model for this instance or create new instance.
 	 * @return adminItem
 	 */
@@ -167,14 +132,12 @@ class adminItem extends AdminController implements PermProvider {
 		}
 		
 		if($onThis) {
-			/** @var ViewAccessableData $name */
 			$this->setModelInst((is_object($name)) ? $name : $this->modelInstances[$name]);
 			$this->model = null;
 			$this->controllerInst = null;
 			return $this;
 		} else {
 			$controller = clone $this;
-			/** @var ViewAccessableData $name */
 			$controller->setModelInst((is_object($name)) ? $name : $this->modelInstances[$name]);
 			$controller->model = null;
 			$controller->controllerInst = null;
@@ -186,26 +149,31 @@ class adminItem extends AdminController implements PermProvider {
 	/**
 	 * auto selects the model
 	 *
+	 * @param bool $onThis
+	 * @param ViewAccessableData|null $model
 	 * @return adminItem
 	 */
 	public function autoSelectModel($onThis = false, $model = null) {
-		
-		if(isset($model) && is_string($model)) {
-			if(isset($this->modelInstances[$model])) {
-				return $this->selectModel($model, $onThis);
-			}
+		if($onThis) {
+			$this->modelInst($model);
+			return $this;
 		}
-		
-		// get
-		if(isset($this->request->get_params["model"]))
-			if(isset($this->modelInstances[$this->request->get_params["model"]])) {
-				return $this->selectModel($this->request->get_params["model"], $onThis);
-			}
-			
-		
-		// preselect first model
-		return $this->selectModel(ArrayLib::firstkey($this->modelInstances), $onThis);
-			
+
+		$controller = clone $this;
+		$controller->modelInst($model);
+		return $controller;
+	}
+
+	/**
+	 * @param string $model
+	 * @return bool
+	 */
+	public function createDefaultSetFromModel($model) {
+		if(parent::createDefaultSetFromModel($model)) {
+			$this->decorateModel($this->model_inst);
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -217,7 +185,6 @@ class adminItem extends AdminController implements PermProvider {
 	 * @return DataObject
 	 */
 	public function decorateModel($model, $additional = array(), $controller = null) {
-		
 		$model->customise(array_merge(array(
 			"admintitle"	=> $this->adminTitle(),
 			"url"			=> $this->url(),
@@ -248,7 +215,6 @@ class adminItem extends AdminController implements PermProvider {
 	 * @return mixed
 	 */
 	public function __call($methodName, $args) {
-		
 		if(gObject::method_exists($this->getControllerInst(), $methodName)) {
 			$this->getControllerInst()->request = $this->request;
 			return call_user_func_array(array($this->getControllerInst(), $methodName), $args);
@@ -380,63 +346,35 @@ class adminItem extends AdminController implements PermProvider {
 	}
 
 	/**
-	 * gets a controller for a record in a given model
-	 *
-	 * @return string
-	 */
-	public function handleRecordForModel() {
-		
-		$model = $this->getParam("model");
-		$id = $this->getParam("id");
-		
-		if(!in_array($model, $this->models)) {
-			return $this->index();
-		}
-		
-		$data = DataObject::get($model, array("id" => $id));
-		
-		$this->callExtending("handleRecordForModel", $model);
-		$this->decorateRecord($data);
-		$data = $this->decorateModel($data);
-		
-		if($data->Count() > 0) {
-			return $this->selectModel($data->first())->handleRequest($this->request);
-		} else {
-			return $this->index();
-		}
-	}
-
-	/**
 	 * handles a request with a given record in it's controller
 	 *
 	 * @return string
 	 */
 	public function record() {
-		$id = $this->getParam("id");
-		
-		$model = $this->model();
-		
-		// get data
-		$data = DataObject::get($model, array("id" => $id));
-		$this->callExtending("handleRecord", $model);
-		$this->decorateRecord($data);
-		$data = $this->decorateModel($data);
-
-		// check for deleted if no data is there
-		if($data->Count() > 0) {
-			return $this->selectModel($data->first())->handleRequest($this->request);
-		} else {
-			// get data
-			$data = DataObject::get_versioned($model, "group", array("recordid" => $id));
-			$this->callExtending("handleRecord", $model);
+		if (is_a($this->modelInst(), "IDataSet")) {
+			$data = clone $this->modelInst();
+			$data->addFilter(array("id" => $this->getParam("id")));
+			$this->callExtending("decorateRecord", $model);
 			$this->decorateRecord($data);
-			$data = $this->decorateModel($data);
-
-			if($data->Count() > 0) {
-				return $this->selectModel($data->first())->handleRequest($this->request);
+			$this->decorateModel($data);
+			if ($data->first() != null) {
+				return $this->getWithModel($data->first())->handleRequest($this->request);
 			} else {
+				if(is_a($this->modelInst(), "DataObjectSet")) {
+					$clonedData = clone $data;
+					$clonedData->setVersion("group");
+					$this->decorateRecord($clonedData);
+					$this->decorateModel($clonedData);
+
+					if($clonedData->Count() > 0) {
+						return $this->selectModel($clonedData->first())->handleRequest($this->request);
+					}
+				}
+
 				return $this->index();
 			}
+		} else {
+			return $this->index();
 		}
 	}
 }

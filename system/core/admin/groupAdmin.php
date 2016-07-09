@@ -29,9 +29,7 @@ class groupAdmin extends adminItem {
 	/**
 	 * models
 	*/
-	public $models = array(
-		"group"
-	);
+	public $model = "group";
 	
 	static $icon = "system/templates/admin/images/group.png";
 	
