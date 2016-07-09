@@ -24,7 +24,7 @@ function ImageUploadController(field, updateUrl, options) {
 
     this.registerEventHandler();
     this.updateCropArea({
-        status: this.field.upload != 0,
+        status: this.field.upload != null,
         file: this.field.upload
     });
 
