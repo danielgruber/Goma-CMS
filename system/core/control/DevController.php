@@ -269,8 +269,9 @@ class Dev extends RequestHandler {
 				return false;
 			$file = ROOT . CACHE_DIRECTORY . "/" . $filename;
 
+			/** @var GomaFormResponse $return */
 			$return = call_user_func_array(array("G_" . $name . "SoftwareType", "buildDistro"), array($file, $subname, $this));
-			if(is_string($return))
+			if(is_a($return, "GomaFormResponse") && $return->isStringResponse() && !is_bool($return->getRawBody()))
 				return $return;
 
 			FileSystem::sendFile($file);
