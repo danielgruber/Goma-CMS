@@ -75,6 +75,8 @@ var AjaxUpload = function(DropZone, options) {
 AjaxUpload.prototype = {
     uploadRateRefreshTime: 500,
     usePut: true,
+    useSlice: false,
+    sliceSize: 4194304, // 4MB
 
     frames: [],
     name: "file",
@@ -274,7 +276,7 @@ AjaxUpload.prototype = {
      *
      *@name _complete
      */
-    _complete: function(event, uploadInst, fileIndex, upload) {
+    _complete: function(uploadInst, fileIndex, upload) {
         var now = new Date().getTime();
         var timeDiff = now - upload.downloadStartTime;
 
@@ -292,10 +294,6 @@ AjaxUpload.prototype = {
 
     /**
      * progress-handler
-     *
-     *@name progress
-     *@access public
-     *@method event
      */
     _progress: function(event, upload) {
         if (event.lengthComputable) {
@@ -366,36 +364,18 @@ AjaxUpload.prototype = {
         for ( var i = 0; i < files.length; i++) {
             var file = files[i];
 
-            if(typeof file.name != "undefined") {
-                file.fileName = file.name;
-            }
-
-            if(typeof file.size != "undefined") {
-                file.fileSize = file.size;
-            }
-
             var _xhr = this.generateXHR(i, file);
 
-            this.queue[_xhr.upload.fileIndex] = {
+            this.queue[_xhr.fileIndex] = {
                 send: function() {
-                    if (!_this.usePut) {
-                        var formData = new FormData();
-
-                        formData.append(_this.name, this.upload.fileObj);
-
-                        this.xhr.formData = formData;
-
-                        return this.xhr.send(this.xhr.formData);
-                    } else {
-                        return this.xhr.send(this.upload.fileObj);
-                    }
+                    this.xhr.send();
                 },
                 abort: function() {
                     return this.xhr.abort();
                 },
-                fileIndex: _xhr.upload.fileIndex,
+                fileIndex: _xhr.fileIndex,
                 xhr: _xhr,
-                upload: _xhr.upload
+                upload: _xhr
             };
 
             this.loading = true;
@@ -414,57 +394,31 @@ AjaxUpload.prototype = {
      *@access public
      */
     generateXHR: function(i, file) {
+        var _this = this;
 
-        var $this = this;
-
-        // create a new xhr object
-        var xhr = new XMLHttpRequest();
-        var upload = xhr.upload;
-        upload.fileIndex = i + this.queue.length;
-        upload.fileObj = file;
-        upload.downloadStartTime = new Date().getTime();
-        upload.currentStart = new Date().getTime();
-        upload.currentProgress = 0;
-        upload.startData = 0;
-        upload.fileName = file.fileName;
-        upload.fileSize = file.fileSize;
-
-        // add listeners
-        upload.addEventListener("progress", function(event){
-            var currentStart = $this._progress(event, this);
-            if(currentStart) {
-                $this.startData = event.loaded;
-                $this.currentStart = currentStart;
+        return new slicedAjaxUpload(this.ajaxurl, file, this.useSlice ? this.sliceSize : -1, {
+            usePut: this.usePut,
+            fileIndex: i + this.queue.length,
+            currentStart: new Date().getTime(),
+            currentProgress: 0,
+            startData: 0,
+            downloadStartTime: new Date().getTime(),
+            progress: function(event) {
+                var currentStart = _this._progress(event, this);
+                if(currentStart) {
+                    this.startData = event.loaded;
+                    this.currentStart = currentStart;
+                }
+            },
+            done: function(data, xhr, uploader) {
+                _this._complete(xhr, uploader.fileIndex, uploader);
+                _this._success(xhr.responseText, uploader.fileIndex, uploader);
+            },
+            fail: function(status, data, xhr, uploader) {
+                _this._complete(xhr, uploader.fileIndex, uploader);
+                _this._fail(xhr.status, xhr.responseText, uploader.fileIndex, uploader);
             }
-        }, false);
-
-        if(this.usePut) {
-            xhr.open("PUT", this.ajaxurl);
-
-            xhr.setRequestHeader("X-File-Name", file.fileName.replace(/[^\w\.\-]/g, '-'));
-            xhr.setRequestHeader("X-File-Size", file.fileSize.toString());
-            xhr.setRequestHeader("content-type", "application/octet-stream");
-        } else {
-            xhr.open("POST", this.ajaxurl);
-        }
-        xhr.setRequestHeader("Cache-Control", "no-cache");
-        xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-
-        xhr.onreadystatechange = function (event) {
-            if (xhr.readyState === 4) {
-                $this._complete(event, this, this.upload.fileIndex, this.upload);
-            }
-
-            if (xhr.readyState === 4 && xhr.responseText !== "" && xhr.status === 200) {
-                $this._success(xhr.responseText, this.upload.fileIndex, this.upload);
-            }
-
-            if(xhr.readyState === 4 && xhr.status !== 200) {
-                $this._fail(xhr.status, xhr.responseText, this.upload.fileIndex, this.upload);
-            }
-        };
-
-        return xhr;
+        });
     },
 
     /**
@@ -476,8 +430,8 @@ AjaxUpload.prototype = {
     processQueue: function() {
         for(var i in this.queue) {
             if(!this.queue[i].loading && !this.queue[i].loaded) {
-                if(this.checkFileExt(this.queue[i].upload.fileName)) {
-                    if(this.max_size === -1 || typeof this.queue[i].upload.fileSize === "undefined" || this.queue[i].upload.fileSize <= this.max_size) {
+                if(this.checkFileExt(this.queue[i].upload.file.name)) {
+                    if(this.max_size === -1 || typeof this.queue[i].upload.file.size === "undefined" || this.queue[i].upload.file.size <= this.max_size) {
                         this.queue[i].loading = true;
                         this.queue[i].send();
                         this.uploadStarted(i, this.queue[i].upload);
@@ -691,6 +645,160 @@ AjaxUpload.prototype = {
             this._complete(null, this, index, this.queue[index].upload);
             this.queue[index].loading = false;
             this.queue[index].loaded = true;
+        }
+    }
+};
+
+var slicedAjaxUpload = function(url, file, sliceSize, options) {
+    this.url = url;
+    this.file = file;
+    this.sliceSize = sliceSize > 0 ? sliceSize : file.size;
+
+    for(var i in options) {
+        if(options.hasOwnProperty(i)) {
+            this[i] = options[i];
+        }
+    }
+
+    this.initSliceMethod();
+    this.init();
+
+    return this;
+};
+
+slicedAjaxUpload.prototype = {
+    usePut: true,
+    name: "file",
+    progress: null,
+    fail: null,
+    done: null,
+
+    downloadStartTime: new Date().getTime(),
+    currentStart: new Date().getTime(),
+
+    _currentXHR: null,
+
+    _slices: [],
+
+    init: function() {
+        this._slices = [];
+        for(var start = 0; start < this.file.size; start += this.sliceSize) {
+            this._slices.push({
+                start: start,
+                end: Math.min(start + this.sliceSize, this.file.size),
+                done: false
+            });
+        }
+    },
+
+    initSliceMethod: function() {
+        if ('mozSlice' in this.file) {
+            this.slice_method = 'mozSlice';
+        }
+        else if ('webkitSlice' in this.file) {
+            this.slice_method = 'webkitSlice';
+        }
+        else {
+            this.slice_method = 'slice';
+        }
+    },
+
+    alreadyDoneSlices: function() {
+        var a = 0;
+        for(var i in this._slices) {
+            if(this._slices.hasOwnProperty(i)) {
+                if(this._slices[i].done) {
+                    a++;
+                } else {
+                    break;
+                }
+            }
+        }
+        return a;
+    },
+
+    alreadyDoneFileSize: function() {
+        return this.alreadyDoneSlices() * this.sliceSize;
+    },
+
+    _sendNextJunk: function() {
+        var next = this.alreadyDoneSlices();
+
+        if(this._slices.hasOwnProperty(next)) {
+            var xhr = new XMLHttpRequest();
+            var upload = xhr.upload;
+            upload.slice = next;
+            upload.uploader = this;
+
+            // add listeners
+            upload.addEventListener("progress", function(event){
+                event.total = this.file.size;
+                event.loaded = this.alreadyDoneFileSize() + event.loaded;
+
+                if(this.progress != null) {
+                    this.progress.apply(this, [event]);
+                }
+            }.bind(this), false);
+
+            if(this.usePut) {
+                xhr.open("PUT", this.url);
+
+                xhr.setRequestHeader("content-type", "application/octet-stream");
+            } else {
+                xhr.open("POST", this.url);
+            }
+
+            xhr.setRequestHeader("X-File-Name", this.file.name.replace(/[^\w\.\-]/g, '-'));
+            xhr.setRequestHeader("X-File-Size", this.file.size.toString());
+            xhr.setRequestHeader("Cache-Control", "no-cache");
+            xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+            xhr.setRequestHeader("Content-Range", "bytes " + this._slices[next].start + " - " + this._slices[next].end);
+
+            xhr.onreadystatechange = function (event) {
+                if (xhr.readyState === 4 && xhr.responseText !== "" && xhr.status === 200) {
+                    this.upload.uploader._slices[this.upload.slice].done = true;
+                    this.upload.uploader._sendNextJunk();
+                }
+
+                if(xhr.readyState === 4 && xhr.status !== 200) {
+                    this.upload.uploader._sendFail(xhr);
+                }
+            }.bind(xhr);
+
+            var chunk = this._slices[next].start == 0 && this._slices[next].end == this.file.size ? this.file :
+                this.file[this.slice_method](this._slices[next].start, this._slices[next].end);
+
+            if (!this.usePut) {
+                var formData = new FormData();
+                formData.append(this.name, chunk, this.file.name);
+                xhr.formData = formData;
+
+                xhr.send(xhr.formData);
+            } else {
+                xhr.send(chunk);
+            }
+
+            this._currentXHR = xhr;
+        } else {
+            if(this.done) {
+                this.done(this._currentXHR.responseText, this._currentXHR, this);
+            }
+        }
+    },
+
+    _sendFail: function(xhr) {
+        if(this.fail) {
+            this.fail(xhr.status, xhr.responseText, xhr, this);
+        }
+    },
+
+    send: function() {
+        this._sendNextJunk();
+    },
+
+    abort: function() {
+        if(this._currentXHR) {
+            this._currentXHR.abort();
         }
     }
 };

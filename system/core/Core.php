@@ -3,6 +3,7 @@
 /**
  * Goma Core.
  *
+ * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package		Goma\Core
  * @version		3.4
  */

@@ -85,6 +85,11 @@ class FileUpload extends FormField {
 	protected $templateView;
 
 	/**
+	 * @var string
+	 */
+	protected $chunkKey;
+
+	/**
 	 * creates field.
 	 * @param string $name
 	 * @param string $title
@@ -163,25 +168,34 @@ class FileUpload extends FormField {
 	 * @return string
 	 */
 	public function ajaxUpload() {
-		if(isset($this->request->post_params["file"])) {
-			try {
-				$response = $this->handleUpload($this->request->post_params["file"]);
-				/** @var Uploads $response */
-				if (is_object($response)) {
-					return new JSONResponseBody(array(
-						"status" => 1,
-						"file" => $this->getFileResponse($response)
-					));
-				} else if (is_string($response)) {
-					return $this->sendFailureJSON($response);
-				} else {
-					return $this->sendFailureJSON();
-				}
-			} catch(Exception $e) {
-				return $this->sendFailureJSON($e->getMessage());
+		try {
+			if(!$this->chunkKey) {
+				$this->chunkKey = randomString(10);
 			}
-		} else {
-			return $this->sendFailureJSON();
+			$chunkedUpload = new ChunkedUploadHandler($this->request, "file", $this->chunkKey);
+			if(!$chunkedUpload->isFinished()) {
+				return new JSONResponseBody(array(
+					"status" => 2,
+					"wait" 	 => true,
+					"done"	 => $chunkedUpload->getStatus()
+				));
+			}
+
+			$response = $this->handleUpload($chunkedUpload->getFileArray());
+			$chunkedUpload->delete();
+			/** @var Uploads $response */
+			if (is_object($response)) {
+				return new JSONResponseBody(array(
+					"status" => 1,
+					"file" => $this->getFileResponse($response)
+				));
+			} else if (is_string($response)) {
+				return $this->sendFailureJSON($response);
+			} else {
+				return $this->sendFailureJSON();
+			}
+		} catch(Exception $e) {
+			return $this->sendFailureJSON($e->getMessage());
 		}
 	}
 

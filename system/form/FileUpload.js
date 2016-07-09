@@ -38,6 +38,7 @@ function FileUpload(form, field, formelement, url, size, types) {
 		ajaxurl: url + "/ajaxUpload/",
 		browse: this.browse,
 		usePut: false,
+		useSlice: true,
 		
 		max_size: size,
 		
