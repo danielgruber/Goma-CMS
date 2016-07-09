@@ -1,15 +1,13 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma cms
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
+  * @package goma cms
+  * @link http://goma-cms.org
+  * @license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  * @author Goma-Team
   * last modified: 24.11.2012
   * $Version 1.3
 */
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
 class welcomeController extends Controller {
 	/**
 	 * allowed_actions
@@ -57,8 +55,7 @@ class welcomeController extends Controller {
 		));
 		$form->setSubmission("user_create");
 		$form->addValidator(new FormValidator(array($this, "validatePassword")), "password");
-		$data = new ViewAccessableData();
-		return $data->customise(array("form" => $form->render()))->renderWith("welcome/step2.html");
+		return $form->renderWith("welcome/step2.html");
 	}
 	/**
 	 * step 3
@@ -73,9 +70,8 @@ class welcomeController extends Controller {
 		));
 		$form->setSubmission("saveSettings");
 		$form->addValidator(new RequiredFields(array("pagetitle")), "pagetitle");
-		
-		$data = new ViewAccessableData();
-		return $data->customise(array("form" => $form->render()))->renderWith("welcome/step3.html");
+
+		return $form->renderWith("welcome/step3.html");
 	}
 	/**
 	 * user-creation
@@ -89,7 +85,7 @@ class welcomeController extends Controller {
 		$data->writeToDB(true, true);
 		$data->groups()->add(DataObject::get_one("group", array("type" => 2)));
 		$data->groups()->commitStaging(false, true);
-		HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "step3/");
+		return GomaResponse::redirect(BASE_URI . BASE_SCRIPT . "step3/");
 	}
 	/**
 	 * pwd-validation
@@ -114,13 +110,10 @@ class welcomeController extends Controller {
 		$data->titel = $result["pagetitle"];
 		$data->timezone = $result["timezone"];
 		$data->writeToDB(false, true);
-		HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "finish/");
+		return GomaResponse::redirect(BASE_URI . BASE_SCRIPT . "finish/");
 	}
 	/**
 	 * finishes the process
-	 *
-	 *@name finish
-	 *@access public
 	*/
 	public function finish() {
 		Resources::add("default.css");
@@ -128,7 +121,7 @@ class welcomeController extends Controller {
 		if(@fopen(APP_FOLDER . "application/WELCOME_RUN.php", "w")) {
 			fclose(APP_FOLDER . "application/WELCOME_RUN.php");
 		} else {
-			throwError(6, "PHP-Error", "Write-Error: Could not write '" . CURRENT_PROJECT . "/application/WELCOME_RUN.php'. Please create this file for security reason!");
+			throw new FileException("Write-Error: Could not write '" . CURRENT_PROJECT . "/application/WELCOME_RUN.php'. Please create this file for security reason!");
 		}
 		return tpl::render("welcome/finish.html");
 	}

@@ -75,6 +75,7 @@ var AjaxUpload = function(DropZone, options) {
 AjaxUpload.prototype = {
     uploadRateRefreshTime: 500,
     usePut: true,
+
     frames: [],
     name: "file",
 
@@ -432,8 +433,8 @@ AjaxUpload.prototype = {
         upload.addEventListener("progress", function(event){
             var currentStart = $this._progress(event, this);
             if(currentStart) {
-                this.startData = event.loaded;
-                this.currentStart = currentStart;
+                $this.startData = event.loaded;
+                $this.currentStart = currentStart;
             }
         }, false);
 

@@ -26,7 +26,7 @@ class ContactController extends PageController
             new TextField('subject', lang("subject")),
             new email("email", lang("email")),
             new textarea("text", lang("text"), null, "300px"),
-            new captcha("captcha")
+            //new captcha("captcha")
         ),
             array(
                 new FormAction("submit", lang("lp_submit"))
@@ -43,13 +43,13 @@ class ContactController extends PageController
             $form->addValidator(new RequiredFields(array("name", "text")), "Required Fields");
         }
 
-        $response = $form->render();
-        if(is_string($response)) {
-            $this->tplVars["content"] = $this->modelInst()->data()->forTemplate() . $response;
-            return parent::index();
+        $renderedForm = $form->render();
+        if($renderedForm->shouldServe()) {
+            $this->tplVars["content"] = $this->modelInst()->data()->forTemplate() . $renderedForm->getResponseBodyString();
+            $renderedForm->setBodyString(parent::index());
         }
 
-        return $response;
+        return $renderedForm;
     }
 
     /**
@@ -80,10 +80,13 @@ class ContactController extends PageController
      * @return GomaResponse
      */
     public function submitAndSend($data, $from = null) {
+        return $this->confirmByForm("blub", function() use($data, $from) {
             $this->send($data, $from);
 
             AddContent::addSuccess(lang("mail_successful_sent"));
 
-        return GomaResponse::redirect(BASE_URI . $this->namespace);
+            return GomaResponse::redirect(BASE_URI . $this->namespace);
+        });
+
     }
 }

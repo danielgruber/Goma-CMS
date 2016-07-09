@@ -74,7 +74,7 @@ class ContactBox extends Box
 
         $form->addValidator(new RequiredFields(array("name", "text")), "Required Fields");
 
-        return $this->text . $form->render();
+        return $form->renderPrependString($this->text);
     }
 
     /**

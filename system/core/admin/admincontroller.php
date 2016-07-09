@@ -78,16 +78,15 @@ class adminController extends Controller
     }
 
     /**
-     *__construct
+     * @param null $keyChain
      */
-    public function __construct()
+    public function __construct($keyChain = null)
     {
-
+        parent::__construct($keyChain);
 
         Resources::addData("goma.ENV.is_backend = true;");
         defined("IS_BACKEND") OR define("IS_BACKEND", true);
         Core::setHeader("robots", "noindex, nofollow");
-        parent::__construct();
     }
 
     /**

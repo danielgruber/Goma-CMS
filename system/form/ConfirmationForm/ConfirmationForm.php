@@ -33,22 +33,6 @@ class ConfirmationForm extends Form {
     protected $random;
 
     /**
-     * @param RequestHandler $controller
-     * @param Request $request
-     * @return string|void
-     */
-    public function initWithRequest($controller, $request)
-    {
-        parent::initWithRequest($controller, $request);
-
-        foreach($this->getRequest()->post_params as $key => $value) {
-            if(!$this->hasField($key)) {
-                $this->add(new HiddenField($key, $value));
-            }
-        }
-    }
-
-    /**
      * @param string $methodName
      * @param array $args
      * @return mixed

@@ -99,6 +99,13 @@ class Form extends AbstractFormComponentWithChildren {
 	protected $leaveCheck = true;
 
 	/**
+	 * session-manager.
+	 *
+	 * @var ISessionManager
+	 */
+	protected $session;
+
+	/**
 	 * @param RequestHandler|null $controller
 	 * @param string|null $name
 	 * @param array $fields
@@ -119,8 +126,9 @@ class Form extends AbstractFormComponentWithChildren {
 	 * @param array $validators
 	 * @param Request|null $request
 	 * @param ViewAccessableData|null $model
+	 * @param ISessionManager $session
 	 */
-	public function __construct($controller = null, $name = null, $fields = array(), $actions = array(), $validators = array(), $request = null, $model = null) {
+	public function __construct($controller = null, $name = null, $fields = array(), $actions = array(), $validators = array(), $request = null, $model = null, $session = null) {
 
 		parent::__construct(strtolower($name), $fields, $model);
 
@@ -130,6 +138,7 @@ class Form extends AbstractFormComponentWithChildren {
 		if(PROFILE)
 			Profiler::mark("form::__construct");
 
+		$this->session = isset($session) ? $session : GlobalSessionManager::globalSession();
 		$this->initWithRequest($controller, $request);
 
 		$this->addFields(array(), $actions, $validators);
@@ -201,10 +210,10 @@ class Form extends AbstractFormComponentWithChildren {
 	protected function checkForRestore() {
 		// if we restore form
 		if(
-			GlobalSessionManager::globalSession()->hasKey("form_restore." . $this->name()) &&
-			GlobalSessionManager::globalSession()->hasKey(self::SESSION_PREFIX . "." . strtolower($this->name))
+			$this->session->hasKey("form_restore." . $this->name()) &&
+			$this->session->hasKey(self::SESSION_PREFIX . "." . strtolower($this->name))
 		) {
-			$data = GlobalSessionManager::globalSession()->get(self::SESSION_PREFIX . "." . strtolower($this->name));
+			$data = $this->session->get(self::SESSION_PREFIX . "." . strtolower($this->name));
 			$this->useStateData = $data->useStateData;
 			$this->result = $data->result;
 			$this->state = $data->state;
@@ -214,11 +223,11 @@ class Form extends AbstractFormComponentWithChildren {
 				$this->activateSecret($data->secretKey);
 			}
 
-			GlobalSessionManager::globalSession()->remove("form_restore." . $this->name());
+			$this->session->remove("form_restore." . $this->name());
 		} else {
 			// get form-state
-			if(GlobalSessionManager::globalSession()->hasKey("form_state_" . $this->name)) {
-				$this->state = new FormState(GlobalSessionManager::globalSession()->get("form_state_" . $this->name));
+			if($this->session->hasKey("form_state_" . $this->name)) {
+				$this->state = new FormState($this->session->get("form_state_" . $this->name));
 				$this->activateSecret($this->state->secret);
 			} else {
 				$this->state = new FormState();
@@ -241,22 +250,16 @@ class Form extends AbstractFormComponentWithChildren {
 
 	/**
 	 * activates restore for next generate
-	 *
-	 *@name activateRestore
-	 *@access public
 	 */
 	public function activateRestore() {
-		GlobalSessionManager::globalSession()->set("form_restore." . $this->name, true);
+		$this->session->set("form_restore." . $this->name, true);
 	}
 
 	/**
 	 * disables restore for next generate
-	 *
-	 *@name disableRestore
-	 *@access public
 	 */
 	public function disableRestore() {
-		GlobalSessionManager::globalSession()->remove("form_restore." . $this->name);
+		$this->session->remove("form_restore." . $this->name);
 	}
 
 	/**
@@ -271,7 +274,7 @@ class Form extends AbstractFormComponentWithChildren {
 	/**
 	 * generates default fields for this form
 	 */
-	public function defaultFields() {
+	protected function defaultFields() {
 		$this->add(new HiddenField("form_submit_" . $this->name(), "1"));
 
 		Resources::add("system/form/form.js", "js", "tpl");
@@ -283,25 +286,40 @@ class Form extends AbstractFormComponentWithChildren {
 	/**
 	 * renders the form
 	 *
-	 * @return mixed|string
+	 * @return GomaResponse
+	 * @internal
 	 */
-	public function render() {
+	public function renderData() {
 		Resources::add("form.less", "css");
 
+		$this->defaultFields();
+
+		$this->form->html("");
+
 		// check for submit or append info for user to resubmit.
-		if(isset($this->getRequest()->post_params["form_submit_" . $this->name()]) &&
-			GlobalSessionManager::globalSession()->hasKey(self::SESSION_PREFIX . "." . strtolower($this->name))) {
+		if((isset($this->getRequest()->post_params["form_submit_" . $this->name()]) &&
+			$this->session->hasKey(self::SESSION_PREFIX . "." . strtolower($this->name)))) {
 
 			// check secret
 			if($this->secretKey && isset($this->getRequest()->post_params["secret_" . $this->ID()]) &&
 				$this->getRequest()->post_params["secret_" . $this->ID()] == $this->state->secret) {
-				$this->defaultFields();
 				return $this->trySubmit();
 			} else if(!$this->secretKey) {
-				$this->defaultFields();
 				return $this->trySubmit();
 			} else {
 				$this->form->append(new HTMLNode("div", array("class" => "notice form"), lang("form_not_saved_yet", "The Data hasn't saved yet.")));
+			}
+		} else if(isset($this->getRequest()->post_params["__form_step_done_" . $this->getName()])) {
+			$oldRequest = $this->getRequest();
+
+			if($data = $this->session->get(self::SESSION_PREFIX . "_multistep_" . $this->getName())) {
+				$this->request = $data["request"];
+
+				$response = $this->trySubmit();
+
+				$this->request = $oldRequest;
+
+				return $response;
 			}
 		}
 
@@ -309,11 +327,34 @@ class Form extends AbstractFormComponentWithChildren {
 			return $data;
 		}
 
-		// render form now.
-		GlobalSessionManager::globalSession()->remove("form_secrets." . $this->name());
+		$this->session->remove("form_secrets." . $this->name());
 
-		$this->defaultFields();
 		return $this->renderForm();
+	}
+
+	/**
+	 * @return GomaFormResponse
+	 */
+	public function render() {
+		return new GomaFormResponse($this);
+	}
+
+	/**
+	 * @param string|ViewAccessableData $model
+	 * @param string $view
+	 * @param string $formName
+	 * @return GomaResponse
+     */
+	public function renderWith($model, $view = null, $formName = "form") {
+		return GomaFormResponse::create($this)->renderWith($model, $view, $formName);
+	}
+
+	/**
+	 * @param string $content
+	 * @return GomaResponse
+	 */
+	public function renderPrependString($content) {
+		return GomaFormResponse::create($this)->prependContent($content);
 	}
 
 	/**
@@ -326,7 +367,7 @@ class Form extends AbstractFormComponentWithChildren {
 				if (preg_match("/^field_action_([a-zA-Z0-9_]+)_([a-zA-Z0-9_]+)$/", $key, $matches)) {
 					if (isset($this->fields[$matches[1]]) && $this->fields[$matches[1]]->hasAction($matches[2])) {
 						$this->activateRestore();
-						if ($data = GlobalSessionManager::globalSession()->get(self::SESSION_PREFIX . "." . strtolower($this->name))) {
+						if ($data = $this->session->get(self::SESSION_PREFIX . "." . strtolower($this->name))) {
 							$this->result = $data->result;
 							$this->post = $data->post;
 							$this->restorer = $data;
@@ -404,7 +445,7 @@ class Form extends AbstractFormComponentWithChildren {
 		if(PROFILE)
 			Profiler::unmark("Form::renderForm::render");
 
-		GlobalSessionManager::globalSession()->set("form_state_" . $this->name, $this->state->ToArray());
+		$this->session->set("form_state_" . $this->name, $this->state->ToArray());
 
 		$this->saveToSession();
 
@@ -555,7 +596,7 @@ class Form extends AbstractFormComponentWithChildren {
 		}
 
 		/** @var Form $data */
-		$data = GlobalSessionManager::globalSession()->get(self::SESSION_PREFIX . "." . strtolower($this->name));
+		$data = $this->session->get(self::SESSION_PREFIX . "." . strtolower($this->name));
 		$data->request = $this->request;
 
 		$this->saveToSession();
@@ -563,7 +604,14 @@ class Form extends AbstractFormComponentWithChildren {
 		try {
 			$content = $data->handleSubmit();
 
-			GlobalSessionManager::globalSession()->set("form_state_" . $this->name, $this->state->ToArray());
+			if(is_a($content, "Form")) {
+				$content = $this->handleNextForm($content);
+			} else if(is_a($content, "GomaFormResponse")) {
+				/** @var GomaFormResponse $content */
+				$content = $this->handleNextForm($content->getForm());
+			}
+
+			$this->session->set("form_state_" . $this->name, $this->state->ToArray());
 
 			return $content;
 		} catch(Exception $e) {
@@ -579,10 +627,30 @@ class Form extends AbstractFormComponentWithChildren {
 			$this->state = $data->state;
 			$this->state->secret = $this->secretKey;
 
-			$this->defaultFields();
-
 			return $this->renderForm($errors);
 		}
+	}
+
+	/**
+	 * @param Form $form
+	 * @return mixed|string
+	 */
+	protected function handleNextForm($form) {
+		if($form->getName() == $this->getName()) {
+			throw new InvalidArgumentException("Multi-Step-Forms require different names.");
+		}
+
+		$form->add(new HiddenField("__form_step_done_" . $this->getName(), 1));
+
+		$this->session->set(self::SESSION_PREFIX . "_multistep_" . $this->getName(), array(
+			"request"	=> $this->request
+		));
+
+		if(isset($this->getRequest()->post_params["secret_" . $this->ID()])) {
+			$this->activateSecret($this->getRequest()->post_params["secret_" . $this->ID()]);
+		}
+
+		return $form->render();
 	}
 
 	/**
@@ -596,6 +664,7 @@ class Form extends AbstractFormComponentWithChildren {
 	 * @throws FormNotValidException
 	 */
 	protected function handleSubmit() {
+
 		$submissionWithoutValidation = self::findSubmission($this, $this->getRequest()->post_params, null);
 
 		$result = $this->gatherResultForSubmit(is_null($submissionWithoutValidation));
@@ -867,7 +936,7 @@ class Form extends AbstractFormComponentWithChildren {
 	 * saves current form to session
 	 */
 	public function saveToSession() {
-		GlobalSessionManager::globalSession()->set(self::SESSION_PREFIX . "." . strtolower($this->name), $this);
+		$this->session->set(self::SESSION_PREFIX . "." . strtolower($this->name), $this);
 	}
 
 	/**

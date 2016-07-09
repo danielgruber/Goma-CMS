@@ -419,4 +419,8 @@ class GomaResponse extends gObject {
         }
         return $this;
     }
+
+    public function getRawBody() {
+        return $this->getBody()->getBody();
+    }
 }

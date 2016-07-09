@@ -53,11 +53,6 @@ class Controller extends RequestHandler
     public $model_inst = false;
 
     /**
-     * filter for the model_inst
-     */
-    public $filter = array();
-
-    /**
      * allowed actions
      */
     public $allowed_actions = array(
@@ -356,8 +351,8 @@ class Controller extends RequestHandler
             $data->addFilter(array("id" => $this->getParam("id")));
             $this->callExtending("decorateRecord", $model);
             $this->decorateRecord($data);
-            if ($data) {
-                return $this->getWithModel($data)->handleRequest($this->request);
+            if ($data->first() != null) {
+                return $this->getWithModel($data->first())->handleRequest($this->request);
             } else {
                 return $this->index();
             }
@@ -449,13 +444,6 @@ class Controller extends RequestHandler
 
         foreach($fields as $field) {
             $form->add($field);
-        }
-
-        // we add filter to the form
-        foreach ($this->filter as $key => $value) {
-            if(is_string($value)) {
-                $form->add(new HiddenField($key, $value));
-            }
         }
 
         $this->callExtending("afterForm", $form);
@@ -762,7 +750,7 @@ class Controller extends RequestHandler
         return ControllerRedirectBackResponse::create(
             $redirect,
             $this->request ? $this->request->getShiftedPart() : null,
-            $this->request->canReplyJavaScript()
+            $this->request ? $this->request->canReplyJavaScript() : false
         )->setParam($param, $value);
     }
 
@@ -788,12 +776,12 @@ class Controller extends RequestHandler
 
             return false;
         }, $btnokay, $description);
-        if(!is_bool($data)) {
+        if(!is_bool($data->getRawBody())) {
             Director::serve($data);
             exit;
         }
 
-        return $data;
+        return $data->getRawBody();
     }
 
     /**
@@ -802,7 +790,7 @@ class Controller extends RequestHandler
      * @param Callable $errorCallback
      * @param null $btnokay
      * @param null $description
-     * @return null|string
+     * @return GomaFormResponse
      */
     public function confirmByForm($title, $successCallback, $errorCallback = null, $btnokay = null, $description = null) {
         $form = new ConfirmationForm($this, "confirm_" . $this->classname, array(
@@ -830,7 +818,11 @@ class Controller extends RequestHandler
         self::$successCallback = $successCallback;
         self::$errorCallback = $errorCallback;
 
-        return $this->showWithDialog($form->render(), lang("confirm", "Confirm..."));
+        $data = $form->render();
+        if($data->shouldServe()) {
+            $data->setBodyString($this->showWithDialog($data->getResponseBodyString(), lang("confirm", "Confirm...")));
+        }
+        return $data;
     }
 
     private static $errorCallback;
@@ -879,11 +871,11 @@ class Controller extends RequestHandler
             return $data[0];
         }
 
-        if(!is_bool($data)) {
+        if(!is_bool($data->getRawBody())) {
             Director::serve($data);
             exit;
         }
-        return $data;
+        return $data->getRawBody();
     }
 
     private static $successPromptCallback;
@@ -895,7 +887,7 @@ class Controller extends RequestHandler
      * @param null $defaultValue
      * @param array $validators
      * @param bool $usePwdField
-     * @return mixed|null|string
+     * @return GomaFormResponse
      */
     public function promptByForm($message, $successCallback, $errorCallback = null, $defaultValue = null, $validators = array(), $usePwdField = false) {
         $field = ($usePwdField) ? new PasswordField("prompt_text", $message, $defaultValue) :
@@ -912,7 +904,11 @@ class Controller extends RequestHandler
         self::$successPromptCallback = $successCallback;
         self::$errorCallback = $errorCallback;
 
-        return $this->showWithDialog($form->render(), lang("prompt", "Insert Text..."));
+        $data = $form->render();
+        if($data->shouldServe()) {
+            $data->setBodyString($this->showWithDialog($data->getResponseBodyString(), lang("prompt", "Insert Text...")));
+        }
+        return $data;
     }
 
     /**
