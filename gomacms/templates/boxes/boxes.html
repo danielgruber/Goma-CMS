@@ -1,7 +1,7 @@
 <% INCLUDE_CSS "boxes.css" %>
 
 <% IF $cache %>
-	<% IF $this.first().can("write") AND NOT adminAsUser() %>
+	<% IF $canWrite AND NOT adminAsUser() %>
 		<% GLOAD("sortable") %>
 		<% GLOAD("resizable") %>
 		<% GLOAD("dropdownDialog") %>
@@ -10,7 +10,7 @@
 	$cache
 <% ELSE %>
 
-	<% IF $this.forceData().first().can("write") AND NOT adminAsUser() %>
+	<% IF $canWrite AND NOT adminAsUser() %>
 		<% GLOAD("sortable") %>
 		<% GLOAD("resizable") %>
 		<% GLOAD("dropdownDialog") %>
@@ -125,7 +125,7 @@
 				</div>
 			<% ENDCONTROL %>
 		<% ELSE %>
-			<% IF can("write") AND NOT adminAsUser()  %>
+			<% IF $canWrite AND NOT adminAsUser()  %>
 				<% IF NOT $boxlimit OR $this.count() < $boxlimit %>
 					<div class="no_box">
 						<a rel="dropdownDialog" href="{BASE_SCRIPT}boxes_new/$pageid/add?insertafter=1">{$_lang_new_box}</a>

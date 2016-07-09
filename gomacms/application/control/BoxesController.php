@@ -55,9 +55,8 @@ class BoxesController extends FrontedController {
     /**
      * renders boxes
      *
-     * @name renderBoxes
-     * @access public
-     * @param string - id
+     * @param string $id
+     * @param $count
      */
     public static function renderBoxes($id, $count = null)
     {
@@ -99,7 +98,6 @@ class BoxesController extends FrontedController {
                 $data->width = $this->request->post_params["width"];
                 $data->writeToDB();
 
-                // TODO: Find better way
                 return new JSONResponseBody("ok");
             }
         }
@@ -140,11 +138,22 @@ class BoxesController extends FrontedController {
 
         $this->callExtending("beforeRenderBoxes", $pid);
 
+        $canWrite = $data->first() ? $data->first()->can("write") : gObject::instance("boxes")->can("write");
+
         $cacher = new Cacher("boxes2_" . $pid . "_" . Core::adminAsUser() . "_" . member::$id . "_" . $this->modelInst()->maxCount("last_modified"));
         if ($cacher->checkValid()) {
-            return $this->modelInst()->customise(array("pageid" => $pid, "boxlimit" => (int)$count, "cache" => $cacher->getData()))->renderWith("boxes/boxes.html");
+            return $this->modelInst()->customise(array(
+                "pageid" => $pid,
+                "boxlimit" => (int)$count,
+                "cache" => $cacher->getData(),
+                "canWrite" => $canWrite
+            ))->renderWith("boxes/boxes.html");
         } else {
-            $output = $this->modelInst()->customise(array("pageid" => $pid, "boxlimit" => (int)$count))->renderWith("boxes/boxes.html");
+            $output = $this->modelInst()->customise(array(
+                "pageid" => $pid,
+                "boxlimit" => (int)$count,
+                "canWrite" => $canWrite
+            ))->renderWith("boxes/boxes.html");
 
             if ($this->checkCachable()) {
                 $cacher->write($output, 86400);
