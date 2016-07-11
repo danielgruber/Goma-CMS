@@ -1687,7 +1687,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
 
             foreach($searchQuery as $word) {
                 $i = 0;
-                $table_name = ClassInfo::$class_info[$this->baseClass]["table"];
+                $table_name = $this->baseTable();
                 if ($table_name != "")
                 {
                     if ($this->searchFields())
@@ -1728,8 +1728,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
                         }
                     }
                 }
-
-
             }
 
             if ($filter) {
@@ -2221,8 +2219,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
 
     /**
      * returns DataBase-Fields of this record
-     *
-     *@name DataBaseFields
+     * @param bool $recursive
+     * @return array
      */
     public function DataBaseFields($recursive = false) {
         if ($recursive) {

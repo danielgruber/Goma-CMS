@@ -54,6 +54,11 @@ class History extends DataObject {
 	);
 
 	/**
+	 * @var array
+	 */
+	static $search_fields = false;
+
+	/**
 	 * disable history for this dataobject, because we would have an endless loop
 	 *
 	 *@name history

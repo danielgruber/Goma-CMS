@@ -33,7 +33,7 @@ class ExternalFormControllerTest extends GomaUnitTest
         $form = new Form($controller, "testform", array(
             new ExternalFormFieldTest("testfield", "TestField")
         ));
-        $form->render();
+        $form->render()->__toString();
 
         $externalFormController = new ExternalFormController();
         $externalFormController->setRequest($newRequest);

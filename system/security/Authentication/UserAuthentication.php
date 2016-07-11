@@ -48,6 +48,11 @@ class UserAuthentication extends DataObject implements HistoryData {
     );
 
     /**
+     * @var bool
+     */
+    static $search_fields = false;
+
+    /**
      * returns text what to show about the event
      *
      * @name generateHistoryData

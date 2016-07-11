@@ -11,16 +11,11 @@
 class Newsettings extends DataObject implements HistoryData {
 	/**
 	 * name of this dataobject
-	 *
-	 * @name 	name
-	 * @access 	public
 	*/
 	public static $cname = '{$_lang_settings}';
 	
 	/**
 	 * fields for general tab
-	 *
-	 * @name db
 	*/
 	static $db = array(
 		"titel"				=> "varchar(50)",
@@ -32,8 +27,6 @@ class Newsettings extends DataObject implements HistoryData {
 	
 	/**
 	 * defaults of these fields
-	 *
-	 * @name default
 	*/
 	static $default = array(
 		"titel"				=> "Goma - Open Source CMS / Framework",
@@ -46,8 +39,6 @@ class Newsettings extends DataObject implements HistoryData {
 	
 	/**
 	 * information above each textfield about a specific field
-	 *
-	 * @name fieldInfo
 	*/
 	public $fieldInfo = array(
 		"register_enabled"	=> "{\$_lang_register_enabled_info}",
@@ -57,9 +48,12 @@ class Newsettings extends DataObject implements HistoryData {
 	);
 
 	/**
+	 * @var bool
+	 */
+	static $search_fields = false;
+
+	/**
 	 * returns the titles for the fields for automatic form generation
-	 *
-	 *@name getFieldTitles
 	*/
 	public function getFieldTitles() {
 		return  array(
@@ -80,12 +74,11 @@ class Newsettings extends DataObject implements HistoryData {
 		$cacher = new Cacher("settings");
 		$cacher->delete();
 	}
-	
+
 	/**
 	 * generates the Form
-	 *
-	 *@name getForm
-	*/
+	 * @param Form $form
+	 */
 	public function getForm(&$form) {
 		$tabs = new TabSet("tabs", array(), $form);
 
@@ -115,12 +108,11 @@ class Newsettings extends DataObject implements HistoryData {
 		$form->addAction(new CancelButton('cancel',lang("cancel")));
 		$form->addAction(new FormAction("submit", lang("save"), null, array("green")));
 	}
-	
+
 	/**
 	 * generates form for subClasses.
-	 *
-	 * @name 	generateSubClassForm
-	*/
+	 * @param Form $form
+	 */
 	public function generateSubClassForm(&$form) {
 		$tabs = $form->tabs;
 		foreach(ClassInfo::getChildren("newsettings") as $child) {
@@ -133,9 +125,6 @@ class Newsettings extends DataObject implements HistoryData {
 
 	/**
 	 * generates date-formats
-	 *
-	 *@name generateDate
-	 *@access public
 	*/
 	public function generateDate() {
 		$formats = array();
@@ -147,9 +136,6 @@ class Newsettings extends DataObject implements HistoryData {
 	
 	/**
 	 * generates time-formats
-	 *
-	 *@name generateTime
-	 *@access public
 	*/
 	public function generateTime() {
 		$formats = array();
@@ -178,8 +164,7 @@ class Newsettings extends DataObject implements HistoryData {
 	/**
 	 * returns text what to show about the event
 	 *
-	 * @name    generateHistoryData
-	 * @access    public
+	 * @param Newsettings $record
 	 * @return array
 	 */
 	public static function generateHistoryData($record) {
@@ -189,6 +174,5 @@ class Newsettings extends DataObject implements HistoryData {
 		$lang = str_replace('$url', "admin/settings" . URLEND, $lang);
 		
 		return array("icon" => $icon, "text" => $lang, "relevant" => true);
-		
 	}
 }

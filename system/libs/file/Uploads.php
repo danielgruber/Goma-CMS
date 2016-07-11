@@ -81,6 +81,10 @@ class Uploads extends DataObject {
         )
     );
 
+    static $search_fields = array(
+        "filename", "path"
+    );
+
     /**
      * adds a file to the upload-folder
      *

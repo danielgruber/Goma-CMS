@@ -190,7 +190,7 @@ if (goma.ui === undefined) {
 				}
 			}
 
-			window.onbeforeunload = goma.ui.fireUnloadEvents;
+			$(window).bind('beforeunload', goma.ui.fireUnloadEvents);
 
 			$(window).resize(function () {
 				var i;

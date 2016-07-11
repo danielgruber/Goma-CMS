@@ -52,12 +52,6 @@ class Page extends pages
 	static $index = array(
 		
 	);
-	/**
-	 * searchable fields
-	*/
-	static $search_fields = array(
-	
-	);
 	
 	public $prefix = "Page_";
 	

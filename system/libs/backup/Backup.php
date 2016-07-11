@@ -1,41 +1,36 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 02.02.2013
-  * $Version 1.2.9
+  * @package goma framework
+  * @link http://goma-cms.org
+  * @license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  * @author Goma-Team
 */
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
 StaticsManager::addSaveVar("Backup", "excludeList");
 StaticsManager::addSaveVar("Backup", "fileExcludeList");
 
 class Backup extends gObject {
 	/**
 	 * list of excluded tables
-	 *
-	 *@name excludeList
-	 *@access public
 	*/
 	public static $excludeList = array("statistics", "statistics_state");
 	
 	/**
 	 * excludes files
-	 *
-	 *@name fileExcludeList
-	 *@access public
 	*/
 	public static $fileExcludeList = array("/uploads/d05257d352046561b5bfa2650322d82d","temp", "/backups", "/config.php", "/backup", "version.php");
 
 	/**
 	 * generates a database-backup
 	 *
-	 * @name generateDBBackup
-	 * @access public
+	 * @param string $file
+	 * @param string $prefix
+	 * @param array $excludeList
 	 * @return string
+	 * @throws GFSFileExistsException
+	 * @throws GFSRealFilePermissionException
+	 * @throws PListException
+	 * @throws SQLException
 	 */
 	public static function generateDBBackup($file, $prefix = DB_PREFIX, $excludeList = array()) {
 		$excludeList = array_merge(StaticsManager::getStatic("Backup", "excludeList"), $excludeList);
@@ -207,9 +202,6 @@ class Backup extends gObject {
 				echo $template->display("/system/templates/GFSUnpacker.html");
 				exit;
 			}
-			
-			
-		
 		}
 		
 		$gfs->write("info.plist", $plist->toXML());
@@ -218,9 +210,6 @@ class Backup extends gObject {
 	}
 	/**
 	 * generates a file-backup
-	 *
-	 *@name generateFileBackup
-	 *@access public
 	*/
 	public static function generateFileBackup($file, $excludeList = array(), $includeTPL = true) {
 		$backup = new GFS_Package_Creator($file);

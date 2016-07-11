@@ -40,7 +40,11 @@ class BackupModel extends DataObject {
 		"size"			=> "bigint(30)",
 		"type"			=> "varchar(40)"
 	);
-	
+
+	static $search_fields = array(
+		"name"
+	);
+
 	static $default_sort = "create_date DESC";
 
     /**

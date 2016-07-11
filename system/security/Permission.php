@@ -64,6 +64,10 @@ class Permission extends DataObject
         "forModel" => "varchar(100)"
     );
 
+    static $search_fields = array(
+        "name"
+    );
+
     /**
      * groups-relation of this set
      */

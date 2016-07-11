@@ -36,8 +36,6 @@ class livecounter extends DataObject
 	
 	/**
 	 * database-fields
-	 *
-	 *@name db
 	*/
 	static $db = array(
 			'user' 			=> 'varchar(200)', 
@@ -52,35 +50,27 @@ class livecounter extends DataObject
 		
 	/**
 	 * the name of the table isn't livecounter, it's statistics
-	 *
-	 *@name table
 	*/
 	static $table = "statistics";
 	
 	/**
 	 * indexes
-	 *
-	 *@name index
 	*/
 	static $index = array(
 		"autorid" 		=> false,
 		"editorid"		=> false,
         "phpsessid"		=> "INDEX"
 	);
-	
+
+	static $search_fields = false;
+
 	/**
 	 * a regexp to use to intentify browsers, which support cookies
-	 *
-	 *@name cookie_support
-	 *@access public
 	*/
 	public static $cookie_support = "(firefox|msie|AppleWebKit|opera|khtml|icab|irdier|teleca|webfront|iemobile|playstation)";
 	
 	/**
 	 * a regexp to use to intentify browsers, which support cookies
-	 *
-	 *@name no_cookie_support
-	 *@access public
 	*/
 	public static $no_cookie_support = "(hotbar|Mozilla\/1.22)";
 	

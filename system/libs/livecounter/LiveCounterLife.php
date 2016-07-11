@@ -17,8 +17,6 @@ class liveCounter_live extends DataObject {
 
     /**
      * database-fields
-     *
-     *@name db
      */
     static $db = array(
         'phpsessid' 	=> 'varchar(800)',
@@ -36,15 +34,11 @@ class liveCounter_live extends DataObject {
 
     /**
      * the name of the table isn't livecounter, it's statistics
-     *
-     *@name table
      */
     static $table = "statistics_live";
 
     /**
      * indexes
-     *
-     *@name index
      */
     static $index = array(
         "recordid" 	    => false,
@@ -52,4 +46,6 @@ class liveCounter_live extends DataObject {
         "editorid"		=> false,
         "phpsessid"		=> "INDEX"
     );
+
+    static $search_fields = false;
 }
