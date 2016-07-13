@@ -572,7 +572,7 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet implements Sorta
         $baseTable = $this->relationShip->getTargetBaseTableName();
         if(isset($this->manyManyData)) {
             $recordidQuery = new SelectQuery($baseTable, "", array(
-               "versionid" => array_keys($this->manyManyData)
+                "id" => array_keys($this->manyManyData)
             ));
             $filter[] = $baseTable . ".recordid IN (".$recordidQuery->build("distinct recordid").") ";
         } else {
@@ -652,7 +652,7 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet implements Sorta
     }
 
     /**
-     * checks if we can sort by a specefied field
+     * checks if we can sort by a specified field
      *
      * @param string $field
      * @return bool
