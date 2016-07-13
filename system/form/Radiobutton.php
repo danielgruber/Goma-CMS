@@ -13,7 +13,7 @@ class RadioButton extends FormField
 {
     /**
      * options for this set
-    */
+     */
     public $options;
 
     /**
@@ -122,7 +122,7 @@ class RadioButton extends FormField
                 $this->PostName(),
                 $value,
                 $title,
-                $this->valueMatches($value, $this->model),
+                $this->valueMatches($value, $this->getModel()),
                 $this->disabled || isset($this->disabledNodes[$value])
             ));
         }
