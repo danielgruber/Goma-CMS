@@ -5,7 +5,7 @@ defined("IN_GOMA") OR die();
  * Base-Class for FormFields and Form, which handles logic of result and model.
  *
  * @property FormState state
- * @package Goma
+ * @package vorort.news
  *
  * @author Goma-Team
  * @copyright 2016 Goma-Team
@@ -150,7 +150,11 @@ abstract class AbstractFormComponentWithChildren extends AbstractFormComponent {
      * removes a field
      * @param string $field
      */
-    public function remove($field) {
+    public function remove($field = null) {
+        if(!isset($field)) {
+            parent::remove();
+        }
+
         if(!is_object($field) && !is_array($field)) {
             if (isset($this->fields[$field])) {
                 unset($this->fields[$field]);
@@ -202,7 +206,7 @@ abstract class AbstractFormComponentWithChildren extends AbstractFormComponent {
      * it's not relevant how deep the field is in this form if the field is *not*
      * within a ClusterFormField
      * @param string $offset
-     * @return array|string
+     * @return array|string|FormField
      */
     public function __get($offset) {
         if($offset == "result") {
@@ -443,6 +447,22 @@ abstract class AbstractFormComponentWithChildren extends AbstractFormComponent {
         /** @var AbstractFormComponent $field */
         foreach($this->fieldList as $field) {
             $field->argumentResult($result);
+        }
+    }
+
+    /**
+     * we do not know why but unserialize does sometimes shit with fields.
+     */
+    public function __wakeup() {
+        foreach($this->fields as $name => $field) {
+            if(is_array($field)) {
+                /** @var FormField $fieldInArray */
+                foreach($field as $fieldInArray) {
+                    if(is_a($fieldInArray, "AbstractFormComponent")) {
+                        $this->fields[strtolower(trim($fieldInArray->name))] = $fieldInArray;
+                    }
+                }
+            }
         }
     }
 }

@@ -32,7 +32,9 @@ class LangSelectTest extends GomaUnitTest implements TestAble
         $this->unitTestAssignProps(array("png", "jpg"), "blub", array("png", "jpg"), "blub");
         $this->unitTestAssignProps("*", null, "*", $defaultCollection);
 
-        $this->assertEqual(gObject::instance("FileUploadSet")->handleUpload(null), "No Upload defined.");
+        $this->assertThrows(function() {
+            gObject::instance("FileUploadSet")->handleUpload(null);
+        }, "Exception");
     }
 
     public function unitTestAssignProps($fileTypes, $collection, $expectedTypes, $expectedCollection) {

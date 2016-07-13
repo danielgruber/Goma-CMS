@@ -31,6 +31,29 @@ class FormTest extends GomaUnitTest implements TestAble {
 	}
 
 	/**
+	 *
+	 */
+	public function testFormUrl() {
+		$request = new Request("get", "url");
+
+		$requestHandler = new RequestHandler();
+		$requestHandler->Init($request);
+		$form = new Form($requestHandler, "blub");
+
+		$this->assertEqual($form->url, ROOT_PATH . BASE_SCRIPT . "url" . URLEND);
+
+		$request = new Request("get", "");
+
+		$requestHandler = new RequestHandler();
+		$requestHandler->Init($request);
+		$form = new Form($requestHandler, "blub");
+
+		$url = ROOT_PATH . BASE_SCRIPT . $request->url . URLEND;
+		$url = $url == "//" ? "/" : $url;
+		$this->assertEqual($form->url, $url);
+	}
+
+	/**
 	 * tests if fields are accessable by name.
 	*/
 	public function testFieldAccessable() {

@@ -191,11 +191,12 @@ class Form extends AbstractFormComponentWithChildren {
 		$this->controller = $controller;
 		$this->request = isset($request) ? $request : $controller->getRequest();
 
-		if(!isset($this->request)) {
+		if(!$this->getRequest()) {
 			$this->request = new Request(isset($_POST) ? "post" : "get", URL, $_GET, $_POST);
 		}
 
 		$this->url = str_replace('"', '', ROOT_PATH . BASE_SCRIPT . $this->getRequest()->url . URLEND);
+		$this->url = $this->url == "//" ? "/" : $this->url;
 
 		if(isset($this->controller->originalNamespace) && $this->controller->originalNamespace) {
 			$this->namespace = ROOT_PATH . BASE_SCRIPT . $this->controller->originalNamespace . "/forms/form/" . $this->name;

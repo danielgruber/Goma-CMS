@@ -133,7 +133,7 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 			$this->resolveSources($class);
 
 			$this->filter($filter);
-			$this->sort = (isset($sort) && !empty($sort)) ? $sort : null;
+			$this->sort($sort);
 			$this->join($join);
 			$this->search($search);
 			$this->setVersion($version);
@@ -821,13 +821,17 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 	 * @example $list->sort('Name'); // default ASC sorting
 	 * @example $list->sort('Name DESC'); // DESC sorting
 	 * @example $list->sort('Name', 'ASC');
+	 * @example $list->sort(array('Name', 'ASC'));
 	 */
 	public function sort() {
 		$args = func_get_args();
-		if(count($args) == 0 || $args[0] === null){
+		if(count($args) == 0 || $args[0] === null || $args[0] === array()){
 			$this->sort = null;
 			$this->clearCache();
 			return $this;
+		}
+		if(count($args) == 1 && is_array($args[0])) {
+			$args = $args[0];
 		}
 		if(count($args)>2){
 			throw new InvalidArgumentException('Sort takes zero, one or two arguments');
