@@ -11,6 +11,23 @@
  * @method RequestHandler getOwner()
  */
 class FormRequestExtension extends Extension {
+
+    /**
+     * external form controller.
+     */
+    protected $externalFormController;
+
+    /**
+     * FormRequestExtension constructor.
+     * @param ExternalFormController|null $externalFormController
+     */
+    public function __construct($externalFormController = null)
+    {
+        parent::__construct();
+
+        $this->externalFormController = isset($externalFormController) ? $externalFormController : new ExternalFormController();
+    }
+
     /**
      * called before handling action so we can hook in and create the 'form'-action.
      * @param string $action
@@ -35,14 +52,14 @@ class FormRequestExtension extends Extension {
                     $formRequest = clone $formRequest;
                     $urlParts = array_slice($params, 2);
                     $formRequest->setUrlParts(array_merge($urlParts, $parts));
+                } else if($parts[0] == "form" && !isset($params[1])) {
+                    $request->shift(1);
                 }
 
                 $handleWithMethod = false;
 
-                $externalForm = new ExternalFormController();
-
                 if ($arguments = $formRequest->match('$form!/$field!', true)) {
-                    $content = $externalForm->handleRequest($formRequest, true);
+                    $content = $this->externalFormController->handleRequest($formRequest, true);
                     if (!$content) {
                         $content = $this->getOwner()->index();
                     }
