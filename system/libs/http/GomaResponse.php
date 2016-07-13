@@ -423,4 +423,12 @@ class GomaResponse extends gObject {
     public function getRawBody() {
         return $this->getBody()->getBody();
     }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return (string) $this->getResponseBodyString();
+    }
 }

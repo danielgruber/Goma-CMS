@@ -209,6 +209,8 @@ class ManyManyTestObjectOne extends DataObject {
         "twos"  => "ManyManyTestObjectTwo"
     );
 
+    static $search_fields = false;
+
     static $many_many_extra_fields = array(
         "twos"  => array(
             "extra" => "varchar(100)"
@@ -231,6 +233,8 @@ class ManyManyTestObjectTwo extends DataObject {
     static $db = array(
         "two"   => "varchar(200)"
     );
+
+    static $search_fields = false;
 
     static $belongs_many_many = array(
         "ones"  => array(

@@ -59,4 +59,6 @@ class Word extends DataObject {
 	static $db = array(
 		"word"		=> "varchar(50)"
 	);
+
+	static $search_fields = false;
 }

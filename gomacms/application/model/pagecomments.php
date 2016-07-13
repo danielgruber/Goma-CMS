@@ -35,6 +35,10 @@ class PageComments extends DataObject {
      */
     public $writeField = "autorid";
 
+    static $search_fields = array(
+        "name", "text"
+    );
+
     /**
      * insert is always okay
      */

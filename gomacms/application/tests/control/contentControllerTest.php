@@ -71,8 +71,8 @@ class contentControllerTest extends GomaUnitTest
         // check if secret works
         $request->post_params["prompt_text"] = "1234";
         $response = $controller->handleRequest($request);
-        $this->assertPattern("/prompt_text/", $response);
-        $this->assertNoPattern("/Hallo Welt/", $response);
+        $this->assertPattern("/prompt_text/", (string) $response);
+        $this->assertNoPattern("/Hallo Welt/", (string) $response);
 
         $formData = GlobalSessionManager::globalSession()->get("form_state_prompt_contentcontroller");
         $request->post_params["prompt_text"] = "12345";
@@ -81,13 +81,13 @@ class contentControllerTest extends GomaUnitTest
         $request->post_params["save"] = "ok";
 
         $chain->clear();
-        $this->assertPattern("/error/", $controller->handleRequest($request));
+        $this->assertPattern("/error/", (string) $controller->handleRequest($request));
 
         $formData = GlobalSessionManager::globalSession()->get("form_state_prompt_contentcontroller");
         $request->post_params["prompt_text"] = "1234";
         $request->post_params["secret_form_" . md5("prompt_contentcontroller")] = $formData["secret"];
         $chain->clear();
-        $this->assertPattern("/Hallo Welt/", $controller->handleRequest($request));
+        $this->assertPattern("/Hallo Welt/", (string) $controller->handleRequest($request));
 
         $request->post_params["save"] = null;
         $request->post_params["cancel"] = "cancel";

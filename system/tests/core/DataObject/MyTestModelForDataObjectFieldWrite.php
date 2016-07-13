@@ -16,4 +16,6 @@ class MyTestModelForDataObjectFieldWrite extends DataObject {
     static $default = array(
         "blub" => 2
     );
+
+    static $search_fields = false;
 }

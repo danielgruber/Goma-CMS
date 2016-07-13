@@ -93,6 +93,7 @@ class MockWriteEntityWithFields extends DataObject {
     static $db = array(
         "test" => "int(10)"
     );
+    static $search_fields = false;
 }
 
 class MockWriteExtendedEntityWithFieldsInParent extends MockWriteEntityWithFields {}

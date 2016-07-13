@@ -44,6 +44,8 @@ class Rating extends DataObject
         "rators" => ""
     );
 
+    static $search_fields = false;
+
     /**
      * checks if user already voted
      *

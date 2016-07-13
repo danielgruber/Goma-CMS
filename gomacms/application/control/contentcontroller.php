@@ -138,7 +138,7 @@ class ContentController extends FrontedController
      * shows password accept form. we need an array as given password.
      *
      * @param array $passwords
-     * @return bool
+     * @return GomaFormResponse
      */
     protected function showPasswordForm($passwords) {
         // set password + breadcrumb
@@ -170,7 +170,8 @@ class ContentController extends FrontedController
     {
         $check = $this->checkForReadPermission();
         if(is_array($check)) {
-            if(($response = $this->showPasswordForm($check)) !== true) {
+            $response = $this->showPasswordForm($check);
+            if($response->getRawBody() !== true) {
                 $content = $response;
                 return;
             }
