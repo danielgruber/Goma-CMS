@@ -61,6 +61,7 @@ class ConfirmationForm extends Form {
      */
     public function renderForm($errors = array())
     {
+        $this->random = "dialog_" . randomString(10);
         if($this->getRequest()->canReplyJavaScript()) {
             foreach($this->actions as $actionData) {
                 /** @var FormAction $action */
@@ -84,7 +85,6 @@ class ConfirmationForm extends Form {
         if($this->getRequest()->canReplyJavaScript()) {
             $ajaxResponse = new AjaxResponse();
 
-            $this->random = "dialog_" . randomString(10);
             $ajaxResponse->append("body", '<div style="display: none;" id="'.$this->random.'">'.$content.'</div>');
             $ajaxResponse->exec("gloader.loadAsync('dropdownDialog').done(function(){
                 window['confirm_".$this->random."'] = new dropdownDialog('#".$this->random."', null, 'fixed', {
