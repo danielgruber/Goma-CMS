@@ -10,7 +10,6 @@
  *
  * @version     1.2
  */
-// TODO: Improve stuff with publishedids and relationship-data.
 class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet implements SortableDataObjectSet {
 
     const MANIPULATION_DELETE_SPECIFIC = "many_many_deleterecords";
@@ -259,6 +258,15 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet implements Sorta
     }
 
     /**
+     * @return string
+     */
+    protected function getQueryVersionField() {
+        return  $this->dataSourceVersion != DataObject::VERSION_MODE_CURRENT_VERSION ?
+            ($this->queryVersion() == DataObject::VERSION_STATE ? "stateid" : "publishedid") :
+            "id";
+    }
+
+    /**
      * returns current relationship data.
      */
     public function getRelationshipData() {
@@ -310,7 +318,7 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet implements Sorta
         );
         $query->innerJoin(
             $baseTable . "_state",
-            "{$baseTable}_state.publishedid = {$baseTable}.id",
+            "{$baseTable}_state.{$this->getQueryVersionField()} = {$baseTable}.id",
             "",
             false
         );

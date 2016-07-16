@@ -38,17 +38,20 @@ class ManyManyDataObjectSet extends GomaUnitTest implements TestAble {
             1, 2, 3
         ));
 
-        $this->assertEqual($set->getFilterForQuery(), array($relationShip->getTargetBaseTableName() . ".id IN ('".implode("','", array(1, 2, 3))."') "));
+        $recordidQuery = new SelectQuery($relationShip->getTargetBaseTableName(), "", array(
+            "id" => array(1,2,3)
+        ));
+        $this->assertPattern("/".preg_quote($recordidQuery->build("distinct recordid"), "/")."/", $set->getFilterForQuery()[0]);
 
         $filter1 = array("name" => "blub");
         $set->filter($filter1);
 
-        $this->assertEqual($set->getFilterForQuery(), array_merge($filter1,
-            array($relationShip->getTargetBaseTableName() . ".id IN ('".implode("','", array(1, 2, 3))."') ")
-        ));
+        $this->assertEqual($set->getFilterForQuery()["name"], "blub");
+        $this->assertPattern("/".preg_quote($recordidQuery->build("distinct recordid"), "/")."/", $set->getFilterForQuery()[0]);
 
         $set->filter("name = 'blub'");
-        $this->assertEqual($set->getFilterForQuery(), array("name = 'blub'", $relationShip->getTargetBaseTableName() . ".id IN ('".implode("','", array(1, 2, 3))."') "));
+        $this->assertEqual("name = 'blub'", $set->getFilterForQuery()[0]);
+        $this->assertPattern("/".preg_quote($recordidQuery->build("distinct recordid"), "/")."/", $set->getFilterForQuery()[1]);
     }
 
     public function testEmpty() {
