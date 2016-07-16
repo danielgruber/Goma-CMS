@@ -106,6 +106,11 @@ class Form extends AbstractFormComponentWithChildren {
 	protected $session;
 
 	/**
+	 * submit-request.
+	 */
+	protected $submitRequest;
+
+	/**
 	 * @param RequestHandler|null $controller
 	 * @param string|null $name
 	 * @param array $fields
@@ -296,6 +301,7 @@ class Form extends AbstractFormComponentWithChildren {
 		$this->defaultFields();
 
 		$this->form->html("");
+		$notSavedYet = false;
 
 		// check for submit or append info for user to resubmit.
 		if((isset($this->getRequest()->post_params["form_submit_" . $this->name()]) &&
@@ -308,17 +314,17 @@ class Form extends AbstractFormComponentWithChildren {
 			} else if(!$this->secretKey) {
 				return $this->trySubmit();
 			} else {
-				$this->form->append(new HTMLNode("div", array("class" => "notice form"), lang("form_not_saved_yet", "The Data hasn't saved yet.")));
+				$notSavedYet = true;
 			}
 		} else if(isset($this->getRequest()->post_params["__form_step_done_" . $this->getName()])) {
-			$oldRequest = $this->getRequest();
+			$this->submitRequest = $this->getRequest();
 
 			if($data = $this->session->get(self::SESSION_PREFIX . "_multistep_" . $this->getName())) {
 				$this->request = $data["request"];
 
 				$response = $this->trySubmit();
 
-				$this->request = $oldRequest;
+				$this->request = $this->submitRequest;
 
 				return $response;
 			}
@@ -330,7 +336,7 @@ class Form extends AbstractFormComponentWithChildren {
 
 		$this->session->remove("form_secrets." . $this->name());
 
-		return $this->renderForm();
+		return $this->renderForm(array(), $notSavedYet);
 	}
 
 	/**
@@ -347,7 +353,7 @@ class Form extends AbstractFormComponentWithChildren {
 	 * @return GomaResponse
      */
 	public function renderWith($model, $view = null, $formName = "form") {
-		return GomaFormResponse::create($this)->renderWith($model, $view, $formName);
+		return GomaFormResponse::create($this)->setRenderWith($model, $view, $formName);
 	}
 
 	/**
@@ -387,9 +393,16 @@ class Form extends AbstractFormComponentWithChildren {
 	 * renders the form
 	 *
 	 * @param array $errors
+	 * @param bool $notSavedYet
 	 * @return mixed|string
 	 */
-	public function renderForm($errors = array()) {
+	public function renderForm($errors = array(), $notSavedYet = false) {
+		if($errors || $notSavedYet) {
+			if($this->getRequest()->canReplyJavaScript()) {
+				return $this->replyJSErrors($errors, $notSavedYet);
+			}
+		}
+
 		$this->renderedFields = array();
 		if(PROFILE)
 			Profiler::mark("Form::renderForm");
@@ -427,7 +440,7 @@ class Form extends AbstractFormComponentWithChildren {
 		$view->fields = $fieldDataSet;
 		$view->actions = $actionDataSet;
 
-		$this->form->append($view->customise(array("errors" => new DataSet($errorSet)))->renderWith("form/form.html"));
+		$this->form->append($view->customise(array("errors" => new DataSet($errorSet), "showSavedYetIssue" => $notSavedYet))->renderWith("form/form.html"));
 
 		$this->callExtending("afterRender");
 
@@ -454,6 +467,48 @@ class Form extends AbstractFormComponentWithChildren {
 			Profiler::unmark("Form::renderForm");
 
 		return $data;
+	}
+
+	/**
+	 * @param array $errors
+	 * @param bool $notSavedYet
+	 * @return FormAjaxResponse
+	 */
+	protected function replyJSErrors($errors, $notSavedYet) {
+		$response = new FormAjaxResponse($this);
+		$response->exec('$("#' . $this->form()->{"secret_" . $this->form()->id()}->id() . '").val("' . convert::raw2js($this->getSecretKey()) . '");');
+
+		if($notSavedYet) {
+			array_unshift($errors, new Exception(lang("form_not_saved_yet", "The Data hasn't saved yet.")));
+		}
+
+		/** @var Exception $error */
+		foreach ($errors as $error) {
+			if (is_a($error, "FormMultiFieldInvalidDataException")) {
+				/** @var FormMultiFieldInvalidDataException $error */
+				foreach ($error->getFieldsMessages() as $field => $message) {
+					if ($message) {
+						$response->addError(lang($message, $message));
+					}
+
+					$response->addErrorField($field);
+				}
+			} else if (is_a($error, "FormInvalidDataException")) {
+				/** @var FormInvalidDataException $error */
+				if ($error->getMessage()) {
+					$response->addError(lang($error->getMessage(), $error->getMessage()));
+				}
+
+				$response->addErrorField($error->getField());
+			} else {
+				if ($error->getMessage()) {
+					$prev = $error->getPrevious() ? " " . $error->getPrevious()->getMessage() : "";
+					$response->addError(lang($error->getMessage(), $error->getMessage()) . $prev);
+				}
+			}
+		}
+
+		return $response;
 	}
 
 	/**
@@ -599,27 +654,30 @@ class Form extends AbstractFormComponentWithChildren {
 		/** @var Form $data */
 		$data = $this->session->get(self::SESSION_PREFIX . "." . strtolower($this->name));
 		$data->request = $this->request;
+		$data->submitRequest = $this->submitRequest;
 
 		$this->saveToSession();
 
 		try {
 			$content = $data->handleSubmit();
 
+			/** @var Form|GomaFormResponse $content */
 			if(is_a($content, "Form")) {
-				$content = $this->handleNextForm($content);
-			} else if(is_a($content, "GomaFormResponse")) {
+				$content = $this->handleNextForm($content->render());
+			} else
+			if(is_a($content, "GomaFormResponse")) {
 				/** @var GomaFormResponse $content */
-				$content = $this->handleNextForm($content->getForm());
+				$content = $this->handleNextForm($content);
 			}
 
 			$this->session->set("form_state_" . $this->name, $this->state->ToArray());
 
 			return $content;
 		} catch(Exception $e) {
-			if(is_a($e, "FormNotValidException")) {
+			if (is_a($e, "FormNotValidException")) {
 				/** @var FormNotValidException $e */
 				$errors = $e->getErrors();
-			} else if(!is_a($e, "FormNotSubmittedException")) {
+			} else if (!is_a($e, "FormNotSubmittedException") || $this->getRequest()->canReplyJavaScript()) {
 				$errors = array($e);
 			} else {
 				$errors = array();
@@ -633,15 +691,19 @@ class Form extends AbstractFormComponentWithChildren {
 	}
 
 	/**
-	 * @param Form $form
+	 * @param GomaFormResponse $formResponse
 	 * @return mixed|string
 	 */
-	protected function handleNextForm($form) {
-		if($form->getName() == $this->getName()) {
+	protected function handleNextForm($formResponse) {
+		if($formResponse->getForm()->getName() == $this->getName()) {
 			throw new InvalidArgumentException("Multi-Step-Forms require different names.");
 		}
 
-		$form->add(new HiddenField("__form_step_done_" . $this->getName(), 1));
+		if($formResponse->isRendered()) {
+			throw new LogicException("You can't use multi step when form is already rendered.");
+		}
+
+		$formResponse->getForm()->add(new HiddenField("__form_step_done_" . $this->getName(), 1));
 
 		$this->session->set(self::SESSION_PREFIX . "_multistep_" . $this->getName(), array(
 			"request"	=> $this->request
@@ -651,7 +713,7 @@ class Form extends AbstractFormComponentWithChildren {
 			$this->activateSecret($this->getRequest()->post_params["secret_" . $this->ID()]);
 		}
 
-		return $form->render();
+		return $formResponse;
 	}
 
 	/**
@@ -665,7 +727,6 @@ class Form extends AbstractFormComponentWithChildren {
 	 * @throws FormNotValidException
 	 */
 	protected function handleSubmit() {
-
 		$submissionWithoutValidation = self::findSubmission($this, $this->getRequest()->post_params, null);
 
 		$result = $this->gatherResultForSubmit(is_null($submissionWithoutValidation));
@@ -677,6 +738,8 @@ class Form extends AbstractFormComponentWithChildren {
 		if(!$submission) {
 			throw new FormNotSubmittedException();
 		}
+
+		$this->controller->setRequest($this->submitRequest ? $this->submitRequest : $this->getRequest());
 
 		if(is_callable($submission) && !is_string($submission)) {
 			return call_user_func_array($submission, array(
@@ -770,7 +833,7 @@ class Form extends AbstractFormComponentWithChildren {
 			if(is_a($field, "FormActionHandler")) {
 				if(isset($post[$field->postname()]) ||
 					(isset($post["default_submit"]) && !$field->input->hasClass("cancel") && !$field->input->name != "cancel")) {
-					if($field->canSubmit($result) && $submit = $field->getSubmit($result)) {
+					if($field->canSubmit($result) && $submit = $field->__getSubmit($result)) {
 						if($submit == self::DEFAULT_SUBMSSION) {
 							$submission = $form->submission;
 						} else {

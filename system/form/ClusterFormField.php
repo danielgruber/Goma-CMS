@@ -16,6 +16,11 @@ class ClusterFormField extends FieldSet {
     public $controller;
 
     /**
+     * @var bool
+     */
+    private $fieldsDefined = false;
+
+    /**
      * constructing
      *
      * @param string|null $name
@@ -30,6 +35,27 @@ class ClusterFormField extends FieldSet {
 
         $this->model = $value;
         $this->container->setTag("div");
+    }
+
+    /**
+     *
+     */
+    protected function defineFields() {
+
+    }
+
+    /**
+     * @param null $fieldErrors
+     * @return $this
+     */
+    public function exportBasicInfo($fieldErrors = null)
+    {
+        if(!$this->fieldsDefined) {
+            $this->fieldsDefined = true;
+            $this->defineFields();
+        }
+
+        return parent::exportBasicInfo($fieldErrors);
     }
 
     /**

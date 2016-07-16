@@ -28,7 +28,6 @@ $calendar = array(
 	"Feb"		=> "Feb",
 	"Mar"		=> "Mär",
 	"Apr"		=> "Apr",
-	"May"		=> "Mai",
 	"Jun"		=> "Jun",
 	"Jul"		=> "Jul",
 	"Aug"		=> "Aug",
@@ -38,7 +37,7 @@ $calendar = array(
 	"Dec"		=> "Dez",
 	
 	// week
-	
+
 	"Monday"	=> "Montag",
 	"Tuesday"	=> "Dienstag",
 	"Wednesday"	=> "Mittwoch",
@@ -46,7 +45,8 @@ $calendar = array(
 	"Friday"	=> "Freitag",
 	"Saturday"	=> "Samstag",
 	"Sunday"	=> "Sonntag",
-	
+
+
 	"Mon"		=> "Mo",
 	"Tue"		=> "Di",
 	"Wed"		=> "Mi",
@@ -54,4 +54,6 @@ $calendar = array(
 	"Fri"		=> "Fr",
 	"Sat"		=> "Sa",
 	"Sun"		=> "So",
+
+	"Motag"		=> "Montag",
 );

@@ -67,6 +67,13 @@ class CancelButton extends FormAction
     }
 
     /**
+     * @return null|string
+     */
+    public function __getSubmit() {
+        return array($this, "redirect");
+    }
+
+    /**
      * @return GomaResponse
      */
     public function redirect() {

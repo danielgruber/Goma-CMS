@@ -1,3 +1,7 @@
+<% IF $showSavedYetIssue %>
+	<div class="notice form"><% lang("form_not_saved_yet", "The Data hasn't saved yet.") %></div>
+<% END %>
+
 <% IF $errors %>
 <div class="error">
 	<ul>

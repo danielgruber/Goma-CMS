@@ -20,8 +20,15 @@ class GomaFormResponse extends GomaResponse {
 
     /**
      * prepended string.
+     *
+     * @var string[]
      */
-    protected $prependString;
+    protected $prependString = array();
+
+    /**
+     * functions after rendering.
+     */
+    protected $functionsForRendering = array();
 
     /**
      * @var ViewAccessableData
@@ -36,12 +43,17 @@ class GomaFormResponse extends GomaResponse {
     /**
      * @var string
      */
-    protected $templateName;
+    protected $templateName = "form";
 
     /**
      * @var string|GomaResponse
      */
     protected $renderedForm;
+
+    /**
+     * resolve-cache.
+     */
+    protected $resolveCache = array();
 
     /**
      * @param Form $form
@@ -87,10 +99,45 @@ class GomaFormResponse extends GomaResponse {
             $this->renderedForm = $this->form->renderData();
             if(!is_a($this->renderedForm, "GomaResponse")) {
                 parent::setBody($this->renderedForm);
-
                 parent::getBody()->setIncludeResourcesInBody(!$this->form->getRequest()->is_ajax());
+            } else if(!isset($this->renderedForm)) {
+                throw new LogicException("Form response can't be null.");
+            }
+
+            foreach($this->functionsForRendering as $function) {
+                if(is_callable($function)) {
+                    call_user_func_array($function, array($this));
+                }
             }
         }
+    }
+
+    /**
+     * rendering.
+     * @param string $content
+     * @return string
+     */
+    protected function resolveRendering($content) {
+        $key = md5($content);
+        if(isset($this->resolveCache[$key])) {
+            return $this->resolveCache[$key];
+        }
+
+        foreach($this->prependString as $string) {
+            $content = $string . $content;
+        }
+
+        if($this->template != null) {
+            $content = $this->serveWithModel->customise(array(
+                $this->templateName => $content
+            ))->renderWith($this->template);
+
+            $this->template = null;
+        }
+
+        $this->resolveCache[$key] = $content;
+
+        return $content;
     }
 
     /**
@@ -128,7 +175,7 @@ class GomaFormResponse extends GomaResponse {
      */
     public function getBody()
     {
-        return $this->isStringResponse()  ? parent::getBody() : $this->renderedForm->getBody();
+        return $this->isStringResponse()  ? $this->resolveRendering(parent::getBody()) : $this->renderedForm->getBody();
     }
 
     /**
@@ -136,14 +183,16 @@ class GomaFormResponse extends GomaResponse {
      */
     public function getResponseBodyString()
     {
-        return !$this->isStringResponse() ? $this->renderedForm->getResponseBodyString() : parent::getResponseBodyString();
+        return !$this->isStringResponse() ? $this->renderedForm->getResponseBodyString() : $this->resolveRendering(
+            parent::getResponseBodyString()
+        );
     }
 
     /**
      * @param string $body
      * @return $this
      */
-    public function setBodyString($body)
+    public function setBodyString($body, $resetCustomisation = true)
     {
         if(!$this->isStringResponse()) {
             $this->renderedForm->setBodyString($body);
@@ -246,7 +295,8 @@ class GomaFormResponse extends GomaResponse {
      * @return $this
      */
     public function prependContent($content) {
-        $this->prependString = $content;
+        $this->resolveCache = array();
+        $this->prependString[] = $content;
         return $this;
     }
 
@@ -256,7 +306,8 @@ class GomaFormResponse extends GomaResponse {
      * @param string $formName
      * @return $this
      */
-    public function renderWith($model, $view = null, $formName = "form") {
+    public function setRenderWith($model, $view = null, $formName = "form") {
+        $this->resolveCache = array();
         if(is_string($model)) {
             if(!isset($view)) {
                 $view = $model;
@@ -268,7 +319,7 @@ class GomaFormResponse extends GomaResponse {
 
         $this->serveWithModel = $model;
         $this->template = $view;
-        $this->templateName = $formName;
+        $this->templateName = isset($formName) ? $formName : "form";
 
         return $this;
     }
@@ -283,6 +334,13 @@ class GomaFormResponse extends GomaResponse {
         } else {
             parent::output();
         }
+    }
+
+    /**
+     * @return string
+     */
+    public function render() {
+        return $this->resolveRendering(parent::render());
     }
 
     /**
@@ -304,5 +362,30 @@ class GomaFormResponse extends GomaResponse {
     public function __toString()
     {
         return $this->getResponseBodyString();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isRendered()
+    {
+        return isset($this->renderedForm);
+    }
+
+    /**
+     * @param Callable $function
+     * @return $this
+     */
+    public function addRenderFunction($function) {
+        if(isset($this->renderedForm)) {
+            throw new InvalidArgumentException("Rendering has been finished.");
+        }
+
+        if(!is_callable($function)) {
+            throw new InvalidArgumentException("Function must be callable.");
+        }
+
+        $this->functionsForRendering[] = $function;
+        return $this;
     }
 }

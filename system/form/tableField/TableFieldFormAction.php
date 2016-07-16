@@ -58,6 +58,11 @@ class TableField_FormAction extends FormAction {
         };
     }
 
+    public function __getSubmit()
+    {
+        return $this->getSubmit();
+    }
+
     /**
      * returns false, because a tableField-action never triggers the form to submit
      * but we hook into it.

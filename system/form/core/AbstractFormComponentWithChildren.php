@@ -449,20 +449,4 @@ abstract class AbstractFormComponentWithChildren extends AbstractFormComponent {
             $field->argumentResult($result);
         }
     }
-
-    /**
-     * we do not know why but unserialize does sometimes shit with fields.
-     */
-    public function __wakeup() {
-        foreach($this->fields as $name => $field) {
-            if(is_array($field)) {
-                /** @var FormField $fieldInArray */
-                foreach($field as $fieldInArray) {
-                    if(is_a($fieldInArray, "AbstractFormComponent")) {
-                        $this->fields[strtolower(trim($fieldInArray->name))] = $fieldInArray;
-                    }
-                }
-            }
-        }
-    }
 }

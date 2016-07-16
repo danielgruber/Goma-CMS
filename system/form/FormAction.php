@@ -140,6 +140,13 @@ class FormAction extends FormField implements FormActionHandler
     }
 
     /**
+     * @return null|string
+     */
+    public function __getSubmit() {
+        return $this->submit;
+    }
+
+    /**
      * here you can add classes or remove some
      */
 

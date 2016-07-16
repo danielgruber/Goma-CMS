@@ -819,9 +819,13 @@ class Controller extends RequestHandler
         self::$errorCallback = $errorCallback;
 
         $data = $form->render();
-        if($data->shouldServe()) {
-            $data->setBodyString($this->showWithDialog($data->getResponseBodyString(), lang("confirm", "Confirm...")));
-        }
+        $data->addRenderFunction(
+            function($data){
+                /** @var GomaFormResponse $data */
+                if($data->shouldServe()) {
+                    $data->setBodyString($this->showWithDialog($data->getResponseBodyString(), lang("confirm", "Confirm...")));
+                }
+            });
         return $data;
     }
 
@@ -905,9 +909,13 @@ class Controller extends RequestHandler
         self::$errorCallback = $errorCallback;
 
         $data = $form->render();
-        if($data->shouldServe()) {
-            $data->setBodyString($this->showWithDialog($data->getResponseBodyString(), lang("prompt", "Insert Text...")));
-        }
+        $data->addRenderFunction(
+            function($data){
+                /** @var GomaFormResponse $data */
+                if($data->shouldServe()) {
+                    $data->setBodyString($this->showWithDialog($data->getResponseBodyString(), lang("prompt", "Insert Text...")));
+                }
+        });
         return $data;
     }
 

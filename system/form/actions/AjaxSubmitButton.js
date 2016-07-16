@@ -23,39 +23,34 @@ var initAjaxSubmitbutton = function(id, divId, formObject, field, url, appendix)
         $.ajax({
             url: url + appendix,
             type: "post",
-            data: form.serialize(),
+            data: form.serialize() + "&" + encodeURIComponent($(this).attr("name")) + "=" + encodeURIComponent($(this).val()),
             dataType: "html",
             headers: {
                 accept: "text/javascript; charset=utf-8"
-            },
-            complete: function()
-            {
-                $(document.body).css("cursor", "default").css("cursor", "auto");
-                container.find(".loading").remove();
-                button.css("display", "inline");
-
-                var eventb = jQuery.Event("ajaxresponded");
-                form.trigger(eventb);
-
-                goma.ui.updateFlexBoxes();
-            },
-            success: function(script, textStatus, jqXHR) {
-                goma.ui.loadResources(jqXHR).done(function(){;
-                    var method = new Function("field", "form", script);
-                    var r = method.call(form.get(0), field, formObject);
-                    RunAjaxResources(jqXHR);
-
-                    goma.ui.updateFlexBoxes();
-
-                    return r;
-                });
-            },
-            error: function(jqXHR, textStatus, errorThrown)
-            {
-                alert("There was an error while submitting your data, please check your Internet Connection or send an E-Mail to the administrator");
-
-                goma.ui.updateFlexBoxes();
             }
+        }).always(function(){
+            $(document.body).css("cursor", "default").css("cursor", "auto");
+            container.find(".loading").remove();
+            button.css("display", "inline");
+
+            var eventb = jQuery.Event("ajaxresponded");
+            form.trigger(eventb);
+
+            goma.ui.updateFlexBoxes();
+        }).done(function(script, textStatus, jqXHR){
+            goma.ui.loadResources(jqXHR).done(function(){;
+                var method = new Function("field", "form", script);
+                var r = method.call(form.get(0), field, formObject);
+                RunAjaxResources(jqXHR);
+
+                goma.ui.updateFlexBoxes();
+
+                return r;
+            });
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+            alert("There was an error while submitting your data, please check your Internet Connection or send an E-Mail to the administrator");
+
+            goma.ui.updateFlexBoxes();
         });
         return false;
     });
