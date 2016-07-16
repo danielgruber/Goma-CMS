@@ -369,11 +369,7 @@ class FileUploadSet extends FormField
     {
         if (isset($this->request->post_params["sorted"])) {
             if(is_a($this->getModel(), "ISortableDataObjectSet")) {
-                $versionIds = array();
-                foreach($this->request->post_params["sorted"] as $id) {
-                    $versionIds[] = $this->getModel()->find("id", $id)->versionid;
-                }
-                $this->getModel()->setSortByIdArray($versionIds);
+                $this->getModel()->setSortByIdArray($this->request->post_params["sorted"]);
             }
         }
 

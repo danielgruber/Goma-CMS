@@ -61,9 +61,14 @@ class ManyManyIntegrationTest extends GomaUnitTest implements TestAble
                 "one" => "one_" . $i
             ));
             $one->writeToDB(true, true);
+            $one->random = randomString(10);
+            $one->writeToDB(true, true);
+
             $this->twos[$i] = $two = new ManyManyTestObjectTwo(array(
                 "two"   => "two_" . $i
             ));
+            $two->writeToDB(true, true);
+            $two->random = randomString(10);
             $two->writeToDB(true, true);
 
             /** @var ManyMany_DataObjectSet $onesInTwo */
@@ -214,13 +219,15 @@ class ManyManyIntegrationTest extends GomaUnitTest implements TestAble
  * @property array twosids
  * @property string one
  * @property string extra
+ * @property string random
  */
 class ManyManyTestObjectOne extends DataObject {
 
     static $version = true;
 
     static $db = array(
-        "one"   => "varchar(200)"
+        "one"       => "varchar(200)",
+        "random"    => "varchar(200)"
     );
 
     static $many_many = array(
@@ -243,13 +250,15 @@ class ManyManyTestObjectOne extends DataObject {
  * @property array onesids
  * @property string two
  * @property string extra
+ * @property string random
  */
 class ManyManyTestObjectTwo extends DataObject {
 
     static $version;
 
     static $db = array(
-        "two"   => "varchar(200)"
+        "two"   => "varchar(200)",
+        "random"    => "varchar(200)"
     );
 
     static $search_fields = false;

@@ -696,14 +696,18 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet implements ISort
         $info = array();
         $data = $this->getRelationshipData();
         foreach($ids as $id) {
-            $info[$id] = isset($data[$id]) ? $data[$id] : array();
-            unset($data[$id]);
+            if($record = $this->find("id", $id)) {
+                $info[$record->versionid] = isset($data[$record->versionid]) ? $data[$record->versionid] : array();
+                unset($data[$record->versionid]);
+            }
         }
+
         foreach($data as $id => $record) {
             if(isset($record)) {
                 $info[$id] = $record;
             }
         }
+
         $this->setSourceData($info);
         return $this;
     }
