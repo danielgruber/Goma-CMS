@@ -181,6 +181,24 @@ class ManyManyIntegrationTest extends GomaUnitTest implements TestAble
         }
     }
 
+    public function testSort() {
+        /** @var ManyManyTestObjectOne $firstOne */
+        $firstOne = DataObject::get_one("ManyManyTestObjectOne");
+
+        $this->assertEqual($firstOne->twos()->count(), count($this->twos));
+        $ids = $firstOne->twosids;
+
+        shuffle($ids);
+        $twos = $firstOne->twos();
+        $twos->setSortByIdArray($ids);
+
+        $this->assertEqual($twos->getRelationshipIDs(), $ids);
+
+        $twos->commitStaging(false, true);
+        $firstOne = DataObject::get_one("ManyManyTestObjectOne");
+        $this->assertEqual($firstOne->twosids, $ids);
+    }
+
     public function testFilter() {
         $firstOne = DataObject::get_one("ManyManyTestObjectOne");
 

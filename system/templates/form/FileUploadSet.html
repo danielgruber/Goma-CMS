@@ -29,7 +29,7 @@
                 <td class="actions">
                     <% IF $upload.canDelete %>
                     <div class="delete">
-                        <input type="checkbox" id="{$id}__delete_{$upload.id}" name="{$name}__delete_3028" value="1" />
+                        <input type="checkbox" id="{$id}__delete_{$upload.id}" name="{$name}__delete_$upload.id" value="1" />
                         <label for="{$id}__delete_{$upload.id}" ><% lang("delete") %></label>
                     </div>
                     <% END %>

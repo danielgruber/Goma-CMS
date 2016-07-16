@@ -106,7 +106,7 @@ var FileUploadSet = function(name, table, url) {
 			
 			this.queue[fileIndex].tableid = id;
 
-            var tableRow = this.addTableRow(id, color, upload.fileName);
+            var tableRow = this.addTableRow(id, color, upload.file.name);
             tableRow.find("td.filename").append('<div class="progressbar"><div class="progress"></div><span>'+lang("waiting")+'</span></div></div');
 			tableRow.find(".delete img").click(function(){
 				that.abort(fileIndex);

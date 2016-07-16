@@ -49,11 +49,6 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet implements ISort
     protected $updateExtraFieldsStage;
 
     /**
-     * sort-information.
-     */
-    protected $sortInformation = array();
-
-    /**
      * ManyMany_DataObjectSet constructor.
      * @param array|IDataObjectSetDataSource|IDataObjectSetModelSource|null|string $class
      * @param array|null|string $filter
@@ -441,7 +436,7 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet implements ISort
         }
 
         $manipulation = array();
-        $sort = count($this->sortInformation);
+        $sort = 0;
         $addedRecords = array();
 
         if($this->fetchMode == self::FETCH_MODE_CREATE_NEW) {
@@ -532,13 +527,12 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet implements ISort
      * @return array
      */
     protected function getRecordFromRelationData($id, $sort, $record) {
-        $searchedSort =  array_search($id, $this->sortInformation);
         $newRecord = array(
             $this->relationShip->getOwnerField()        => $this->ownRecord->versionid,
             $this->relationShip->getTargetField()       => $id,
             $this->relationShip->getTargetSortField()   => isset($record[$this->relationShip->getTargetSortField()]) ?
                 $record[$this->relationShip->getTargetSortField()] : 0,
-            $this->relationShip->getOwnerSortField()    => $searchedSort ? $searchedSort : $sort
+            $this->relationShip->getOwnerSortField()    => $sort
         );
 
         foreach($this->relationShip->getExtraFields() as $field => $type) {
@@ -554,13 +548,6 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet implements ISort
     public function getSortForQuery()
     {
         $sort = parent::getSortForQuery();
-        if($this->sortInformation) {
-            if ($sort) {
-                return array_merge((array)$sort, array("versionid", $this->sortInformation));
-            } else {
-                return array(array("versionid", $this->sortInformation));
-            }
-        } else
         if(isset($this->manyManyData)) {
             if ($sort) {
                 return array_merge((array)$sort, array("versionid", array_keys($this->manyManyData)));
@@ -706,8 +693,18 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet implements ISort
             throw new InvalidArgumentException();
         }
 
-        $this->sortInformation = $ids;
-        $this->clearCache();
+        $info = array();
+        $data = $this->getRelationshipData();
+        foreach($ids as $id) {
+            $info[$id] = isset($data[$id]) ? $data[$id] : array();
+            unset($data[$id]);
+        }
+        foreach($data as $id => $record) {
+            if(isset($record)) {
+                $info[$id] = $record;
+            }
+        }
+        $this->setSourceData($info);
         return $this;
     }
 
