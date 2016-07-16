@@ -12,7 +12,7 @@ defined("IN_GOMA") OR die();
  *
  * @version 1.0
  */
-interface SortableDataObjectSet extends IDataSet {
+interface ISortableDataObjectSet extends IDataSet {
     /**
      * moves item to given position.
      *

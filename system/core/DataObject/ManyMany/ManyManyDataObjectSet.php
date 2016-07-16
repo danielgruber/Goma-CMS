@@ -10,7 +10,7 @@
  *
  * @version     1.2
  */
-class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet implements SortableDataObjectSet {
+class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet implements ISortableDataObjectSet {
 
     const MANIPULATION_DELETE_SPECIFIC = "many_many_deleterecords";
     const MANIPULATION_DELETE_EXISTING = "many_many_deleteexisting";
@@ -441,7 +441,7 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet implements Sorta
         }
 
         $manipulation = array();
-        $sort = 0;
+        $sort = count($this->sortInformation);
         $addedRecords = array();
 
         if($this->fetchMode == self::FETCH_MODE_CREATE_NEW) {
@@ -532,12 +532,13 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet implements Sorta
      * @return array
      */
     protected function getRecordFromRelationData($id, $sort, $record) {
+        $searchedSort =  array_search($id, $this->sortInformation);
         $newRecord = array(
             $this->relationShip->getOwnerField()        => $this->ownRecord->versionid,
             $this->relationShip->getTargetField()       => $id,
             $this->relationShip->getTargetSortField()   => isset($record[$this->relationShip->getTargetSortField()]) ?
                 $record[$this->relationShip->getTargetSortField()] : 0,
-            $this->relationShip->getOwnerSortField()    => $sort
+            $this->relationShip->getOwnerSortField()    => $searchedSort ? $searchedSort : $sort
         );
 
         foreach($this->relationShip->getExtraFields() as $field => $type) {
@@ -553,6 +554,13 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet implements Sorta
     public function getSortForQuery()
     {
         $sort = parent::getSortForQuery();
+        if($this->sortInformation) {
+            if ($sort) {
+                return array_merge((array)$sort, array("versionid", $this->sortInformation));
+            } else {
+                return array(array("versionid", $this->sortInformation));
+            }
+        } else
         if(isset($this->manyManyData)) {
             if ($sort) {
                 return array_merge((array)$sort, array("versionid", array_keys($this->manyManyData)));
@@ -675,30 +683,52 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet implements Sorta
      *
      * @param DataObject $item
      * @param int $position
-     * @return mixed
+     * @return $this
      */
     public function move($item, $position)
     {
-        // TODO: Implement move() method.
+        $this->forceData();
+        $this->staging->merge($this->items);
+        $this->staging->move($item, $position);
+        $this->setFetchMode(DataObjectSet::FETCH_MODE_CREATE_NEW);
+        return $this;
     }
 
     /**
      * sets sort by array of ids.
      *
      * @param int []
+     * @return $this
      */
     public function setSortByIdArray($ids)
     {
-        // TODO: Implement setSortByIdArray() method.
+        if(!is_array($ids)) {
+            throw new InvalidArgumentException();
+        }
+
+        $this->sortInformation = $ids;
+        $this->clearCache();
+        return $this;
     }
 
     /**
      * uasort.
      *
      * @param Callable
+     * @return $this
      */
     public function sortCallback($callback)
     {
-        // TODO: Implement sortCallback() method.
+        $this->forceData();
+        array_map($this->items, array($this, "getConverted"));
+
+        $this->staging->merge($this->items);
+        $items = $this->staging->ToArray();
+
+        uasort($items, $callback);
+        $this->staging = new ArrayList($items);
+
+        $this->setFetchMode(DataObjectSet::FETCH_MODE_CREATE_NEW);
+        return $this;
     }
 }

@@ -110,11 +110,6 @@ class FileUploadSet extends FormField
     protected $templateView;
 
     /**
-     * used for internal sort-function.
-     */
-    private $sortInfo;
-
-    /**
      * @param string $name
      * @param string $title
      * @param array|null $file_types
@@ -371,33 +366,13 @@ class FileUploadSet extends FormField
      */
     public function saveSort()
     {
-        // TODO: Implement it
-        $this->sortInfo = array();
         if (isset($this->request->post_params["sorted"])) {
-            foreach ($this->request->post_params["sorted"] as $k => $id) {
-                $this->sortInfo[$id] = $k;
+            if(is_a($this->getModel(), "ISortableDataObjectSet")) {
+                $this->getModel()->setSortByIdArray($this->request->post_params["sorted"]);
             }
         }
 
-        $this->value->sortWithCallback(array($this, "sort"));
-
         return 1;
-    }
-
-    /**
-     * sort-function.
-     */
-    public function sort($a, $b)
-    {
-        $sortA = isset($this->sortInfo[$a->id]) ? $this->sortInfo[$a->id] : 10000;
-        $sortB = isset($this->sortInfo[$b->id]) ? $this->sortInfo[$b->id] : 10000;
-
-        if ($sortA == $sortB) {
-            return 0;
-        }
-
-        return ($sortA < $sortB) ? -1 : 1;
-
     }
 
     /**
