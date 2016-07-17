@@ -45,19 +45,7 @@ class MultiFormFormField extends ClusterFormField {
     protected $secret;
 
     /**
-     * @return HTMLNode
-     */
-    public function createNode()
-    {
-        $node = parent::createNode();
-        $node->type = "hidden";
-        $node->val(1);
-
-        return $node;
-    }
-
-    /**
-     * @return array|string|ViewAccessableData
+     * @return DataObjectSet|IDataSet
      */
     public function getModel() {
         if (!isset($this->hasNoValue) || !$this->hasNoValue) {
@@ -106,11 +94,15 @@ class MultiFormFormField extends ClusterFormField {
             throw new InvalidArgumentException("Value for MultiFormFormField must be DataSet or DataObjectSet.");
         }
 
+        if(is_a($this->getModel(), "DataObjectSet")) {
+            $this->getModel()->setModifyAllMode();
+        }
+
         foreach($this->getAddableClasses() as $class) {
             if($this->parent->getFieldPost($this->PostName() . "_add_" . $class)) {
                 $this->getModel()->add(
                     $this->getModel()->createNew(array(
-                        "classname" => $class
+                        "class_name" => $class
                     ))
                 );
             }
@@ -119,18 +111,22 @@ class MultiFormFormField extends ClusterFormField {
         /** @var DataObject $record */
         $i = 0;
         foreach($this->getModel() as $record) {
-            $name = $record->versionid != 0 ? $this->name . "_" . $record->versionid :
-                $this->name . "_a" . $this->getModel()->count();
-            $record->{$this->modelKeyField} = $name;
+            if(!isset($record->{$this->modelKeyField})) {
+                $record->{$this->modelKeyField} =  $record->versionid != 0 ? $this->name . "_" . $record->versionid :
+                    $this->name . "_a" . $i;
+            }
             $field = new ClusterFormField(
-                $name,
+                $record->{$this->modelKeyField},
                 "",
                 array(
-                    new HiddenField("shouldDelete", 0),
-                    new HiddenField("sort", $i)
+                    $hiddenDelete = new HiddenField("__shouldDeletePart", 0),
+                    $hiddenSort = new HiddenField("__sortPart", $i)
                 ),
                 $record
             );
+
+            $hiddenDelete->POST = $hiddenSort->POST = true;
+
             $field->container->addClass($record->classname);
             $field->setTemplate("form/MultiFormComponent.html");
 
@@ -147,15 +143,34 @@ class MultiFormFormField extends ClusterFormField {
         $this->saveToSession();
     }
 
+    /**
+     * @return array|string|ViewAccessableData
+     */
     public function result()
     {
         $result = $this->getModel();
         if(!$result)
             throw new LogicException();
 
-        foreach($this->getModel() as $record) {
-
+        $sortIds = array();
+        foreach($result as $record) {
+            if(isset($record->{$this->modelKeyField})) {
+                if($this->getField($record->{$this->modelKeyField})) {
+                    $this->getField($record->{$this->modelKeyField})->argumentResult($record);
+                    if ($record->__shouldDeletePart) {
+                        $result->removeFromSet($record);
+                    } else {
+                        array_splice($sortIds, $record->__sortPart, 0, $record->id);
+                    }
+                }
+            }
         }
+
+        if(is_a($result, "ISortableDataObjectSet")) {
+            $result->setSortByIdArray($sortIds);
+        }
+
+        return $result;
     }
 
     /**
@@ -187,15 +202,6 @@ class MultiFormFormField extends ClusterFormField {
      */
     protected function getAllowAddOfKindClass() {
         return $this->allowAddOfKind ? (ClassInfo::exists($this->allowAddOfKind) ? $this->allowAddOfKind : $this->getModel()->DataClass()) : null;
-    }
-
-    /**
-     * @param FormFieldRenderData $info
-     * @return HTMLNode
-     */
-    public function field($info)
-    {
-        return $this->container;
     }
 
     /**

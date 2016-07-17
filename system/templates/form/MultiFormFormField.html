@@ -1,0 +1,37 @@
+<% INCLUDE_CSS "Multi/multiFormFormField.less" %>
+<% INCLUDE_JS "Multi/multiFormFormField.js" %>
+
+<% CONTROL fields() as $field %>
+    <% CONTROL field.jsRenderResources() as $resource %>
+        <% INCLUDE_JS $resource %>
+    <% ENDCONTROL %>
+
+    <% CONTROL field.cssRenderResources() as $resource %>
+        <% INCLUDE_CSS $resource %>
+    <% ENDCONTROL %>
+
+    $field.field
+<% ENDCONTROL %>
+
+<% IF $addable %>
+    <div class="add">
+        <h3><% lang("NEW_BOX") %></h3>
+        <% CONTROL addable() %>
+            <button type="submit" value="1" name="{$postName}_add_{$addable.class}">
+                <% IF $addable.icon %>
+                    <img src="$addable.icon" alt="" />
+                <% END %>
+                $addable.title
+            </button>
+        <% ENDCONTROL %>
+    </div>
+<% END %>
+
+<script type="text/javascript">
+    $(function(){
+        window["mf"] = new multiFormFieldController('#$divId', {
+            sortable: $sortable,
+            deletable: $deletable
+        });
+    })
+</script>

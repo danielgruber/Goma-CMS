@@ -32,6 +32,10 @@ function FileUpload(form, field, formelement, url, size, types) {
 		this.uploader.updateFile(null);
 		return false;
 	}.bind(this));
+
+	if(!field.upload) {
+		$this.formelement.find(".delete-file-button").hide();
+	}
 	
 	this.uploader = new AjaxUpload("#" + this.element.id, {
 		url: url + "/frameUpload/",
@@ -127,11 +131,13 @@ function FileUpload(form, field, formelement, url, size, types) {
 				});
 				$($this.element).find("a").removeAttr("href");
 				$($this.element).find("span").html("");
+				$this.formelement.find(".delete-file-button").hide();
 
 				$this.field.upload = null;
 			} else if(data.status == 0) {
 				$this.infoZone.html('<div class="error">'+data.error+'</div>');
 			} else {
+				$this.formelement.find(".delete-file-button").show();
 				$this.field.upload = data.file;
 				if(data.file["icon128"]) {
 					if(window.devicePixelRatio > 1.5 && data.file["icon128@2x"]) {
