@@ -54,6 +54,8 @@ self.dropdownDialogs = [];
 
 	dropdownDialog.prototype = {
 		subDialogs: [],
+		updateTimeout: null,
+		currentPos: null,
 		copyElement: true,
 
 		checkEdit: function() {
@@ -95,19 +97,21 @@ self.dropdownDialogs = [];
 					"position": "absolute"
 				});
 
-				var d = function(){
-					if(this.dropdown != null) {
+				var definePositionClosure = function(){
+					if(this.dropdown != null && this.updateTimeout == null) {
+						this.updateTimeout = setTimeout(function(){
+							this.updateTimeout = null;
+						}.bind(this), 500);
 						this.definePosition();
 					}
 				}.bind(this);
 
-
-				this.dropdown.find(" > div > .content").resize(d);
-				$(window).resize(d);
+				this.dropdown.find(" > div > .content").resize(definePositionClosure);
+				$(window).resize(definePositionClosure);
 
 				$(window).scroll(function(){
 					if(this.dropdown != null) {
-						this.moveDropdown($this.currentPos);
+						this.moveDropdown(this.currentPos);
 					}
 				}.bind(this));
 
@@ -197,8 +201,6 @@ self.dropdownDialogs = [];
 			this.currentPos = position;
 			// now move dropdown
 			this.moveDropdown(position);
-
-			//if(typeof profiler != "undefined") profiler.unmark("dropdownDialog.definePosition");
 		},
 
 		/**

@@ -182,7 +182,11 @@ class GomaResponse extends gObject {
      * @return $this
      */
     public function setBodyString($body) {
-        $this->body->setBody($body);
+        if(!is_a($body, "GomaResponseBody")) {
+            $this->body->setBody($body);
+        } else {
+            $this->setBody($body);
+        }
         return $this;
     }
 

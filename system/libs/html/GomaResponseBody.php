@@ -65,6 +65,9 @@ class GomaResponseBody extends gObject {
         if(is_array($body)) {
             throw new InvalidArgumentException("setBody requires String or object with __toString");
         }
+        if($body == $this) {
+            throw new InvalidArgumentException("Body should not be same as object.");
+        }
 
         $this->body = $body;
         return $this;
