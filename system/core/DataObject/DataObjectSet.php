@@ -477,9 +477,9 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 	public function countWholeSet() {
 		if(!isset($this->count)) {
 			$this->count = (int) $this->dbDataSource()->getAggregate(
-				$this->version, "count", "*", false,
-				$this->getFilterForQuery(), array(), null,
-				$this->getJoinForQuery(), $this->search) + $this->getStagingWithFilterAndSort()->count();
+					$this->version, "count", "*", false,
+					$this->getFilterForQuery(), array(), null,
+					$this->getJoinForQuery(), $this->search) + $this->getStagingWithFilterAndSort()->count();
 		}
 
 		return $this->count;
@@ -684,9 +684,7 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 	 */
 	public function getStagingWithFilterAndSort() {
 		try {
-			$sortForArrayList = $this->sort ? array($this->sort["field"] => $this->sort["type"]) : null;
-
-			return $this->staging->filter((array)$this->filter)->sort($sortForArrayList);
+			return $this->staging->filter((array)$this->filter)->sort($this->sort);
 		} catch(Exception $e) {
 			log_exception($e);
 			return new ArrayList();
@@ -830,50 +828,43 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 			$this->clearCache();
 			return $this;
 		}
-		if(count($args) == 1 && is_array($args[0])) {
+		if(count($args) == 1 && is_array($args[0]) && isset($args[0][0])) {
 			$args = $args[0];
 		}
 		if(count($args)>2){
 			throw new InvalidArgumentException('Sort takes zero, one or two arguments');
 		}
-		$column = $args[0];
-		$type = isset($args[1]) ? $args[1] : null;
 
-		if(!is_string($column))
-			throw new InvalidArgumentException("First argument of sort must be a string.");
-
-		if(substr(strtolower($column), -4) == "desc") {
-			$column = substr($column, 0, -4);
-			$type = "desc";
-		}
-
-		if(substr(strtolower($column), -3) == "asc") {
-			$column = substr($column, 0, -3);
-			$type = "asc";
-		}
-
-		if(!$this->canSortBy($column)) {
-			throw new InvalidArgumentException("can not sort by $column");
-		}
-
-		if(is_string($type) || is_null($type)) {
-			switch (strtolower($type)) {
-				case "desc":
-					$type = "DESC";
-					break;
-				default:
-					$type = "ASC";
-					break;
+		$columns = $types = array();
+		if(is_string($args[0])) {
+			if(substr(strtolower($args[0]), -4) == "desc") {
+				$args[0] = substr($args[0], 0, -4);
+				$types = array("desc");
+			} else if(substr(strtolower($args[0]), -3) == "asc") {
+				$args[0] = substr($args[0], 0, -3);
+				$types = array("asc");
+			} else {
+				$types = array(isset($args[1]) && strtolower($args[1]) == "desc" ? "desc" : "asc");
 			}
-		} else if(!is_array($type)) {
-			throw new InvalidArgumentException("Unknown type for \$type in function sort()");
+			$columns = array($args[0]);
+		} else if(is_array($args[0])) {
+			$columns = array_keys($args[0]);
+			$types = array_values($args[0]);
 		}
 
-		if(isset($this->sort["field"]) && $this->sort["field"] == $column && $this->sort["type"] == $type) {
+		foreach($columns as $column) {
+			if (!$this->canSortBy($column)) {
+				throw new InvalidArgumentException("can not sort by $column");
+			}
+		}
+
+		$sort = array_combine($columns, $types);
+
+		if($this->sort == $sort) {
 			return $this;
 		}
 
-		$this->sort = array("field" => $column, "type" => $type);
+		$this->sort = $sort;
 		$this->clearCache();
 
 		return $this;
