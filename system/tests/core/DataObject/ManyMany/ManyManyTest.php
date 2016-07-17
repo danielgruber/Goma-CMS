@@ -62,14 +62,14 @@ class ManyManyIntegrationTest extends GomaUnitTest implements TestAble
             ));
             $one->writeToDB(true, true);
             $one->random = randomString(10);
-            $one->writeToDB(true, true);
+            $one->writeToDB(false, true);
 
             $this->twos[$i] = $two = new ManyManyTestObjectTwo(array(
                 "two"   => "two_" . $i
             ));
             $two->writeToDB(true, true);
             $two->random = randomString(10);
-            $two->writeToDB(true, true);
+            $two->writeToDB(false, true);
 
             /** @var ManyMany_DataObjectSet $onesInTwo */
             $onesInTwo = $two->ones();
@@ -195,7 +195,11 @@ class ManyManyIntegrationTest extends GomaUnitTest implements TestAble
 
         shuffle($ids);
         $twos = $firstOne->twos();
-        $twos->setSortByIdArray($ids);
+        $recordids = array();
+        foreach($ids as $id) {
+            $recordids[] = $twos->find("versionid", $id)->recordid;
+        }
+        $twos->setSortByIdArray($recordids);
 
         $this->assertEqual($twos->getRelationshipIDs(), $ids);
 
