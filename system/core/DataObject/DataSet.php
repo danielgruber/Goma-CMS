@@ -10,7 +10,7 @@
  *
  * @version     2.0
  */
-class DataSet extends ArrayList implements IDataSet {
+class DataSet extends ArrayList implements IDataSet, ISortableDataObjectSet {
     const ID = "DataSet";
 
     /**
@@ -382,7 +382,7 @@ class DataSet extends ArrayList implements IDataSet {
      * @return DataSet
      */
     public function activatePages($page = null, $perPage = null) {
-       return $this->activatePagination($page, $perPage);
+        return $this->activatePagination($page, $perPage);
     }
 
     /**
@@ -417,7 +417,7 @@ class DataSet extends ArrayList implements IDataSet {
      * @return DataSet
      */
     public function setPage($page = null, $perPage = null) {
-       return $this->activatePagination($page, $perPage);
+        return $this->activatePagination($page, $perPage);
     }
 
     /**
@@ -675,5 +675,40 @@ class DataSet extends ArrayList implements IDataSet {
         }
 
         return $object;
+    }
+
+    /**
+     * sets sort by array of ids.
+     *
+     * @param int []
+     * @return DataSet
+     */
+    public function setSortByIdArray($ids)
+    {
+        $arrayList = clone $this;
+        $newItems = array();
+        foreach($ids as $id) {
+            if($item = $arrayList->find("id", $id)) {
+                $newItems[] = $item;
+                $arrayList->remove($item);
+            }
+        }
+        foreach($arrayList->items as $item) {
+            $newItems[] = $item;
+        }
+        $this->items = $newItems;
+        return $this;
+    }
+
+    /**
+     * uasort.
+     *
+     * @param Callable
+     * @return DataSet
+     */
+    public function sortCallback($callback)
+    {
+        uasort($this->items, $callback);
+        return $this;
     }
 }

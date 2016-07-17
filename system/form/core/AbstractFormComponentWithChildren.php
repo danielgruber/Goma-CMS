@@ -215,6 +215,16 @@ abstract class AbstractFormComponentWithChildren extends AbstractFormComponent {
             return $this->result;
         }
 
+        if($offset == "form") {
+            if(property_exists($this, "form")) {
+                return $this->form;
+            }
+
+            if($this->parent) {
+                return $this->parent->form;
+            }
+        }
+
         if($offset == "state") {
             if($this->parent) {
                 return $this->parent->state->{$this->classname . $this->name};

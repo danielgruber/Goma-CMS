@@ -112,9 +112,9 @@ class ClusterFormField extends FieldSet {
     public function ID()
     {
         if (Core::is_ajax()) {
-            return "form_field_" . $this->classname . "_" . md5($this->form()->getName() . $this->title) . "_" . $this->name . "_ajax";
+            return "form_field_" . $this->classname . "_" . md5($this->form()->getName()) . "_" . $this->name . "_ajax";
         } else {
-            return "form_field_" . $this->classname . "_" . md5($this->form()->getName() . $this->title) . "_" . $this->name;
+            return "form_field_" . $this->classname . "_" . md5($this->form()->getName()) . "_" . $this->name;
         }
     }
 
