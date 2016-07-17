@@ -109,12 +109,15 @@ class ClassInfo extends gObject {
 	/**
 	 * gets the childs of a class
 	 *
-	 * @param string - class_name
+	 * @param string $class
 	 * @return array
 	 */
 	public static function getChildren($class) {
-
 		$class = ClassManifest::resolveClassName($class);
+		if(!self::exists($class)) {
+			return array();
+		}
+
 		if(isset(self::$class_info[$class]["child"]))
 			return self::$class_info[$class]["child"];
 

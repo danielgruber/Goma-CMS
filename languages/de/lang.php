@@ -665,5 +665,7 @@ $lang = array(
 
 	"fromLabel"   => "Von",
 	"toLabel"     => "Bis",
-	"customLabel" => "Eigenes"
+	"customLabel" => "Eigenes",
+
+	"block_deleted"		=> "Block wurde gelöscht"
 );

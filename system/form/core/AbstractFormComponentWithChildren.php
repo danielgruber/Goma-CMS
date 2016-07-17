@@ -381,6 +381,7 @@ abstract class AbstractFormComponentWithChildren extends AbstractFormComponent {
 
             $info->getRenderedField()->append(
                 $this->templateView
+                    ->customise(array("model" => $this->getModel()))
                     ->customise($info->ToRestArray(false, false))
                     ->customise(array("fields" => new DataSet($data)))
                     ->renderWith($this->template)
