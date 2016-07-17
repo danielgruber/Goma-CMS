@@ -674,10 +674,9 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet implements ISort
      */
     public function move($item, $position)
     {
-        $this->forceData();
-        $this->staging->merge($this->items);
+        $this->setModifyAllMode();
         $this->staging->move($item, $position);
-        $this->setFetchMode(DataObjectSet::FETCH_MODE_CREATE_NEW);
+        $this->items = $this->staging->ToArray();
         return $this;
     }
 
@@ -720,16 +719,12 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet implements ISort
      */
     public function sortCallback($callback)
     {
-        $this->forceData();
-        array_map($this->items, array($this, "getConverted"));
-
-        $this->staging->merge($this->items);
+        $this->setModifyAllMode();
         $items = $this->staging->ToArray();
 
         uasort($items, $callback);
         $this->staging = new ArrayList($items);
 
-        $this->setFetchMode(DataObjectSet::FETCH_MODE_CREATE_NEW);
         return $this;
     }
 }

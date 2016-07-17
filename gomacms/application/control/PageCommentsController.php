@@ -40,6 +40,7 @@ class PageCommentsController extends FrontedController {
      *
      * @name hideDeletedObject
      * @access public
+     * @return AjaxResponse
      */
     public function hideDeletedObject($response, $data)
     {

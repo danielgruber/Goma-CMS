@@ -127,11 +127,11 @@ class HasOneDropdown extends SingleSelectDropDown
 	public function validate($id)
 	{
 		if ($this->classname == "hasonedropdown") {
-			if (DataObject::count($this->_object, array("id" => $id)) > 0) {
-				return true;
-			} else {
-				return false;
-			}
+			$data = clone $this->options;
+
+			$data->addFilter(array("id" => $id));
+
+			return $data->count() > 0;
 		} else {
 			return true;
 		}

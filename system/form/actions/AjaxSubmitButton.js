@@ -39,13 +39,17 @@ var initAjaxSubmitbutton = function(id, divId, formObject, field, url, appendix)
             goma.ui.updateFlexBoxes();
         }).done(function(script, textStatus, jqXHR){
             goma.ui.loadResources(jqXHR).done(function(){;
-                var method = new Function("field", "form", script);
-                var r = method.call(form.get(0), field, formObject);
-                RunAjaxResources(jqXHR);
+                try {
+                    var method = new Function("field", "form", script);
+                    var r = method.call(form.get(0), field, formObject);
+                    RunAjaxResources(jqXHR);
 
-                goma.ui.updateFlexBoxes();
+                    goma.ui.updateFlexBoxes();
 
-                return r;
+                    return r;
+                } catch(e) {
+                    alert(e);
+                }
             });
         }).fail(function(jqXHR, textStatus, errorThrown) {
             alert("There was an error while submitting your data, please check your Internet Connection or send an E-Mail to the administrator");

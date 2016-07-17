@@ -140,9 +140,17 @@ class PageCommentsDataObjectExtension extends DataObjectExtension {
         if ($this->getOwner()->showcomments) {
             /** @var HasMany_DataObjectSet $comments */
             $comments = $this->getOwner()->comments();
+
+            /** @var GomaFormResponse $form */
+            $form = gObject::instance("PageCommentsController")->setModelInst($comments)->form("add");
+            if(!$form->isStringResponse()) {
+                Director::serve($form);
+                exit;
+            }
+
             $object->append($comments->customise(array(
                 "page"  => $this->getOwner(),
-                "form" => gObject::instance("PageCommentsController")->setModelInst($comments)->form("add")
+                "form" => $form
             ))->renderWith("comments/comments.html"));
         }
     }

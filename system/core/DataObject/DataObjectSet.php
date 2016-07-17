@@ -396,7 +396,7 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 	 * @return DataObject
 	 */
 	public function firstOrNew() {
-		return $this->first() ? $this->first() : $this->modelSource()->createNew();
+		return $this->first() ? $this->first() : $this->modelSource->createNew();
 	}
 
 	/**
@@ -1010,12 +1010,16 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 
 		$this->staging->add($record);
 
-		if(($this->page === null || count($this->items) < $this->perPage) && $matchesFilter) {
-			if($this->items != null) {
-				$this->items[] = $record;
-			}
+		if(($this->page === null || count($this->items) == $this->perPage)) {
+			if(count($this->items) < $this->perPage || $matchesFilter) {
+				if ($this->items !== null) {
+					$this->items[] = $record;
+				}
 
-			$this->lastCache = $record;
+				$this->lastCache = $record;
+			}
+		} else {
+			$this->clearCache();
 		}
 
 		if($write)
@@ -1538,6 +1542,25 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 			));
 			return $set->first() ? $set->first() : $this->getStagingWithFilterAndSort()->find($name, $value, $caseInsensitive);
 		}
+	}
+
+	/**
+	 * @return $this
+	 */
+	public function setModifyAllMode() {
+		if($this->page !== null) {
+			throw new LogicException("Modification-Mode requires to have no pagination.");
+		}
+
+		if($this->fetchMode == self::FETCH_MODE_EDIT) {
+			$this->forceData();
+			$this->items = array_map(array($this, "getConverted"), $this->items);
+
+			$this->staging->merge($this->items);
+			$this->setFetchMode(self::FETCH_MODE_CREATE_NEW);
+		}
+
+		return $this;
 	}
 }
 

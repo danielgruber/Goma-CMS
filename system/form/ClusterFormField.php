@@ -67,8 +67,9 @@ class ClusterFormField extends FieldSet {
      */
     public function hasAction($action)
     {
-        if (isset($this->fields[$action]))
+        if (isset($this->fields[strtolower($action)])) {
             return true;
+        }
 
         if (parent::hasAction($action))
             return true;
@@ -85,8 +86,8 @@ class ClusterFormField extends FieldSet {
      */
     public function handleAction($action)
     {
-        if (isset($this->fields[$action])) {
-            return $this->fields[$action]->handleRequest($this->request);
+        if (isset($this->fields[strtolower($action)])) {
+            return $this->fields[strtolower($action)]->handleRequest($this->request);
         }
 
         return parent::handleAction($action);
