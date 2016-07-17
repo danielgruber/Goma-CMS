@@ -112,6 +112,11 @@ class FormFieldRenderData extends gObject implements IRestResponse {
     );
 
     /**
+     * @var string
+     */
+    protected $postname;
+
+    /**
      * constructor.
      * @param string $name
      * @param string $type
@@ -439,6 +444,24 @@ class FormFieldRenderData extends gObject implements IRestResponse {
     }
 
     /**
+     * @return string
+     */
+    public function getPostName()
+    {
+        return $this->postname;
+    }
+
+    /**
+     * @param string $postname
+     * @return $this
+     */
+    public function setPostName($postname)
+    {
+        $this->postname = $postname;
+        return $this;
+    }
+
+    /**
      * to rest array.
      * @param bool $includeRendered
      * @param bool $includeChildren
@@ -458,7 +481,8 @@ class FormFieldRenderData extends gObject implements IRestResponse {
             "hasRenderData" => $this->renderedField != null,
             "disabled"  => $this->isDisabled,
             "cssRenderResources" => $this->renderResources["css"],
-            "jsRenderResources" => $this->renderResources["js"]
+            "jsRenderResources" => $this->renderResources["js"],
+            "postname"  => $this->postname
         );
 
         if($this->js) {

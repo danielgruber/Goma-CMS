@@ -295,7 +295,8 @@ class LeftAndMain extends AdminItem {
 			// notify the user
 			Notification::notify($model->classname, lang("SUCCESSFUL_SAVED", "The data was successfully written!"), lang("SAVED"));
 
-			$response->exec("var href = '".BASE_URI . $this->adminURI()."record/".$model->id."/edit".URLEND."'; if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) { if(location.href == href) location.reload(); else location.href = href; } else { reloadTree(function(){ goma.ui.ajax(undefined, {url: href, showLoading: true, pushToHistory: true}); }, ".var_export($model["id"], true)."); }");
+			$response->exec("var href = '" . BASE_URI . $this->adminURI() . "record/" . $model->id . "/edit" . URLEND . "'; if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) { if(location.href == href) location.reload(); else location.href = href; } else { reloadTree(function(){ goma.ui.ajax(undefined, {url: href, showLoading: true, pushToHistory: true}); }, " . var_export($model["id"], true) . "); }");
+
 			return $response;
 		} catch(Exception $e) {
 			$response->exec('alert('.var_export($e->getMessage(), true).');');

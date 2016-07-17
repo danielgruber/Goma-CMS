@@ -46,9 +46,9 @@ class ClusterFormField extends FieldSet {
 
     /**
      * @param null $fieldErrors
-     * @return $this
+     * @return FormFieldRenderData
      */
-    public function exportBasicInfo($fieldErrors = null)
+    public function  exportBasicInfo($fieldErrors = null)
     {
         if(!$this->fieldsDefined) {
             $this->fieldsDefined = true;

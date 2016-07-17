@@ -357,7 +357,8 @@ abstract class AbstractFormComponent extends RequestHandler {
         return $this->createsRenderDataClass()
             -> setIsDisabled($this->disabled)
             -> setField($this)
-            -> setHasError(count($this->errors) > 0);
+            -> setHasError(count($this->errors) > 0)
+            -> setPostName($this->PostName());
     }
 
     /**

@@ -396,7 +396,7 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 	 * @return DataObject
 	 */
 	public function firstOrNew() {
-		return $this->first() ? $this->first() : $this->modelSource->createNew();
+		return $this->first() ? $this->first() : $this->modelSource()->createNew();
 	}
 
 	/**
@@ -1435,6 +1435,15 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 	 * @return ViewAccessableData
 	 */
 	protected function createNewModel($data = array())
+	{
+		return $this->modelSource()->createNew($data);
+	}
+
+	/**
+	 * @param array $data
+	 * @return ViewAccessableData
+	 */
+	public function createNew($data = array())
 	{
 		return $this->modelSource()->createNew($data);
 	}

@@ -351,7 +351,7 @@ class Form extends AbstractFormComponentWithChildren {
 	 * @param string $view
 	 * @param string $formName
 	 * @return GomaResponse
-     */
+	 */
 	public function renderWith($model, $view = null, $formName = "form") {
 		return GomaFormResponse::create($this)->setRenderWith($model, $view, $formName);
 	}
@@ -656,7 +656,7 @@ class Form extends AbstractFormComponentWithChildren {
 		$data->request = $this->request;
 		$data->submitRequest = $this->submitRequest;
 
-		$this->saveToSession();
+		$this->session->set("form_state_" . $this->name, $this->state->ToArray());
 
 		try {
 			$content = $data->handleSubmit();
@@ -665,12 +665,13 @@ class Form extends AbstractFormComponentWithChildren {
 			if(is_a($content, "Form")) {
 				$content = $this->handleNextForm($content->render());
 			} else
-			if(is_a($content, "GomaFormResponse")) {
-				/** @var GomaFormResponse $content */
-				$content = $this->handleNextForm($content);
-			}
+				if(is_a($content, "GomaFormResponse")) {
+					/** @var GomaFormResponse $content */
+					$content = $this->handleNextForm($content);
+				}
 
 			$this->session->set("form_state_" . $this->name, $this->state->ToArray());
+			$this->saveToSession();
 
 			return $content;
 		} catch(Exception $e) {

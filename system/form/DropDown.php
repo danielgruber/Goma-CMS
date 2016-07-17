@@ -95,6 +95,11 @@ class DropDown extends FormField {
 	protected $multiselect = false;
 
 	/**
+	 * @var bool
+	 */
+	protected $noValueSelected = false;
+
+	/**
 	 * sortable relationships.
 	 *
 	 * @var bool
@@ -163,6 +168,18 @@ class DropDown extends FormField {
 				$this->input->value = $model;
 			}
 		}
+	}
+
+	/**
+	 * @return array|string|null
+	 */
+	public function getModel()
+	{
+		if($this->noValueSelected) {
+			return null;
+		}
+
+		return parent::getModel();
 	}
 
 	/**
@@ -485,7 +502,7 @@ class DropDown extends FormField {
 			"left" => $left,
 			"showStart" => $start,
 			"showEnd" => $end,
-			"whole" => is_array($dataSource) ? count($dataSource) : $dataSource->countWholeSet()
+			"whole" => !is_a($dataSource, "IDataSet") ? count($dataSource) : $dataSource->countWholeSet()
 		);
 	}
 
@@ -662,6 +679,7 @@ class DropDown extends FormField {
 						throw new FormInvalidDataException($this->name, "Value not allowed.");
 					}
 				} else {
+					$this->noValueSelected = false;
 					$this->model = $this->getParam("value");
 				}
 			}
@@ -682,8 +700,10 @@ class DropDown extends FormField {
 				unset($this->dataset[$key]);
 				Core::globalSession()->set("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
 			} else {
-				if ($this->model == $this->getParam("value"))
-					$this->model = null;
+				if ($this->getModel() == $this->getParam("value")) {
+					$this->model = 0;
+					$this->noValueSelected = true;
+				}
 			}
 		}
 
