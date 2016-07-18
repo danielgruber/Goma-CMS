@@ -309,7 +309,7 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 		if($fetchMode == self::FETCH_MODE_EDIT || $fetchMode == self::FETCH_MODE_CREATE_NEW) {
 			$this->fetchMode = $fetchMode;
 
-			$this->items = $this->staging->ToArray();
+			$this->items = &$this->staging->ToArray();
 			if($fetchMode == self::FETCH_MODE_CREATE_NEW) {
 				$this->count = $this->staging->count();
 			}
@@ -633,7 +633,7 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 	public function forceData() {
 		if(!isset($this->items)) {
 			if($this->fetchMode == self::FETCH_MODE_CREATE_NEW) {
-				$this->items = $this->getStagingWithFilterAndSort()->ToArray();
+				$this->items = &$this->getStagingWithFilterAndSort()->ToArray();
 			} else {
 				if($this->page !== null && $this->getPageCount() < $this->page) {
 					$this->page = $this->getPageCount();
@@ -1525,7 +1525,9 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 	 * @return DataObject|null
 	 */
 	public function find($name, $value, $caseInsensitive = false) {
-		if(($this->items && $this->page === null) || $this->fetchMode == self::FETCH_MODE_CREATE_NEW) {
+		if($this->fetchMode == self::FETCH_MODE_CREATE_NEW) {
+			return $this->getStagingWithFilterAndSort()->find($name, $value, $caseInsensitive);
+		} else if(($this->items && $this->page === null)) {
 			foreach((array) $this->items as $item) {
 				if($caseInsensitive && strtolower(self::getItemProp($item, $name)) == strtolower($value)) {
 					return $item;
@@ -1533,8 +1535,7 @@ class DataObjectSet extends ViewAccessableData implements IDataSet {
 					return $item;
 				}
 			}
-
-			return $this->getStagingWithFilterAndSort()->find($name, $value, $caseInsensitive);
+			return null;
 		} else {
 			$set = clone $this;
 			$set->addFilter(array(

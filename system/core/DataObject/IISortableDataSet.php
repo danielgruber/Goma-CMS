@@ -24,6 +24,7 @@ interface ISortableDataObjectSet extends IDataSet {
 
     /**
      * sets sort by array of ids.
+     * Should only be used if all items has already been written.
      *
      * @param int[]
      */

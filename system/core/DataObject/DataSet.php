@@ -679,6 +679,7 @@ class DataSet extends ArrayList implements IDataSet, ISortableDataObjectSet {
 
     /**
      * sets sort by array of ids.
+     * Should only be used if all items has already been written.
      *
      * @param int []
      * @return DataSet

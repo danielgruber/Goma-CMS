@@ -180,7 +180,7 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
      * @param array - extra fields, which are not in database
      * @return array
      */
-	public function ToArray($additional_fields = array()) {
+	public function &ToArray($additional_fields = array()) {
 		if(empty($additional_fields))
 			return $this->data;
 		else {

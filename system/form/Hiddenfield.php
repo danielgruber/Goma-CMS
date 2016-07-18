@@ -49,7 +49,7 @@ class HiddenField extends FormField
      */
     public function setValue()
     {
-        if(($value = $this->getModel()) && is_string($value) || is_int($value)) {
+        if(($value = $this->getModel()) !== null && is_string($value) || is_int($value)) {
             $this->input->val($value);
         } else {
             $this->input->val(1);

@@ -151,7 +151,7 @@ abstract class AbstractFormComponent extends RequestHandler {
             if($this->POST) {
                 if (!$this->isDisabled() && $this->parent && ($postData = $this->parent->getFieldPost($this->PostName())) !== null) {
                     return $postData;
-                } else if ($this->model == null) {
+                } else if ($this->model === null) {
                     return $this->parent ? $this->parent->getFieldValue($this->dbname) : null;
                 }
             }

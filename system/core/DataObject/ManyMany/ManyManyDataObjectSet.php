@@ -482,6 +482,10 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet implements ISort
 
         /** @var DataObject $record */
         foreach($copyOfAddStage as $record) {
+            if(is_array($record)) {
+                $record = $this->getConverted($record);
+            }
+
             if(!isset($manipulation[self::MANIPULATION_INSERT_NEW])) {
                 $manipulation[self::MANIPULATION_INSERT_NEW] = array(
                     "command"       => "insert",
@@ -682,6 +686,7 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet implements ISort
 
     /**
      * sets sort by array of ids.
+     * Should only be used if all items has already been written and has ids.
      *
      * @param int []
      * @return $this
@@ -692,23 +697,29 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet implements ISort
             throw new InvalidArgumentException();
         }
 
-        $info = array();
-        $data = $this->getRelationshipData();
-        foreach($ids as $id) {
-            if($record = $this->find("id", $id)) {
-                $info[$record->versionid] = isset($data[$record->versionid]) ? $data[$record->versionid] : array();
-                unset($data[$record->versionid]);
+        if($this->fetchMode == self::FETCH_MODE_EDIT) {
+            $info = array();
+            $data = $this->getRelationshipData();
+            foreach ($ids as $id) {
+                if ($record = $this->find("id", $id)) {
+                    $info[$record->versionid] = isset($data[$record->versionid]) ? $data[$record->versionid] : array();
+                    unset($data[$record->versionid]);
+                }
             }
-        }
 
-        foreach($data as $id => $record) {
-            if(isset($record)) {
-                $info[$id] = $record;
+            foreach ($data as $id => $record) {
+                if (isset($record)) {
+                    $info[$id] = $record;
+                }
             }
-        }
 
-        $this->setSourceData($info);
-        return $this;
+            $this->setSourceData($info);
+
+            return $this;
+        } else {
+            $this->staging = $this->staging->sortByFieldArray($ids);
+            return $this;
+        }
     }
 
     /**

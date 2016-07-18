@@ -60,6 +60,10 @@ abstract class RemoveStagingDataObjectSet extends DataObjectSet {
         if(!$this->removeStaging->find("id", $record->id)) {
             $this->removeStaging->add($record);
         }
+
+        if($this->staging->find("id", $record->id)) {
+            $this->staging->remove($record);
+        }
     }
 
     /**

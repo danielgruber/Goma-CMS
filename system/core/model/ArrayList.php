@@ -68,7 +68,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 	/**
 	 * returns an array of this
 	 */
-	public function ToArray() {
+	public function &ToArray() {
 		return $this->items;
 	}
 
@@ -494,6 +494,30 @@ class ArrayList extends ViewAccessableData implements Countable {
 		// As the last argument we pass in a reference to the items that all the sorting will be applied upon
 		$multisortArgs[] = &$list->items;
 		call_user_func_array('array_multisort', $multisortArgs);
+		return $list;
+	}
+
+	/**
+	 * @param array $fieldArray
+	 * @param string $field
+	 * @return ArrayList
+	 */
+	public function sortByFieldArray($fieldArray, $field = "id") {
+		$list = clone $this;
+		$newListItems = array();
+		foreach($fieldArray as $fieldValue) {
+			if($record = $list->find($field, $fieldValue)) {
+				$newListItems[] = $record;
+				$list->remove($record);
+			}
+		}
+
+		foreach($list as $record) {
+			$newListItems[] = $record;
+		}
+
+		$list->items = $newListItems;
+
 		return $list;
 	}
 
