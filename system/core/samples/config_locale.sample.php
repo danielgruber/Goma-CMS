@@ -1,2 +1,0 @@
-<?php
-$domaininfo = {info};
